@@ -55,7 +55,7 @@ if(request.getParameter("username") !=null &&
 			<form class="login100-form validate-form flex-sb flex-w" action="login_DBSelect.jsp">
 					 
 					<span class="login100-form-title p-b-53">
-						登入系統
+						登入
 						<%if (request.getParameter("status")!="" && request.getParameter("status")!=null){
 							if(request.getParameter("status").equals("loginerror")){ %>
 							<p><font color="red">帳號或密碼錯誤，請重新輸入!</font></p>

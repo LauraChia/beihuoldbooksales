@@ -42,24 +42,27 @@
                 </button>
 
                 <!-- 導覽列 -->
-                <div class="collapse navbar-collapse" id="navbarCollapse">
+                <%
+				    String currentPage = request.getRequestURI();
+                %>
                     <div class="navbar-nav mx-auto">
-                        <a href="shop.jsp" class="nav-link">我要賣書</a>
+				    <a href="shop.jsp" class="nav-link <%= currentPage.endsWith("shop.jsp") ? "nav-active" : "" %>">我要賣書</a>
                         
                         <%-- 登入/登出邏輯 --%>
-                        <%
-                            String accessId = (String) session.getAttribute("accessId");
-                            if (accessId != null) {
-                        %>
-                            <a href="logout.jsp" class="nav-link">登出</a>
-                        <%
-                            } else {
-                        %>
-                            <a href="login.jsp" class="nav-link">登入</a>
-                        <%
-                            }
-                        %>
-                    </div>
+				<%
+				    String accessId = (String) session.getAttribute("accessId");
+				%>
+				
+				<div class="navbar-nav mx-auto">
+				    <a href="shop.jsp" class="nav-link <%= currentPage.endsWith("shop.jsp") ? "nav-active" : "" %>">我要賣書</a>
+				    
+				    <% if (accessId != null) { %>
+				        <a href="profile.jsp" class="nav-link <%= currentPage.endsWith("profile.jsp") ? "nav-active" : "" %>">個人資料</a>
+				        <a href="logout.jsp" class="nav-link">登出</a>
+				    <% } else { %>
+				        <a href="login.jsp" class="nav-link <%= currentPage.endsWith("login.jsp") ? "nav-active" : "" %>">登入</a>
+				    <% } %>
+				</div>
 
                     <!-- 搜尋和用戶圖示 -->
                     <div class="d-flex align-items-center">

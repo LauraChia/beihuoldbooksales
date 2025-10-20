@@ -494,4 +494,7 @@
     line-height: 35px;
 }
 /*** Footer End ***/
-
+.nav-active {
+    color: rgb(144,194,60) !important;
+    font-weight: 600;
+}
