@@ -130,13 +130,13 @@ th, td {
             </div>
             <div class="col-md-6 col-lg-3">
                 <h5 class="text-white mb-4">快速連結</h5>
-                <a class="btn btn-link" href="#">首頁</a>
+                <a class="btn btn-link" href="index.jsp">首頁</a>
                 <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
             </div>
         </div>
     </div>
     <div class="container-fluid text-center border-top border-secondary py-3">
-        <p class="mb-0">&copy; 2025 二手書拍賣網. All Rights Reserved.</p>
+        <p class="mb-0">&copy; 2025 北護二手書拍賣系統. All Rights Reserved.</p>
     </div>
 </div>
 <!-- Footer End -->

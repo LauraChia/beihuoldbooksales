@@ -53,8 +53,7 @@
 				    String accessId = (String) session.getAttribute("accessId");
 				%>
 				
-				<div class="navbar-nav mx-auto">
-				    <a href="shop.jsp" class="nav-link <%= currentPage.endsWith("shop.jsp") ? "nav-active" : "" %>">我要賣書</a>
+				
 				    
 				    <% if (accessId != null) { %>
 				        <a href="profile.jsp" class="nav-link <%= currentPage.endsWith("profile.jsp") ? "nav-active" : "" %>">個人資料</a>
