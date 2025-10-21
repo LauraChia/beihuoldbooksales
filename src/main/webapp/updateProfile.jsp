@@ -23,7 +23,7 @@
 
     try {
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-        String sql = "UPDATE users SET username=?, email=?, password=? WHERE account=?";
+        String sql = "UPDATE users SET username=?, email=?, password=? WHERE username=?";
         ps = con.prepareStatement(sql);
         ps.setString(1, username);
         ps.setString(2, email);

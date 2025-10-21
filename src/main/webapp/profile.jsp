@@ -21,7 +21,7 @@
         // objDBConfig.FilePath() 是你封裝的 Access 檔案路徑方法
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
 
-        String sql = "SELECT email FROM users WHERE account = ?";
+        String sql = "SELECT email FROM users WHERE username = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userAccessId);
         rs = ps.executeQuery();

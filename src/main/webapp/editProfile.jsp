@@ -19,7 +19,7 @@
 
     try {
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-        String sql = "SELECT username, email, password FROM users WHERE account = ?";
+        String sql = "SELECT username, email, password FROM users WHERE username = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userAccessId);
         rs = ps.executeQuery();
@@ -59,7 +59,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">帳號</label>
+                    <label class="form-label">使用者名稱</label>
                     <input type="text" name="username" class="form-control" value="<%= username %>" required>
                 </div>
 
