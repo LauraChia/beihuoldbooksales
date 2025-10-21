@@ -3,33 +3,32 @@
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
 <%
-    // 檢查登入狀態
     if (session.getAttribute("accessId") == null) {
         response.sendRedirect("login.jsp");
         return;
     }
 
     String userAccessId = (String) session.getAttribute("accessId");
+    String username = "";
     String email = "";
+    String password = "";
 
-    // 使用 DBConfig 取得 Access 檔案路徑
     Connection con = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
 
     try {
-        // objDBConfig.FilePath() 是你封裝的 Access 檔案路徑方法
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-
-        String sql = "SELECT email FROM users WHERE account = ?";
+        String sql = "SELECT username, email, password FROM users WHERE account = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userAccessId);
         rs = ps.executeQuery();
 
         if (rs.next()) {
+            username = rs.getString("username");
             email = rs.getString("email");
+            password = rs.getString("password");
         }
-
     } catch (Exception e) {
         e.printStackTrace();
     } finally {
@@ -42,7 +41,7 @@
 <html lang="zh">
 <head>
     <meta charset="utf-8">
-    <title>個人資料 - 北護二手書拍賣網</title>
+    <title>編輯個人資料 - 北護二手書拍賣網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
 </head>
 
@@ -51,12 +50,34 @@
 
     <div class="container mt-5 pt-5">
         <div class="card p-4 shadow-sm">
-            <p><strong>帳號：</strong><%= userAccessId %></p>
-            <p><strong>電子郵件：</strong><%= email %></p>
-            <a href="editProfile.jsp" class="btn btn-primary mt-3">編輯資料</a>
+            <h4 class="mb-4">編輯個人資料</h4>
+
+            <form method="post" action="updateProfile.jsp">
+                <div class="mb-3">
+                    <label class="form-label">帳號</label>
+                    <input type="text" class="form-control" value="<%= userAccessId %>" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">帳號</label>
+                    <input type="text" name="username" class="form-control" value="<%= username %>" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">電子郵件</label>
+                    <input type="email" name="email" class="form-control" value="<%= email %>" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">密碼</label>
+                    <input type="password" name="password" class="form-control" value="<%= password %>" required>
+                </div>
+
+                <button type="submit" class="btn btn-success">儲存變更</button>
+                <a href="profile.jsp" class="btn btn-secondary ms-2">返回</a>
+            </form>
         </div>
     </div>
-
 <!-- Footer Start -->
 <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
     <div class="container py-5">

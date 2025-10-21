@@ -3,37 +3,46 @@
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
 <%
-    // 檢查登入狀態
     if (session.getAttribute("accessId") == null) {
         response.sendRedirect("login.jsp");
         return;
     }
 
-    String userAccessId = (String) session.getAttribute("accessId");
-    String email = "";
+    request.setCharacterEncoding("utf-8");
 
-    // 使用 DBConfig 取得 Access 檔案路徑
+    String userAccessId = (String) session.getAttribute("accessId");
+    String username = request.getParameter("username");
+    String email = request.getParameter("email");
+    String password = request.getParameter("password");
+
+    String message = "";
+    boolean success = false;
+
     Connection con = null;
     PreparedStatement ps = null;
-    ResultSet rs = null;
 
     try {
-        // objDBConfig.FilePath() 是你封裝的 Access 檔案路徑方法
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-
-        String sql = "SELECT email FROM users WHERE account = ?";
+        String sql = "UPDATE users SET username=?, email=?, password=? WHERE account=?";
         ps = con.prepareStatement(sql);
-        ps.setString(1, userAccessId);
-        rs = ps.executeQuery();
+        ps.setString(1, username);
+        ps.setString(2, email);
+        ps.setString(3, password);
+        ps.setString(4, userAccessId);
 
-        if (rs.next()) {
-            email = rs.getString("email");
+        int result = ps.executeUpdate();
+
+        if (result > 0) {
+            message = "✅ 資料已成功更新！3 秒後將自動返回個人資料頁面。";
+            success = true;
+        } else {
+            message = "⚠️ 更新失敗，請稍後再試。";
         }
 
     } catch (Exception e) {
         e.printStackTrace();
+        message = "❌ 發生錯誤：" + e.getMessage();
     } finally {
-        if (rs != null) try { rs.close(); } catch (Exception e) {}
         if (ps != null) try { ps.close(); } catch (Exception e) {}
         if (con != null) try { con.close(); } catch (Exception e) {}
     }
@@ -42,22 +51,24 @@
 <html lang="zh">
 <head>
     <meta charset="utf-8">
-    <title>個人資料 - 北護二手書拍賣網</title>
+    <title>更新個人資料 - 北護二手書拍賣網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <%-- ✅ 成功後自動跳轉 --%>
+    <% if (success) { %>
+        <meta http-equiv="refresh" content="3;URL=profile.jsp">
+    <% } %>
 </head>
 
 <body>
     <%@ include file="menu.jsp" %>
 
     <div class="container mt-5 pt-5">
-        <div class="card p-4 shadow-sm">
-            <p><strong>帳號：</strong><%= userAccessId %></p>
-            <p><strong>電子郵件：</strong><%= email %></p>
-            <a href="editProfile.jsp" class="btn btn-primary mt-3">編輯資料</a>
-        </div>
+        <div class="alert alert-info"><%= message %></div>
+        <a href="profile.jsp" class="btn btn-primary">立即返回個人資料</a>
     </div>
 
-<!-- Footer Start -->
+    <!-- Footer Start -->
 <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
     <div class="container py-5">
         <div class="row g-5">
