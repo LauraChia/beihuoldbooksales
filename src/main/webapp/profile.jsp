@@ -10,6 +10,7 @@
     }
 
     String userAccessId = (String) session.getAttribute("accessId");
+    String username = "";
     String name = "";
     String email = "";
 
@@ -20,12 +21,13 @@
     try {
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
 
-        String sql = "SELECT name, email FROM users WHERE username = ?";
+        String sql = "SELECT username, name, email FROM users WHERE userId = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userAccessId);
         rs = ps.executeQuery();
 
         if (rs.next()) {
+        	username = rs.getString("username");
             name = rs.getString("name");
             email = rs.getString("email");
         }
@@ -51,7 +53,7 @@
 
     <div class="container mt-5 pt-5">
         <div class="card p-4 shadow-sm">
-            <p><strong>帳號：</strong><%= userAccessId %></p>
+            <p><strong>帳號：</strong><%= username %></p>
             <p><strong>使用者名稱：</strong><%= name %></p>
             <p><strong>電子郵件：</strong><%= email %></p>
             <a href="editProfile.jsp" class="btn btn-primary mt-3">編輯資料</a>

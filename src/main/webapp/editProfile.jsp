@@ -10,6 +10,7 @@
 
     String userAccessId = (String) session.getAttribute("accessId");
     String username = "";
+    String name = ""; 
     String email = "";
     String password = "";
 
@@ -19,13 +20,14 @@
 
     try {
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-        String sql = "SELECT username, email, password FROM users WHERE username = ?";
+        String sql = "SELECT username, name, email, password FROM users WHERE userId = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userAccessId);
         rs = ps.executeQuery();
 
         if (rs.next()) {
             username = rs.getString("username");
+            name = rs.getString("name");
             email = rs.getString("email");
             password = rs.getString("password");
         }
@@ -55,12 +57,12 @@
             <form method="post" action="updateProfile.jsp">
                 <div class="mb-3">
                     <label class="form-label">帳號</label>
-                    <input type="text" class="form-control" value="<%= userAccessId %>" readonly>
+                    <input type="text" class="form-control" value="<%= username %>" readonly>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">使用者名稱</label>
-                    <input type="text" name="username" class="form-control" value="<%= username %>" required>
+                    <input type="text" name="name" class="form-control" value="<%= name %>" required>
                 </div>
 
                 <div class="mb-3">
