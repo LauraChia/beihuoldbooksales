@@ -10,23 +10,23 @@
     }
 
     String userAccessId = (String) session.getAttribute("accessId");
+    String name = "";
     String email = "";
 
-    // 使用 DBConfig 取得 Access 檔案路徑
     Connection con = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
 
     try {
-        // objDBConfig.FilePath() 是你封裝的 Access 檔案路徑方法
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
 
-        String sql = "SELECT email FROM users WHERE username = ?";
+        String sql = "SELECT name, email FROM users WHERE username = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userAccessId);
         rs = ps.executeQuery();
 
         if (rs.next()) {
+            name = rs.getString("name");
             email = rs.getString("email");
         }
 
@@ -52,6 +52,7 @@
     <div class="container mt-5 pt-5">
         <div class="card p-4 shadow-sm">
             <p><strong>帳號：</strong><%= userAccessId %></p>
+            <p><strong>使用者名稱：</strong><%= name %></p>
             <p><strong>電子郵件：</strong><%= email %></p>
             <a href="editProfile.jsp" class="btn btn-primary mt-3">編輯資料</a>
         </div>
@@ -74,11 +75,3 @@
         </div>
     </div>
     <div class="container-fluid text-center border-top border-secondary py-3">
-        <p class="mb-0">&copy; 2025 二手書拍賣網. All Rights Reserved.</p>
-    </div>
-</div>
-<!-- Footer End -->
-
-<script src="js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
