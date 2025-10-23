@@ -11,7 +11,7 @@
     request.setCharacterEncoding("utf-8");
 
     String userAccessId = (String) session.getAttribute("accessId");
-    String username = request.getParameter("username");
+    String name = request.getParameter("name");
     String email = request.getParameter("email");
     String password = request.getParameter("password");
 
@@ -25,7 +25,7 @@
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
         String sql = "UPDATE users SET name=?, email=?, password=? WHERE userId=?";
         ps = con.prepareStatement(sql);
-        ps.setString(1, username);
+        ps.setString(1, name);
         ps.setString(2, email);
         ps.setString(3, password);
         ps.setString(4, userAccessId);

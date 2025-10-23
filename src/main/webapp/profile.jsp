@@ -30,6 +30,7 @@
         	username = rs.getString("username");
             name = rs.getString("name");
             email = rs.getString("email");
+            if (email == null) email = "";
         }
 
     } catch (Exception e) {
