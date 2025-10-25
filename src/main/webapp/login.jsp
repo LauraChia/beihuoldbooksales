@@ -94,7 +94,7 @@ if(request.getParameter("username") !=null &&
 							密碼
 						</span>
 
-						<a href="#" class="txt2 bo1 m-l-5">忘記密碼</a>
+						<a href="forgetPassword.jsp" class="txt2 bo1 m-l-5">忘記密碼</a>
 					</div>
 					<div class="wrap-input100 validate-input" data-validate = "請輸入密碼">
 						<input class="input100" type="password" name="password"  required>

@@ -3,7 +3,6 @@
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
 <%
-    // 檢查登入狀態
     if (session.getAttribute("accessId") == null) {
         response.sendRedirect("login.jsp");
         return;
@@ -20,19 +19,20 @@
 
     try {
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-
         String sql = "SELECT username, name, email FROM users WHERE userId = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userAccessId);
         rs = ps.executeQuery();
 
         if (rs.next()) {
-        	username = rs.getString("username");
+            username = rs.getString("username");
             name = rs.getString("name");
             email = rs.getString("email");
+
+            // ✅ 避免 null 顯示
+            if (name == null) name = "";
             if (email == null) email = "";
         }
-
     } catch (Exception e) {
         e.printStackTrace();
     } finally {
@@ -48,16 +48,18 @@
     <title>個人資料 - 北護二手書拍賣網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
 </head>
-
 <body>
     <%@ include file="menu.jsp" %>
 
     <div class="container mt-5 pt-5">
         <div class="card p-4 shadow-sm">
-            <p><strong>帳號：</strong><%= username %></p>
-            <p><strong>使用者名稱：</strong><%= name %></p>
-            <p><strong>電子郵件：</strong><%= email %></p>
-            <a href="editProfile.jsp" class="btn btn-primary mt-3">編輯資料</a>
+            <h4 class="mb-4">個人資料</h4>
+
+            <p>帳號：<%= username %></p>
+            <p>使用者名稱：<%= name %></p>
+            <p>電子郵件：<%= email %></p>
+
+            <a href="editProfile.jsp" class="btn btn-primary">編輯資料</a>
         </div>
     </div>
 
@@ -78,3 +80,11 @@
         </div>
     </div>
     <div class="container-fluid text-center border-top border-secondary py-3">
+        <p class="mb-0">&copy; 2025 二手書拍賣網. All Rights Reserved.</p>
+    </div>
+</div>
+<!-- Footer End -->
+
+<script src="js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

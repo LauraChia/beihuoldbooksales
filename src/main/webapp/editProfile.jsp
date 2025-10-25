@@ -1,4 +1,4 @@
-<%@page contentType="text/html" pageEncoding="utf-8"%>
+<%@page contentType="text/html" pageEncoding="utf-8"%> 
 <%@page import="java.sql.*"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
@@ -17,7 +17,7 @@
     Connection con = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
-
+    
     try {
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
         String sql = "SELECT username, name, email, password FROM users WHERE userId = ?";
@@ -31,6 +31,11 @@
             email = rs.getString("email");
             password = rs.getString("password");
         }
+
+        // ✅ 避免顯示 null
+        if (name == null) name = "";
+        if (email == null) email = "";
+        if (password == null) password = "";
     } catch (Exception e) {
         e.printStackTrace();
     } finally {
@@ -62,17 +67,17 @@
 
                 <div class="mb-3">
                     <label class="form-label">使用者名稱</label>
-                    <input type="text" name="name" class="form-control" value="<%= name %>" required>
+                    <input type="text" name="name" class="form-control" value="<%= name %>">
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">電子郵件</label>
-                    <input type="email" name="email" class="form-control" value="<%= email %>" required>
+                    <input type="email" name="email" class="form-control" value="<%= email %>">
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">密碼</label>
-                    <input type="password" name="password" class="form-control" value="<%= password %>" required>
+                    <input type="password" name="password" class="form-control" value="<%= password %>">
                 </div>
 
                 <button type="submit" class="btn btn-success">儲存變更</button>
@@ -80,6 +85,7 @@
             </form>
         </div>
     </div>
+
 <!-- Footer Start -->
 <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
     <div class="container py-5">
