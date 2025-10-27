@@ -41,8 +41,8 @@
 th, td {
   padding-top: 10px;
   padding-bottom: 20px;
-  padding-left: 30px;
-  padding-right: 40px;
+  padding-left: 10px;
+  padding-right: 30px;
 }
         </style> 
     </head>
@@ -66,9 +66,17 @@ th, td {
         <th>價格</th>
         <th>出版日期</th>
         <th>圖片</th>
+        <th>系所名稱</th>
         <th>聯絡方式</th>
+        <th>書籍狀況</th>
+        <th>有無筆記</th>
+        <th>是否通過審核</th>
+        <th>賣家</th>
+        <th>ISBN</th>
+        <th>使用者編號</th>
         <th>備註</th>
         <th>上架時間</th>
+        
         
     </tr>
 <%
