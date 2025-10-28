@@ -19,14 +19,8 @@ if(request.getParameter("username") != null &&
 	ResultSet rs = smt.executeQuery(sql);
 
 	if(rs.next()){
-		// ❌ 原本錯誤：
-		// session.setAttribute("accessId", request.getParameter("password"));
-		// ↑ 這樣會把密碼存進 session，之後 profile.jsp 查不到使用者資料
-
-		// 👉 修改後：
-		// 登入成功時，改存使用者的 userId（或 username 也可以）
-		session.setAttribute("accessId", rs.getString("userId"));  // ✅ 改這裡
-
+		session.setAttribute("userId", rs.getString("userId"));
+		session.setAttribute("username", rs.getString("username"));
 		// ✅ 登入成功，導回首頁
 		response.sendRedirect("index.jsp");
 	}else{

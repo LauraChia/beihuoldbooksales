@@ -1,134 +1,134 @@
-<%@page contentType="text/html"%>
-<%@page pageEncoding="utf-8"%>
+<%@page contentType="text/html" pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
 
+<%
+    String userId = (String) session.getAttribute("userId");
+    String username = (String) session.getAttribute("username");
+    if (userId == null) {
+        out.println("<script>alert('請先登入才能上架書籍！'); window.location.href='login.jsp';</script>");
+        return;
+    }
+%>
+
 <html lang="zh">
-
-    <head>
-        <meta charset="utf-8">
-        <title>二手書拍賣網</title>
-        <meta content="width=device-width,Sinitial-scale=1.0" name="viewport">
-        <meta content="" name="keywords">
-        <meta content="" name="description">
-
-        <!-- Google Web Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet"> 
-
-        <!-- Icon Font Stylesheet -->
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"/>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
-
-        <!-- Libraries Stylesheet -->
-        <link href="lib/lightbox/css/lightbox.min.css" rel="stylesheet">
-        <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
-
-
-        <!-- Customized Bootstrap Stylesheet -->
-        <link href="css/bootstrap.min.css" rel="stylesheet">
-
-        <!-- Template Stylesheet -->
-        <link href="css/style.css" rel="stylesheet">
-        <style>
-        table, th ,td{
-        border:1px solid black;
-        border-collapse:collaspe;
-        }
-        th, td {
-  padding: 25px;
-}
-th, td {
-  padding-top: 30px;
-  padding-bottom: 30px;
-  padding-left: 30px;
-  padding-right: 30px;
-}
-        </style>
-  <style>
+<head>
+    <meta charset="utf-8">
+    <title>上架書籍 - 二手書拍賣網</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
         body {
-            margin: 0;
-            padding: 0;
             background-color: #f8f9fa;
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
             display: flex;
-            justify-content: center; /* 水平置中 */
-            align-items: center; /* 垂直置中 */
-            min-height: 100vh; /* 使表單在整個視窗垂直居中 */
-            flex-direction: column; /* 使元素垂直排列 */
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main {
+            flex: 1; /* 🔹 讓主內容區塊撐開剩餘空間 */
         }
 
         .form-container {
-            margin: 50px auto; /* 上方和下方的間距 */
-            padding-top: 100px; /* 往下移動的距離 */
-            max-width: 500px; /* 限制表單寬度 */
-            background-color: #ffffff;
-            padding: 20px;
+            background-color: #fff;
+            padding: 30px 40px;
             border: 1px solid #ccc;
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 120px auto 60px;
         }
 
-        label {
-            display: inline-block;
-            width: 100px; /* 控制標籤固定寬度 */
-            margin-bottom: 10px;
-        }
+        label { display: inline-block; width: 100px; margin-bottom: 10px; }
+        input, textarea, select { width: calc(100% - 120px); margin-left: 5px; margin-bottom: 10px; padding: 5px; }
+        .required { color: red; font-weight: bold; }
 
-        input, textarea {
-            width: calc(100% - 120px); /* 控制輸入框的寬度 */
-            margin-left: 5px;
-            margin-bottom: 5px;
-            padding: 5px;
-            box-sizing: border-box;
+        footer, .container-fluid.bg-dark {
+            margin-top: auto;
+            width: 100%;
         }
+    </style>
+</head>
 
-        input[type="submit"], input[type="reset"] {
-            width: auto;
-            margin: 10px 5px;
-            padding: 5px 10px;
-        }
-
-        .required {
-            color: red;
-            font-weight: bold;
-        }
-      
-    </style>       
-    </head>
-
-    <body>
-    
+<body>
     <%@ include file="menu.jsp"%> 
-    <br><br><br><br><br>
-<form action="shop_DBInsertInto.jsp" method="post" style="margin: 0 auto; width: 100%; text-align: left;">
 
-    <label>書名：</label>
-    <input type="text" name="bookname" id="bookname" size="20"required><span class="required">*</span><br><br>
-    <label>作者：</label>
-    <input type="text" name="author" id="author" size="20"required><span class="required">*</span><br><br>
-    <label>價格：</label>
-    <input type="text" name="price" id="price" size="20"required><span class="required">*</span><br><br>
-    <label>出版日期：</label>
-    <input type="date" id="date" name="date"required><span class="required">*</span><br><br>
-    <label>書籍照片：</label>
-    <input type="file" id="bookphoto" name="bookphoto"><br><br>
-    <label>聯絡方式：</label>
-    <input type="text" name="contact" id="contact" size="30"required><span class="required">*</span><br><br>
-    <label>備註：</label>
-    <textarea name="memo" id="memo" rows="5" cols="40"></textarea><br><br>
-    <input type="submit" value="送出">
-    <input type="reset" value="修改">
-    <script language="javascript">  
-			//點選提交按鈕觸發下面的函式
-			function del(){  
-				document.form.action="shop_DBUpdate_pic.jsp";
-				document.form.enctype="multipart/form-data";
-				document.form.submit();
-			}  
-			</script>    
-</form>
+    <main>
+        <div class="form-container">
+            <h3>📚 上架書籍</h3>
+            <form action="shop_DBInsertInto.jsp" method="post" enctype="multipart/form-data">
+                <label>書名：</label>
+                <input type="text" name="titleBook" required><span class="required">*</span><br>
 
+                <label>作者：</label>
+                <input type="text" name="author" required><span class="required">*</span><br>
 
-	</body>
-	
+                <label>價格：</label>
+                <input type="number" name="price" required><span class="required">*</span><br>
+
+                <label>出版日期：</label>
+                <input type="date" name="date" required><span class="required">*</span><br>
+
+                <label>書籍照片：</label>
+                <input type="file" name="photo" accept="image/*"><br>
+
+                <label>聯絡方式：</label>
+                <input type="text" name="contact" required><span class="required">*</span><br>
+
+                <label>有無筆記：</label>
+                <select name="remarks">
+                    <option value="有筆記">有筆記</option>
+                    <option value="無筆記">無筆記</option>
+                </select><br>
+
+                <label>書籍狀況：</label>
+                <select name="condition">
+                    <option value="全新">全新</option>
+                    <option value="良好">良好</option>
+                    <option value="普通">普通</option>
+                    <option value="舊">舊</option>
+                </select><br>
+
+                <label>系所：</label>
+                <input type="text" name="department"><br>
+
+                <label>ISBN：</label>
+                <input type="text" name="ISBN"><br>
+
+                <input type="hidden" name="username" value="<%= username %>">
+                <input type="hidden" name="userId" value="<%= userId %>">
+
+                <div style="text-align:center; margin-top:15px;">
+				    <input type="submit" class="btn btn-primary" value="送出">
+				    <input type="reset" class="btn btn-secondary" value="修改">
+				</div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer Start -->
+    <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
+        <div class="container py-5">
+            <div class="row g-5">
+                <div class="col-md-6 col-lg-3">
+                    <h5 class="text-white mb-4">專題資訊</h5>
+                    <p class="mb-2">題目：北護二手書拍賣系統</p>
+                    <p class="mb-2">系所：健康事業管理系</p>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <h5 class="text-white mb-4">快速連結</h5>
+                    <a class="btn btn-link" href="#">首頁</a>
+                    <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid text-center border-top border-secondary py-3">
+            <p class="mb-0">&copy; 2025 二手書拍賣網. All Rights Reserved.</p>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+    <script src="js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
