@@ -3,8 +3,8 @@
 <head><title>登出</title></head>
 <body>
 <%
-if(session.getAttribute("accessId") != null) {
-    session.removeAttribute("accessId");
+if(session.getAttribute("userId") != null) {
+    session.removeAttribute("userId");
     session.removeAttribute("username");
 }
 response.sendRedirect("index.jsp");

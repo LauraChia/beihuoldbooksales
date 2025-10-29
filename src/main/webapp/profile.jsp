@@ -3,12 +3,12 @@
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
 <%
-    if (session.getAttribute("accessId") == null) {
+    if (session.getAttribute("userId") == null) {
         response.sendRedirect("login.jsp");
         return;
     }
 
-    String userAccessId = (String) session.getAttribute("accessId");
+    String userAccessId = (String) session.getAttribute("userId");
     String username = "";
     String name = "";
     String email = "";
@@ -25,11 +25,12 @@
         rs = ps.executeQuery();
 
         if (rs.next()) {
-            username = rs.getString("username");
+        	username = rs.getString("username");
             name = rs.getString("name");
             email = rs.getString("email");
 
             // ✅ 避免 null 顯示
+            if (username == null) username = "";
             if (name == null) name = "";
             if (email == null) email = "";
         }

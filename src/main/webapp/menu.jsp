@@ -45,23 +45,19 @@
                 <%
 				    String currentPage = request.getRequestURI();
                 %>
-                    <div class="navbar-nav mx-auto">
-				    <a href="shop.jsp" class="nav-link <%= currentPage.endsWith("shop.jsp") ? "nav-active" : "" %>">我要賣書</a>
+                    
                         
-                        <%-- 登入/登出邏輯 --%>
-				<%
-				    String accessId = (String) session.getAttribute("accessId");
-				%>
-				
-				
-				    
-				    <% if (accessId != null) { %>
-				        <a href="profile.jsp" class="nav-link <%= currentPage.endsWith("profile.jsp") ? "nav-active" : "" %>">個人資料</a>
-				        <a href="logout.jsp" class="nav-link">登出</a>
-				    <% } else { %>
-				        <a href="login.jsp" class="nav-link <%= currentPage.endsWith("login.jsp") ? "nav-active" : "" %>">登入</a>
-				    <% } %>
-				</div>
+                <%-- 登入/登出邏輯 --%>
+					<div class="navbar-nav mx-auto">
+					    <a href="shop.jsp" class="nav-link <%= currentPage.endsWith("shop.jsp") ? "nav-active" : "" %>">我要賣書</a>
+					    
+					    <% if (session.getAttribute("username") != null) { %>
+					        <a href="profile.jsp" class="nav-link <%= currentPage.endsWith("profile.jsp") ? "nav-active" : "" %>">個人資料</a>
+					        <a href="logout.jsp" class="nav-link">登出</a>
+					    <% } else { %>
+					        <a href="login.jsp" class="nav-link <%= currentPage.endsWith("login.jsp") ? "nav-active" : "" %>">登入</a>
+					    <% } %>
+					</div>
 
                     <!-- 搜尋和用戶圖示 -->
                     <div class="d-flex align-items-center">
@@ -99,16 +95,13 @@
     </div>
     <!-- 搜尋 Modal End -->
 
-    <!-- 使用者名稱顯示 -->
-    <div class="container mt-4">
-        <%
-            if (accessId != null) {
-        %>
-            <p class="text-end text-primary">歡迎, <strong><%= accessId %></strong></p>
-        <%
-            }
-        %>
-    </div>
+    
+	<!-- 使用者名稱顯示 -->
+	<div class="container mt-4">
+	    <% if (session.getAttribute("username") != null) { %>
+	    <p class="text-end text-primary">歡迎, <strong><%= session.getAttribute("username") %></strong></p>
+	<% } %>
+	</div>
 
     <!-- Bootstrap JS -->
     <script src="js/bootstrap.bundle.min.js"></script>

@@ -3,12 +3,12 @@
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
 <%
-    if (session.getAttribute("accessId") == null) {
+    if (session.getAttribute("userId") == null) {
         response.sendRedirect("login.jsp");
         return;
     }
 
-    String userAccessId = (String) session.getAttribute("accessId");
+    String userId = (String) session.getAttribute("userId");
     String name = request.getParameter("name");
     String email = request.getParameter("email");
     String password = request.getParameter("password");
@@ -28,7 +28,7 @@
         ps.setString(1, name);
         ps.setString(2, email);
         ps.setString(3, password);
-        ps.setString(4, userAccessId);
+        ps.setString(4, userId);
         ps.executeUpdate();
 
         response.sendRedirect("profile.jsp");

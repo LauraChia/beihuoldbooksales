@@ -3,12 +3,12 @@
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
 <%
-    if (session.getAttribute("accessId") == null) {
+    if (session.getAttribute("userId") == null) {
         response.sendRedirect("login.jsp");
         return;
     }
 
-    String userAccessId = (String) session.getAttribute("accessId");
+    String userId = (String) session.getAttribute("userId");
     String username = "";
     String name = ""; 
     String email = "";
@@ -22,7 +22,7 @@
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
         String sql = "SELECT username, name, email, password FROM users WHERE userId = ?";
         ps = con.prepareStatement(sql);
-        ps.setString(1, userAccessId);
+        ps.setString(1, userId);
         rs = ps.executeQuery();
 
         if (rs.next()) {
