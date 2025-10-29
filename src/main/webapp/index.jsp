@@ -1,151 +1,123 @@
-<%@page contentType="text/html"%>
-<%@page pageEncoding="utf-8"%>
+<%@page contentType="text/html" pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
+
 <html lang="zh">
-
-    <head>
-        <meta charset="utf-8">
-        <title>北護二手書拍賣網</title>
-        <meta content="width=device-width,Sinitial-scale=1.0" name="viewport">
-        <meta content="" name="keywords">
-        <meta content="" name="description">
-
-        <!-- Google Web Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet"> 
-
-        <!-- Icon Font Stylesheet -->
-        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css"/>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
-
-        <!-- Libraries Stylesheet -->
-        <link href="lib/lightbox/css/lightbox.min.css" rel="stylesheet">
-        <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
-
-
-        <!-- Customized Bootstrap Stylesheet -->
-        <link href="css/bootstrap.min.css" rel="stylesheet">
-
-        <!-- Template Stylesheet -->
-        <link href="css/style.css" rel="stylesheet">
-        <style>
-        table, th ,td{
-        border:1px solid black;
-        border-collapse:collaspe;
+<head>
+    <meta charset="utf-8">
+    <title>北護二手書拍賣網</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: "Microsoft JhengHei", sans-serif;
         }
-        th, td {
-  padding: 15px;
-}
-th, td {
-  padding-top: 10px;
-  padding-bottom: 20px;
-  padding-left: 10px;
-  padding-right: 30px;
-}
-        </style> 
-    </head>
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 60px auto;
+        }
+        .book-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: 0.2s ease-in-out;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .book-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .book-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        .book-img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+        }
+        .book-info {
+            padding: 12px 14px;
+        }
+        .book-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+            height: 40px;
+            overflow: hidden;
+            line-height: 20px;
+        }
+        .book-author {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .book-price {
+            color: #d9534f;
+            font-weight: bold;
+            font-size: 15px;
+        }
+        .book-date {
+            font-size: 13px;
+            color: #888;
+        }
+    </style>
+</head>
 
-    <body>
-    <%@ include file="menu.jsp"%>
-    <br><br><br><br><br>
+<body>
+<%@ include file="menu.jsp"%>
+<br><br><br><br>
+
 <%
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
     Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
     Statement smt = con.createStatement();
-    String sql = "SELECT * FROM book";              
+    String sql = "SELECT * FROM book ORDER BY createdAt DESC";
     ResultSet rs = smt.executeQuery(sql);
-    String username = (String)session.getAttribute("accessId");
-    boolean isLoggedIn = (username != null && !username.isEmpty());
-%>
-<table style="width:100%; border:1px solid black; border-collapse: collapse;">
-    <tr>
-        <th>書名</th>
-        <th>作者</th>
-        <th>價格</th>
-        <th>出版日期</th>
-        <th>圖片</th>
-        <th>系所名稱</th>
-        <th>聯絡方式</th>
-        <th>書籍狀況</th>
-        <th>有無筆記</th>
-        <th>是否通過審核</th>
-        <th>賣家</th>
-        <th>ISBN</th>
-        <th>使用者編號</th>
-        <th>備註</th>
-        <th>上架時間</th>
-        
-        
-    </tr>
-<%
-    while(rs.next()) {
-        String bookId = rs.getString("bookId"); 
-        String fullDate = rs.getString("date");
-        String formattedDate = fullDate != null ? fullDate.split(" ")[0] : "";
-        String photoPath = rs.getString("photo");
-        String remarks = rs.getString("remarks");
-        String createAt = rs.getString("createdAt");
 %>
 
-    <tr style="border:1px solid black;">
-        <td><%= rs.getString("titleBook") %></td>
-        <td><%= rs.getString("author") %></td>
-        <td><%= rs.getString("price") %></td>
-        <td><%= formattedDate %></td>
-        <!-- 顯示圖片 -->
-        <td>
-            <% if (photoPath != null && !photoPath.isEmpty()) { %>
-                <img src="<%= photoPath %>" alt="書籍圖片" style="width:100px; height:auto;">
-            <% } else { %>
-                無圖片
-            <% } %>
-        </td>
-        <td><%= rs.getString("contact") %></td>
-        <td><%= rs.getString("remarks") %></td>
-        <td><%= rs.getString("createdAt") %></td>
-    </tr>
+<div class="book-grid">
+<%
+    while(rs.next()) {
+        String bookId = rs.getString("bookId");
+        String title = rs.getString("titleBook");
+        String author = rs.getString("author");
+        String price = rs.getString("price");
+        String date = rs.getString("date");
+        String photo = rs.getString("photo");
+        if (photo == null || photo.trim().isEmpty()) {
+            photo = "assets/images/noimage.png"; // 預設圖片
+        }
+%>
+    <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
+        <div class="book-card">
+            <img src="<%= photo %>" alt="書籍圖片" class="book-img">
+            <div class="book-info">
+                <div class="book-title"><%= title %></div>
+                <div class="book-author">作者：<%= author %></div>
+                <div class="book-price">NT$ <%= price %></div>
+                <div class="book-date">出版日期：<%= date != null ? date.split(" ")[0] : "" %></div>
+            </div>
+        </div>
+    </a>
 <%
     }
     con.close();
 %>
-</table>
-</body>
+</div>
 
-       <!-- Back to Top -->
-        <a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top"><i class="fa fa-arrow-up"></i></a>   
-
-        
-    <!-- JavaScript Libraries -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="lib/easing/easing.min.js"></script>
-    <script src="lib/waypoints/waypoints.min.js"></script>
-    <script src="lib/lightbox/js/lightbox.min.js"></script>
-    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
-
-    <!-- Template Javascript -->
-    <script src="js/main.js"></script>
-<!-- Footer Start -->
+<!-- Footer -->
 <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
-    <div class="container py-5">
-        <div class="row g-5">
-            <div class="col-md-6 col-lg-3">
-                <h5 class="text-white mb-4">專題資訊</h5>
-                <p class="mb-2">題目：北護二手書拍賣系統</p>
-                <p class="mb-2">系所：健康事業管理系</p>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <h5 class="text-white mb-4">快速連結</h5>
-                <a class="btn btn-link" href="index.jsp">首頁</a>
-                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
-            </div>
-        </div>
-    </div>
-    <div class="container-fluid text-center border-top border-secondary py-3">
+    <div class="container py-5 text-center">
         <p class="mb-0">&copy; 2025 北護二手書拍賣系統. All Rights Reserved.</p>
     </div>
 </div>
-<!-- Footer End -->
-    </body>  
+
+</body>
+</html>
