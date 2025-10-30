@@ -60,14 +60,23 @@
 %>
 
 <div class="book-detail">
-    <img src="<%= rs.getString("photo") != null ? rs.getString("photo") : "assets/images/noimage.png" %>" alt="書籍圖片">
+    <img src="<%= rs.getString("photo") != null ? rs.getString("photo") : "assets/images/about.png" %>" alt="書籍圖片">
     <div class="detail-info">
         <h2><%= rs.getString("titleBook") %></h2>
-        <div class="price">NT$ <%= rs.getString("price") %></div>
+        
+        <div class="info-item">書名：<%= rs.getString("titleBook") %></div>
+        <div class="price">NT$<%= String.format("%.0f", Float.parseFloat(rs.getString("price"))) %></div>
         <div class="info-item">作者：<%= rs.getString("author") %></div>
-        <div class="info-item">出版日期：<%= rs.getString("date") %></div>
+       <div class="info-item">出版日期：<%= rs.getString("date").split(" ")[0] %></div>
+       <div class="info-item">賣家編號：<%= rs.getString("userId") %></div>
         <div class="info-item">聯絡方式：<%= rs.getString("contact") %></div>
+        <div class="info-item">系所：<%= rs.getString("department") %></div>
+       <div class="info-item">書籍的ISBN：<%= rs.getString("ISBN") %></div>
+        <div class="info-item">狀態：<%= rs.getString("condition") %></div>
+        <div class="info-item">上架日期：<%= rs.getString("createdAt").split(" ")[0] %></div>
         <div class="info-item">備註：<%= rs.getString("remarks") %></div>
+        
+         <a class="btn btn-link" href="index.jsp">回首頁</a>
     </div>
 </div>
 

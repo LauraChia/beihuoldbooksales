@@ -92,7 +92,7 @@
         String date = rs.getString("date");
         String photo = rs.getString("photo");
         if (photo == null || photo.trim().isEmpty()) {
-            photo = "assets/images/noimage.png"; // 預設圖片
+            photo = "assets/images/about.png"; // 預設圖片
         }
 %>
     <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
