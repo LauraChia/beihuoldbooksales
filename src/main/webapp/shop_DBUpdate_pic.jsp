@@ -29,18 +29,9 @@
             con.close();
 
             response.sendRedirect("index.jsp?bookId="+bookId);
-        } catch (Exception e) {
-            // ★修改：改進錯誤提示（顯示實際錯誤內容）
-            out.println("<h3 style='color:red;'>圖片上傳失敗！</h3>");
-            out.println("<pre>");
-
-            // ★安全版本：將錯誤訊息轉為字串後輸出
-            StringWriter sw = new StringWriter();
-            PrintWriter pw = new PrintWriter(sw);
-            e.printStackTrace(pw);
-            out.println(sw.toString());  // ★改這裡，不再直接用 e.printStackTrace(out)
-
-            out.println("</pre>");
+        } catch(Exception e) {
+            out.println("<script>alert('圖片上傳失敗！');</script>");
+            e.printStackTrace();
         }
     } else {
         out.println("<script>alert('未選擇書籍或檔案！');</script>");
