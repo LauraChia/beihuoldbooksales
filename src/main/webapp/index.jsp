@@ -101,7 +101,7 @@
             <div class="book-info">
                 <div class="book-title"><%= title %></div>
                 <div class="book-author">作者：<%= author %></div>
-                <div class="book-price">NT$ <%= price %></div>
+                <div class="price" style="color: red;">NT$<%= (int) Float.parseFloat(rs.getString("price")) %></div>
                 <div class="book-date">出版日期：<%= date != null ? date.split(" ")[0] : "" %></div>
             </div>
         </div>

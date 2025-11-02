@@ -65,7 +65,7 @@
         <h2><%= rs.getString("titleBook") %></h2>
         
         <div class="info-item">書名：<%= rs.getString("titleBook") %></div>
-        <div class="price">NT$<%= String.format("%.0f", Float.parseFloat(rs.getString("price"))) %></div>
+        <div class="price">NT$<%= (int) Float.parseFloat(rs.getString("price")) %></div>
         <div class="info-item">作者：<%= rs.getString("author") %></div>
        <div class="info-item">出版日期：<%= rs.getString("date").split(" ")[0] %></div>
        <div class="info-item">賣家編號：<%= rs.getString("userId") %></div>
