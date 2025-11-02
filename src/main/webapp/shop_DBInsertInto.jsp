@@ -1,30 +1,44 @@
 <%@page contentType="text/html"%>
 <%@page pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
-<jsp:useBean id='objDBConfig' scope='application' class='hitstd.group.tool.database.DBConfig' />
+<%@page import="java.io.*,java.util.*"%>
+<%@page import="com.oreilly.servlet.MultipartRequest"%>
+<jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
+<jsp:useBean id='objFolderConfig' scope='session' class='hitstd.group.tool.upload.FolderConfig' />
+
 <html>
 <body>
 <%
 try {
+    // ★修改開始：使用 MultipartRequest 處理 multipart/form-data 表單
+    MultipartRequest multi = new MultipartRequest(request, objFolderConfig.FilePath(), 10*1024*1024, "UTF-8");
+
+    String titleBook = multi.getParameter("titleBook");
+    String author = multi.getParameter("author");
+    String price = multi.getParameter("price");
+    String date = multi.getParameter("date");
+    String contact = multi.getParameter("contact");
+    String remarks = multi.getParameter("remarks");
+    String condition = multi.getParameter("condition");
+    String department = multi.getParameter("department");
+    String ISBN = multi.getParameter("ISBN");
+    String userId = multi.getParameter("userId");
+
+    // ★抓檔案，存到 photo 欄位，不改名字
+    String photo = multi.getFilesystemName("photo");
+    if (photo == null) photo = "";  // 避免 null 錯誤
+    // ★修改結束
+
+    // 資料庫連線與寫入
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-    Connection con=DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
-    Statement smt= con.createStatement();
+    Connection con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
+    Statement smt = con.createStatement();
 
-    String titleBook = request.getParameter("titleBook") != null ? request.getParameter("titleBook") : "";
-    String author = request.getParameter("author") != null ? request.getParameter("author") : "";
-    String price = request.getParameter("price") != null ? request.getParameter("price") : "";
-    String date = request.getParameter("date") != null ? request.getParameter("date") : "";
-    String photo = request.getParameter("photo") != null ? request.getParameter("photo") : "";
-    String contact = request.getParameter("contact") != null ? request.getParameter("contact") : "";
-    String remarks = request.getParameter("remarks") != null ? request.getParameter("remarks") : "";
-    String condition = request.getParameter("condition") != null ? request.getParameter("condition") : "";
-    String department = request.getParameter("department") != null ? request.getParameter("department") : "";
-    String ISBN = request.getParameter("ISBN") != null ? request.getParameter("ISBN") : "";
-    String username = request.getParameter("username") != null ? request.getParameter("username") : "";
-    String userId = request.getParameter("userId") != null ? request.getParameter("userId") : "";
+    // ★使用原本 photo 欄位名稱
+    String sql = "INSERT INTO book(titleBook, author, price, [date], photo, contact, remarks, condition, department, ISBN, userId) "
+               + "VALUES('" + titleBook + "', '" + author + "', '" + price + "', '" + date + "', '" + photo + "', '" + contact + "', '"
+               + remarks + "', '" + condition + "', '" + department + "', '" + ISBN + "', '" + userId + "')";
 
-    String sql = "INSERT INTO book(titleBook, author, price, [date], photo, contact, remarks, condition, department, ISBN, username, userId) "
-               + "VALUES('"+titleBook+"', '"+author+"', '"+price+"', '"+date+"', '"+photo+"', '"+contact+"', '"+remarks+"', '"+condition+"', '"+department+"', '"+ISBN+"', '"+username+"', '"+userId+"')";
     smt.executeUpdate(sql);
     con.close();
 %>
@@ -34,8 +48,15 @@ window.location.href = "index.jsp";
 </script>
 <%
 } catch (Exception e) {
-    out.println("<script>alert('資料送出失敗，請稍後再試。');</script>");
-    e.printStackTrace();
+    // ★修改開始：印出例外詳細資訊方便除錯
+    out.println("<h3 style='color:red;'>資料送出失敗，請稍後再試。</h3>");
+    out.println("<pre>");
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    e.printStackTrace(pw);
+    out.println(sw.toString());
+    out.println("</pre>");
+    // ★修改結束
 }
 %>
 </body>

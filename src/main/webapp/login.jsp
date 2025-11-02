@@ -73,13 +73,6 @@ if(request.getParameter("username") !=null &&
 						Google
 					</a>
 					 -->
-					 <div class="p-t-31 p-b-9">
-					    <span class="txt1">使用者名稱</span>
-					</div>
-					<div class="wrap-input100 validate-input" data-validate="請輸入使用者名稱">
-					    <input class="input100" type="text" name="name" required>
-					    <span class="focus-input100"></span>
-					</div>
 					<div class="p-t-31 p-b-9">
 						<span class="txt1">帳號
 						</span>
