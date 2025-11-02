@@ -57,7 +57,7 @@
     <main>
         <div class="form-container">
             <h3>📚 上架書籍</h3>
-            <form action="shop_DBInsertInto.jsp" method="post" enctype="multipart/form-data">
+            <form action="shop_DBInsertInto.jsp" method="post">
                 <label>書名：</label>
                 <input type="text" name="titleBook" required><span class="required">*</span><br>
 
