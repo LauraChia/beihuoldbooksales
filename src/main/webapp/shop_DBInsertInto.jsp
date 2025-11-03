@@ -22,8 +22,8 @@ try {
     String ISBN = request.getParameter("ISBN");
     String userId = request.getParameter("userId");
 
-    String sql = "INSERT INTO book(titleBook, author, price, [date], contact, remarks, [condition], department, ISBN, userId) " +
-            "VALUES('" + titleBook + "', '" + author + "', '" + price + "', '" + date + "', '" + contact + "', '" + remarks + "', '" + condition + "', '" + department + "', '" + ISBN + "', '" + userId + "')";
+    String sql = "INSERT INTO book(titleBook, author, price, [date], contact, remarks, [condition], department, ISBN, userId, createdAt) " +
+            "VALUES('" + titleBook + "', '" + author + "', '" + price + "', '" + date + "', '" + contact + "', '" + remarks + "', '" + condition + "', '" + department + "', '" + ISBN + "', '" + userId + "', NOW())";
 
 	smt.executeUpdate(sql);
 	con.close();

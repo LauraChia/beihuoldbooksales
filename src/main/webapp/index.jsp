@@ -112,12 +112,27 @@
 %>
 </div>
 
-<!-- Footer -->
+<!-- Footer Start -->
 <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
-    <div class="container py-5 text-center">
-        <p class="mb-0">&copy; 2025 北護二手書拍賣系統. All Rights Reserved.</p>
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">專題資訊</h5>
+                <p class="mb-2">題目：北護二手書拍賣系統</p>
+                <p class="mb-2">系所：健康事業管理系</p>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">快速連結</h5>
+                <a class="btn btn-link" href="#">首頁</a>
+                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid text-center border-top border-secondary py-3">
+        <p class="mb-0">&copy; 2025 二手書拍賣網. All Rights Reserved.</p>
     </div>
 </div>
+<!-- Footer End -->
 
 </body>
 </html>

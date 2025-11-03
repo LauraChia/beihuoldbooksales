@@ -54,8 +54,10 @@
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
     Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
     Statement smt = con.createStatement();
-    String sql = "SELECT * FROM book WHERE bookId = " + bookId;
-    ResultSet rs = smt.executeQuery(sql);
+    String sql = "SELECT b.*, u.name AS sellerName " +
+            "FROM book b JOIN users u ON b.userId = u.userId " +
+            "WHERE b.bookId = " + bookId;
+ResultSet rs = smt.executeQuery(sql);
     if (rs.next()) {
 %>
 
@@ -64,17 +66,18 @@
     <div class="detail-info">
         <h2><%= rs.getString("titleBook") %></h2>
         
-        <div class="info-item">書名：<%= rs.getString("titleBook") %></div>
         <div class="price">NT$<%= (int) Float.parseFloat(rs.getString("price")) %></div>
         <div class="info-item">作者：<%= rs.getString("author") %></div>
        <div class="info-item">出版日期：<%= rs.getString("date").split(" ")[0] %></div>
-       <div class="info-item">賣家編號：<%= rs.getString("userId") %></div>
         <div class="info-item">聯絡方式：<%= rs.getString("contact") %></div>
         <div class="info-item">系所：<%= rs.getString("department") %></div>
-       <div class="info-item">書籍的ISBN：<%= rs.getString("ISBN") %></div>
+       <div class="info-item">ISBN：<%= rs.getString("ISBN") %></div>
         <div class="info-item">狀態：<%= rs.getString("condition") %></div>
+        <div class="info-item">有無筆記：<%= rs.getString("remarks") %></div>
+        <div class="info-item">賣家：<%= rs.getString("sellerName") %></div>
         <div class="info-item">上架日期：<%= rs.getString("createdAt").split(" ")[0] %></div>
-        <div class="info-item">備註：<%= rs.getString("remarks") %></div>
+        
+
         
          <a class="btn btn-link" href="index.jsp">回首頁</a>
     </div>
@@ -84,6 +87,26 @@
     }
     con.close();
 %>
-
+<!-- Footer Start -->
+<div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">專題資訊</h5>
+                <p class="mb-2">題目：北護二手書拍賣系統</p>
+                <p class="mb-2">系所：健康事業管理系</p>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">快速連結</h5>
+                <a class="btn btn-link" href="#">首頁</a>
+                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid text-center border-top border-secondary py-3">
+        <p class="mb-0">&copy; 2025 二手書拍賣網. All Rights Reserved.</p>
+    </div>
+</div>
+<!-- Footer End -->
 </body>
 </html>

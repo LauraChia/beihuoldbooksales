@@ -31,7 +31,7 @@
         Statement smt = con.createStatement();
 
         // 🔸 更新書籍圖片的 SQL
-        smt.executeUpdate("UPDATE book SET pic = '" + objFolderConfig.WebsiteRelativeFilePath() + fileName +
+        smt.executeUpdate("UPDATE book SET photo = '" + objFolderConfig.WebsiteRelativeFilePath() + fileName +
                           "' WHERE bookId = '" + bookId + "'");
 
         // 🔸 可選：上傳後導回書籍詳細頁或首頁

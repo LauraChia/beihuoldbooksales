@@ -35,7 +35,7 @@
             padding: 30px 40px;
             border: 1px solid #ccc;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             max-width: 800px;
             margin: 120px auto 60px;
         }
@@ -78,8 +78,8 @@
 
                 <label>有無筆記：</label>
                 <select name="remarks">
-                    <option value="有筆記">有筆記</option>
-                    <option value="無筆記">無筆記</option>
+                    <option value="有">有</option>
+                    <option value="無">無</option>
                 </select><br>
 
                 <label>書籍狀況：</label>
