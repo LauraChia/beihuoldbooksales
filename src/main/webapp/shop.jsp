@@ -91,7 +91,14 @@
                 </select><br>
 
                 <label>系所：</label>
-                <input type="text" name="department"><br>
+                <select name="department">
+                <option value="嬰幼兒保育系">嬰幼兒保育系</option>
+                    <option value="健康事業管理系">健康事業管理系</option>
+                    <option value="資訊管理系">資訊管理系</option>
+                    <option value="護理系">護理系</option>
+                    <option value="高齡照護系">高齡照護系</option>
+                </select><br>
+               
 
                 <label>ISBN：</label>
                 <input type="text" name="ISBN"><br>

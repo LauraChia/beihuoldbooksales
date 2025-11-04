@@ -1,136 +1,165 @@
-<%@page contentType="text/html"%>
-<%@page pageEncoding="utf-8"%>
+<%@page contentType="text/html" pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
+
 <html lang="zh">
 
 <head>
     <meta charset="utf-8">
-    <title>搜尋結果</title>
-    <meta content="width=device-width,initial-scale=1.0" name="viewport">
-    <meta content="" name="keywords">
-    <meta content="" name="description">
-
-    <!-- Google Web Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <title>二手書拍賣網 - 搜尋結果</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
-
-    <!-- Icon Font Stylesheet -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
-
-    <!-- Libraries Stylesheet -->
-    <link href="lib/lightbox/css/lightbox.min.css" rel="stylesheet">
-    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
-
-    <!-- Customized Bootstrap Stylesheet -->
+    
+    <!-- Stylesheets -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Template Stylesheet -->
     <link href="css/style.css" rel="stylesheet">
-    <style>
-        table, th, td {
-            border: 1px solid black;
-            border-collapse: collapse;
-        }
+    <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
 
-        th, td {
-            padding: 15px;
-            text-align: left;
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: "Microsoft JhengHei", sans-serif;
+        }
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 100px auto 60px;
+        }
+        .book-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: 0.2s ease-in-out;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+        .book-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .book-link {
+            text-decoration: none;
+            color: inherit;
+        }
+        .book-img {
+            width: 100%;
+            height: 260px;
+            object-fit: cover;
+        }
+        .book-info {
+            padding: 12px 14px;
+        }
+        .book-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 6px;
+            height: 40px;
+            overflow: hidden;
+            line-height: 20px;
+        }
+        .book-author {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+        .book-price {
+            color: #d9534f;
+            font-weight: bold;
+            font-size: 15px;
+        }
+        .book-date {
+            font-size: 13px;
+            color: #888;
         }
     </style>
 </head>
 
 <body>
     <%@ include file="menu.jsp" %>
-    <br><br><br><br><br>
-    <%
-        // 初始化資料庫連線
-        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-        Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
-        Statement smt = con.createStatement();
 
-        // 取得搜尋關鍵字
-        String keyword = request.getParameter("query");
-        String sql = "SELECT * FROM book";
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            // 如果有輸入搜尋關鍵字，則進行條件查詢
-            sql = "SELECT * FROM book WHERE titleBook LIKE '%" + keyword + "%'";
+<%
+    // 取得搜尋參數
+    String type = request.getParameter("type");
+    String query = request.getParameter("query");
+
+    Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+    Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
+    Statement smt = con.createStatement();
+
+    String sql = "SELECT * FROM book";
+    if(query != null && !query.trim().isEmpty() && type != null && !type.trim().isEmpty()) {
+        sql += " WHERE " + type + " LIKE '%" + query + "%'";
+    }
+    sql += " ORDER BY createdAt DESC";
+
+    ResultSet rs = smt.executeQuery(sql);
+%>
+
+<div class="container mt-5">
+    <h3 class="text-center mb-4">搜尋結果</h3>
+</div>
+
+<div class="book-grid">
+<%
+    while(rs.next()) {
+        String bookId = rs.getString("bookId");
+        String title = rs.getString("titleBook");
+        String author = rs.getString("author");
+        String price = rs.getString("price");
+        String date = rs.getString("date");
+        String photo = rs.getString("photo");
+        if(photo == null || photo.trim().isEmpty()) {
+            photo = "assets/images/about.png"; // 預設圖片
         }
-        ResultSet rs = smt.executeQuery(sql);
-    %>
-
-    <div class="container">
-        <h1 class="text-center">搜尋結果</h1>
-
-        <%
-        boolean hasResults = false;
-        while (rs.next()) {
-            hasResults = true;
-            String bookId = rs.getString("bookId");
-            String fullDate = rs.getString("date");
-            String formattedDate = fullDate != null ? fullDate.split(" ")[0] : "";
-            String photoPath = rs.getString("photo");
-            String remarks = rs.getString("remarks");
-        %>
-            <table style="width:100%; border:1px solid black; border-collapse: collapse;">
-                <tr>
-                    <th>書名</th>
-                    <th>作者</th>
-                    <th>價格</th>
-                    <th>出版日期</th>
-                    <th>圖片</th>
-                    <th>聯絡方式</th>
-                    <th>備註</th>
-                </tr>
-                <tr>
-                    <td><%= rs.getString("titleBook") %></td>
-                    <td><%= rs.getString("author") %></td>
-                    <td><%= rs.getString("price") %></td>
-                    <td><%= formattedDate %></td>
-                    <td>
-                        <% if (photoPath != null && !photoPath.isEmpty()) { %>
-                            <img src="<%= photoPath %>" alt="書籍圖片" style="width:100px; height:auto;">
-                        <% } else { %>
-                            無圖片
-                        <% } %>
-                    </td>
-                    <td><%= rs.getString("contact") %></td>
-                    <td>
-                        <% if (remarks != null && !remarks.isEmpty()) { %>
-                            <%= remarks %>
-                        <% } %>
-                    </td>
-                </tr>
-            </table>
-        <% } %>
-
-        <% if (!hasResults) { %>
-            <div class="alert alert-warning" role="alert">
-                未找到相關書籍，請試試其他關鍵字。
+%>
+    <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
+        <div class="book-card">
+            <img src="<%= photo %>" alt="書籍圖片" class="book-img">
+            <div class="book-info">
+                <div class="book-title"><%= title %></div>
+                <div class="book-author">作者：<%= author %></div>
+                <div class="book-price">NT$<%= (int) Float.parseFloat(price) %></div>
+                <div class="book-date">出版日期：<%= date != null ? date.split(" ")[0] : "" %></div>
             </div>
-        <% } %>
+        </div>
+    </a>
+<%
+    }
+    con.close();
+%>
+</div>
 
-        <a href="index.jsp" class="btn btn-primary mt-4">返回首頁</a>
+<!-- Footer Start -->
+<div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">專題資訊</h5>
+                <p class="mb-2">題目：北護二手書拍賣系統</p>
+                <p class="mb-2">系所：健康事業管理系</p>
+                <p class="mb-2">專題組員：黃郁心、賈子瑩、許宇翔、闕紫彤</p>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">快速連結</h5>
+                <a class="btn btn-link" href="index.jsp">首頁</a>
+                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8" target="_blank" rel="noopener noreferrer">系統使用回饋表單</a>
+            </div>
+        </div>
     </div>
+    <div class="container-fluid text-center border-top border-secondary py-3">
+        <p class="mb-0">&copy; 2025年 國北護二手書拍賣網. @All Rights Reserved.</p>
+    </div>
+</div>
+<!-- Footer End -->
 
-    <%
-        con.close();
-    %>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Back to Top -->
-    <a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top"><i class="fa fa-arrow-up"></i></a>
-
-    <!-- JavaScript Libraries -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="lib/easing/easing.min.js"></script>
-    <script src="lib/waypoints/waypoints.min.js"></script>
-    <script src="lib/lightbox/js/lightbox.min.js"></script>
-    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
-
-    <!-- Template Javascript -->
-    <script src="js/main.js"></script>
 </body>
 </html>

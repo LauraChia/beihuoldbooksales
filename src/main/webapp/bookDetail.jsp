@@ -98,7 +98,7 @@ ResultSet rs = smt.executeQuery(sql);
             </div>
             <div class="col-md-6 col-lg-3">
                 <h5 class="text-white mb-4">快速連結</h5>
-                <a class="btn btn-link" href="#">首頁</a>
+                <a class="btn btn-link" href="index.jsp">首頁</a>
                 <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
             </div>
         </div>
