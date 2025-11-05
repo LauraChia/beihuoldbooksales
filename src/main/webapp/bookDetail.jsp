@@ -59,6 +59,19 @@
             "WHERE b.bookId = " + bookId;
 ResultSet rs = smt.executeQuery(sql);
     if (rs.next()) {
+    	String approvalStatus = rs.getString("isApproved");
+    	String statusText = "待審核";  // 預設值
+    	String statusClass = "status-pending";
+
+    	if (approvalStatus != null) {
+    	    if (approvalStatus.equals("已審核") || approvalStatus.equals("approved")) {
+    	        statusText = "已審核";
+    	        statusClass = "status-approved";
+    	    } else if (approvalStatus.equals("未通過") || approvalStatus.equals("rejected")) {
+    	        statusText = "未通過";
+    	        statusClass = "status-rejected";
+    	    }
+    	}
 %>
 
 <div class="book-detail">
@@ -69,14 +82,14 @@ ResultSet rs = smt.executeQuery(sql);
         <div class="price">NT$<%= (int) Float.parseFloat(rs.getString("price")) %></div>
         <div class="info-item">作者：<%= rs.getString("author") %></div>
        <div class="info-item">出版日期：<%= rs.getString("date").split(" ")[0] %></div>
-        <div class="info-item">聯絡方式：<%= rs.getString("contact") %></div>
-        <div class="info-item">系所：<%= rs.getString("department") %></div>
        <div class="info-item">ISBN：<%= rs.getString("ISBN") %></div>
+       <div class="info-item">系所：<%= rs.getString("department") %></div>
         <div class="info-item">狀態：<%= rs.getString("condition") %></div>
         <div class="info-item">有無筆記：<%= rs.getString("remarks") %></div>
         <div class="info-item">賣家：<%= rs.getString("sellerName") %></div>
+        <div class="info-item">聯絡方式：<%= rs.getString("contact") %></div>
         <div class="info-item">上架日期：<%= rs.getString("createdAt").split(" ")[0] %></div>
-        
+        <div class="info-item">審核狀態：<span class="<%= statusClass %>"><%= statusText %></span></div>
 
         
          <a class="btn btn-link" href="index.jsp">回首頁</a>
