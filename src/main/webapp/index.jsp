@@ -36,10 +36,29 @@
             text-decoration: none;
             color: inherit;
         }
+        .book-images {
+            position: relative;
+            width: 100%;
+            height: 260px;
+            overflow: hidden;
+        }
         .book-img {
             width: 100%;
             height: 260px;
             object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            transition: opacity 0.3s ease;
+        }
+        .book-img.img-second {
+            opacity: 0;
+        }
+        .book-card:hover .book-img.img-first {
+            opacity: 0;
+        }
+        .book-card:hover .book-img.img-second {
+            opacity: 1;
         }
         .book-info {
             padding: 12px 14px;
@@ -67,6 +86,17 @@
             font-size: 13px;
             color: #888;
         }
+        .image-indicator {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background-color: rgba(0,0,0,0.6);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            z-index: 10;
+        }
     </style>
 </head>
 
@@ -90,18 +120,36 @@
         String author = rs.getString("author");
         String price = rs.getString("price");
         String date = rs.getString("date");
-        String photo = rs.getString("photo");
-        if (photo == null || photo.trim().isEmpty()) {
-            photo = "assets/images/about.png"; // 預設圖片
+        String photoStr = rs.getString("photo");
+        
+        // 分割圖片路徑
+        String[] photos = new String[2];
+        if (photoStr != null && !photoStr.trim().isEmpty()) {
+            String[] photoArray = photoStr.split(",");
+            photos[0] = photoArray[0].trim();
+            if (photoArray.length > 1) {
+                photos[1] = photoArray[1].trim();
+            } else {
+                photos[1] = photos[0]; // 如果只有一張圖，第二張用同一張
+            }
+        } else {
+            photos[0] = "assets/images/about.png";
+            photos[1] = "assets/images/about.png";
         }
 %>
     <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
         <div class="book-card">
-            <img src="<%= photo %>" alt="書籍圖片" class="book-img">
+            <div class="book-images">
+                <img src="<%= photos[0] %>" alt="書籍圖片1" class="book-img img-first">
+                <img src="<%= photos[1] %>" alt="書籍圖片2" class="book-img img-second">
+                <% if (!photos[0].equals(photos[1])) { %>
+                    <span class="image-indicator">1/2</span>
+                <% } %>
+            </div>
             <div class="book-info">
                 <div class="book-title"><%= title %></div>
                 <div class="book-author">作者：<%= author %></div>
-                <div class="price" style="color: red;">NT$<%= (int) Float.parseFloat(rs.getString("price")) %></div>
+                <div class="book-price">NT$<%= (int) Float.parseFloat(price) %></div>
                 <div class="book-date">出版日期：<%= date != null ? date.split(" ")[0] : "" %></div>
             </div>
         </div>
