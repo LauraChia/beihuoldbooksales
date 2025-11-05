@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
+<%@page import="java.util.*"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
 <html lang="zh">
@@ -41,6 +42,7 @@
             width: 100%;
             height: 260px;
             overflow: hidden;
+            background-color: #f0f0f0;
         }
         .book-img {
             width: 100%;
@@ -49,15 +51,10 @@
             position: absolute;
             top: 0;
             left: 0;
-            transition: opacity 0.3s ease;
-        }
-        .book-img.img-second {
+            transition: opacity 0.5s ease;
             opacity: 0;
         }
-        .book-card:hover .book-img.img-first {
-            opacity: 0;
-        }
-        .book-card:hover .book-img.img-second {
+        .book-img.active {
             opacity: 1;
         }
         .book-info {
@@ -97,6 +94,33 @@
             font-size: 12px;
             z-index: 10;
         }
+        .image-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+        }
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.5);
+            transition: background-color 0.3s;
+        }
+        .dot.active {
+            background-color: white;
+        }
+        .no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            font-size: 14px;
+        }
     </style>
 </head>
 
@@ -114,6 +138,7 @@
 
 <div class="book-grid">
 <%
+    int cardIndex = 0;
     while(rs.next()) {
         String bookId = rs.getString("bookId");
         String title = rs.getString("titleBook");
@@ -122,28 +147,50 @@
         String date = rs.getString("date");
         String photoStr = rs.getString("photo");
         
-        // 分割圖片路徑
-        String[] photos = new String[2];
+        // 分割圖片路徑 - 支援多張圖片
+        List<String> photoList = new ArrayList<>();
         if (photoStr != null && !photoStr.trim().isEmpty()) {
             String[] photoArray = photoStr.split(",");
-            photos[0] = photoArray[0].trim();
-            if (photoArray.length > 1) {
-                photos[1] = photoArray[1].trim();
-            } else {
-                photos[1] = photos[0]; // 如果只有一張圖，第二張用同一張
+            for (String photo : photoArray) {
+                String trimmedPhoto = photo.trim();
+                // 確保路徑正確
+                if (!trimmedPhoto.startsWith("assets/")) {
+                    trimmedPhoto = "assets/images/member/" + trimmedPhoto;
+                }
+                photoList.add(trimmedPhoto);
             }
-        } else {
-            photos[0] = "assets/images/about.png";
-            photos[1] = "assets/images/about.png";
         }
+        
+        // 如果沒有圖片,使用預設圖
+        if (photoList.isEmpty()) {
+            photoList.add("assets/images/about.png");
+        }
+        
+        int photoCount = photoList.size();
+        String cardId = "card-" + cardIndex;
+        cardIndex++;
 %>
     <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
-        <div class="book-card">
-            <div class="book-images">
-                <img src="<%= photos[0] %>" alt="書籍圖片1" class="book-img img-first">
-                <img src="<%= photos[1] %>" alt="書籍圖片2" class="book-img img-second">
-                <% if (!photos[0].equals(photos[1])) { %>
-                    <span class="image-indicator">1/2</span>
+        <div class="book-card" data-card-id="<%= cardId %>">
+            <div class="book-images" id="<%= cardId %>">
+                <% if (photoList.isEmpty()) { %>
+                    <div class="no-image">無圖片</div>
+                <% } else { %>
+                    <% for (int i = 0; i < photoList.size(); i++) { %>
+                        <img src="<%= photoList.get(i) %>" 
+                             alt="書籍圖片<%= (i+1) %>" 
+                             class="book-img <%= (i == 0) ? "active" : "" %>"
+                             onerror="this.src='assets/images/about.png'">
+                    <% } %>
+                    
+                    <% if (photoCount > 1) { %>
+                        <span class="image-indicator"><span class="current-img">1</span>/<%= photoCount %></span>
+                        <div class="image-dots">
+                            <% for (int i = 0; i < photoCount; i++) { %>
+                                <span class="dot <%= (i == 0) ? "active" : "" %>"></span>
+                            <% } %>
+                        </div>
+                    <% } %>
                 <% } %>
             </div>
             <div class="book-info">
@@ -159,6 +206,58 @@
     con.close();
 %>
 </div>
+
+<script>
+// 自動輪播圖片
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.book-card');
+    
+    cards.forEach(card => {
+        const cardId = card.getAttribute('data-card-id');
+        const container = document.getElementById(cardId);
+        const images = container.querySelectorAll('.book-img');
+        const dots = container.querySelectorAll('.dot');
+        const indicator = container.querySelector('.current-img');
+        
+        if (images.length <= 1) return; // 只有一張圖片不需要輪播
+        
+        let currentIndex = 0;
+        let intervalId = null;
+        
+        function showImage(index) {
+            images.forEach(img => img.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            images[index].classList.add('active');
+            dots[index].classList.add('active');
+            
+            if (indicator) {
+                indicator.textContent = index + 1;
+            }
+        }
+        
+        function nextImage() {
+            currentIndex = (currentIndex + 1) % images.length;
+            showImage(currentIndex);
+        }
+        
+        // 滑鼠移入時開始輪播
+        card.addEventListener('mouseenter', function() {
+            intervalId = setInterval(nextImage, 800); // 每0.8秒切換
+        });
+        
+        // 滑鼠移出時停止輪播並回到第一張
+        card.addEventListener('mouseleave', function() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+            currentIndex = 0;
+            showImage(0);
+        });
+    });
+});
+</script>
 
 <!-- Footer Start -->
 <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">

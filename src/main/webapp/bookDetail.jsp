@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
+<%@page import="java.util.*"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
 <html lang="zh">
@@ -21,15 +22,16 @@
         }
         .image-gallery {
             position: relative;
-            width: 300px;
+            width: 350px;
         }
         .image-container {
             position: relative;
-            width: 300px;
-            height: 400px;
+            width: 350px;
+            height: 450px;
             border-radius: 10px;
             overflow: hidden;
             box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            background-color: #f0f0f0;
         }
         .book-image {
             width: 100%;
@@ -67,22 +69,29 @@
         .image-nav.next {
             right: 10px;
         }
-        .image-dots {
+        .thumbnail-container {
             display: flex;
-            justify-content: center;
-            gap: 8px;
+            gap: 10px;
             margin-top: 15px;
+            overflow-x: auto;
+            padding: 5px 0;
         }
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: #ddd;
+        .thumbnail {
+            width: 70px;
+            height: 90px;
+            border-radius: 5px;
+            object-fit: cover;
             cursor: pointer;
-            transition: background-color 0.3s;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            flex-shrink: 0;
         }
-        .dot.active {
-            background-color: #d9534f;
+        .thumbnail:hover {
+            transform: scale(1.05);
+        }
+        .thumbnail.active {
+            border-color: #d9534f;
+            box-shadow: 0 2px 8px rgba(217, 83, 79, 0.4);
         }
         .image-counter {
             position: absolute;
@@ -111,7 +120,6 @@
             margin-top: 10px;
             color: #555;
         }
-        /* 審核狀態樣式 */
         .status-pending {
             color: #ff9800;
             font-weight: bold;
@@ -123,6 +131,14 @@
         .status-rejected {
             color: #f44336;
             font-weight: bold;
+        }
+        .no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -142,26 +158,32 @@
     ResultSet rs = smt.executeQuery(sql);
     
     if (rs.next()) {
-        // 分割圖片路徑
+        // 分割圖片路徑 - 支援多張圖片
         String photoStr = rs.getString("photo");
-        String[] photos = new String[2];
+        List<String> photoList = new ArrayList<>();
+        
         if (photoStr != null && !photoStr.trim().isEmpty()) {
             String[] photoArray = photoStr.split(",");
-            photos[0] = photoArray[0].trim();
-            if (photoArray.length > 1) {
-                photos[1] = photoArray[1].trim();
-            } else {
-                photos[1] = photos[0];
+            for (String photo : photoArray) {
+                String trimmedPhoto = photo.trim();
+                // 確保路徑正確
+                if (!trimmedPhoto.startsWith("assets/")) {
+                    trimmedPhoto = "assets/images/member/" + trimmedPhoto;
+                }
+                photoList.add(trimmedPhoto);
             }
-        } else {
-            photos[0] = "assets/images/about.png";
-            photos[1] = "assets/images/about.png";
         }
-        boolean hasTwoImages = !photos[0].equals(photos[1]);
         
-        // 🔹 處理審核狀態
+        // 如果沒有圖片,使用預設圖
+        if (photoList.isEmpty()) {
+            photoList.add("assets/images/about.png");
+        }
+        
+        int totalImages = photoList.size();
+        
+        // 處理審核狀態
         String approvalStatus = rs.getString("isApproved");
-        String statusText = "待審核";  // 預設值
+        String statusText = "待審核";
         String statusClass = "status-pending";
 
         if (approvalStatus != null) {
@@ -178,22 +200,35 @@
 <div class="book-detail">
     <div class="image-gallery">
         <div class="image-container">
-            <img src="<%= photos[0] %>" alt="書籍圖片1" class="book-image active" id="img1">
-            <img src="<%= photos[1] %>" alt="書籍圖片2" class="book-image" id="img2">
-            
-            <% if (hasTwoImages) { %>
-                <button class="image-nav prev" onclick="changeImage(-1)">‹</button>
-                <button class="image-nav next" onclick="changeImage(1)">›</button>
-                <div class="image-counter">
-                    <span id="current-image">1</span> / 2
-                </div>
+            <% if (photoList.isEmpty()) { %>
+                <div class="no-image">無圖片</div>
+            <% } else { %>
+                <% for (int i = 0; i < photoList.size(); i++) { %>
+                    <img src="<%= photoList.get(i) %>" 
+                         alt="書籍圖片<%= (i+1) %>" 
+                         class="book-image <%= (i == 0) ? "active" : "" %>"
+                         onerror="this.src='assets/images/about.png'">
+                <% } %>
+                
+                <% if (totalImages > 1) { %>
+                    <button class="image-nav prev" onclick="changeImage(-1)">‹</button>
+                    <button class="image-nav next" onclick="changeImage(1)">›</button>
+                    <div class="image-counter">
+                        <span id="current-image">1</span> / <%= totalImages %>
+                    </div>
+                <% } %>
             <% } %>
         </div>
         
-        <% if (hasTwoImages) { %>
-        <div class="image-dots">
-            <span class="dot active" onclick="showImage(0)"></span>
-            <span class="dot" onclick="showImage(1)"></span>
+        <% if (totalImages > 1) { %>
+        <div class="thumbnail-container">
+            <% for (int i = 0; i < photoList.size(); i++) { %>
+                <img src="<%= photoList.get(i) %>" 
+                     alt="縮圖<%= (i+1) %>" 
+                     class="thumbnail <%= (i == 0) ? "active" : "" %>"
+                     onclick="showImage(<%= i %>)"
+                     onerror="this.src='assets/images/about.png'">
+            <% } %>
         </div>
         <% } %>
     </div>
@@ -220,21 +255,19 @@
 <script>
     let currentImageIndex = 0;
     const images = document.querySelectorAll('.book-image');
-    const dots = document.querySelectorAll('.dot');
+    const thumbnails = document.querySelectorAll('.thumbnail');
     const totalImages = images.length;
 
     function showImage(index) {
         // 移除所有 active class
         images.forEach(img => img.classList.remove('active'));
-        if (dots.length > 0) {
-            dots.forEach(dot => dot.classList.remove('active'));
-        }
+        thumbnails.forEach(thumb => thumb.classList.remove('active'));
         
         // 添加 active class 到當前圖片
         currentImageIndex = index;
         images[currentImageIndex].classList.add('active');
-        if (dots.length > 0) {
-            dots[currentImageIndex].classList.add('active');
+        if (thumbnails.length > 0) {
+            thumbnails[currentImageIndex].classList.add('active');
         }
         
         // 更新計數器
@@ -259,10 +292,12 @@
 
     // 鍵盤導航
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowLeft') {
-            changeImage(-1);
-        } else if (e.key === 'ArrowRight') {
-            changeImage(1);
+        if (totalImages > 1) {
+            if (e.key === 'ArrowLeft') {
+                changeImage(-1);
+            } else if (e.key === 'ArrowRight') {
+                changeImage(1);
+            }
         }
     });
 </script>
@@ -278,7 +313,7 @@
         <div class="row g-5">
             <div class="col-md-6 col-lg-3">
                 <h5 class="text-white mb-4">專題資訊</h5>
-                <p class="mb-2">題目：北護二手書拍賣系統</p>
+                <p class="mb-2">題目:北護二手書拍賣系統</p>
                 <p class="mb-2">系所：健康事業管理系</p>
             </div>
             <div class="col-md-6 col-lg-3">

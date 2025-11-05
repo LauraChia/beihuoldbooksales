@@ -1,3 +1,4 @@
+@ -1,53 +1,145 @@
 <%@page contentType="text/html" pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
@@ -143,15 +144,7 @@
 </head>
 <body>
     <%@ include file="menu.jsp" %>
-
-    <div class="container mt-5 pt-5">
-        <div class="card p-4 shadow-sm">
-            <h4 class="mb-4">個人資料</h4>
-
-            <p>帳號：<%= username %></p>
-            <p>使用者名稱：<%= name %></p>
-            <p>電子郵件：<%= email %></p>
-
+@ -63,26 +155,104 @@
             <a href="editProfile.jsp" class="btn btn-primary">編輯資料</a>
         </div>
     </div>

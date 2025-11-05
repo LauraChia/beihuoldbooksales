@@ -138,7 +138,7 @@
 
     ResultSet rs = smt.executeQuery(sql);
     
- 	// 計算結果數量
+  // 計算結果數量
     int resultCount = 0;
     if(query != null && !query.trim().isEmpty() && type != null && !type.trim().isEmpty()) {
         String sqlCount = "SELECT COUNT(*) AS cnt FROM book WHERE " + type + " LIKE ?";
