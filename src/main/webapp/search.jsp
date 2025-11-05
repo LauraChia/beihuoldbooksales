@@ -8,10 +8,10 @@
     <meta charset="utf-8">
     <title>二手書拍賣網 - 搜尋結果</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet">
-    
+
     <!-- Stylesheets -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
@@ -77,7 +77,6 @@
             font-size: 13px;
             color: #888;
         }
-        /* 無結果樣式 */
         .no-results {
             text-align: center;
             padding: 80px 20px;
@@ -118,7 +117,7 @@
     // 取得搜尋參數
     String type = request.getParameter("type");
     String query = request.getParameter("query");
-    
+
     // 搜尋類型的中文顯示
     String typeDisplay = "";
     if("titleBook".equals(type)) typeDisplay = "書名";
@@ -137,8 +136,8 @@
     sql += " ORDER BY createdAt DESC";
 
     ResultSet rs = smt.executeQuery(sql);
-    
-  // 計算結果數量
+
+    // 計算結果數量
     int resultCount = 0;
     if(query != null && !query.trim().isEmpty() && type != null && !type.trim().isEmpty()) {
         String sqlCount = "SELECT COUNT(*) AS cnt FROM book WHERE " + type + " LIKE ?";
@@ -151,7 +150,6 @@
         rsCount.close();
         psCount.close();
     } else {
-        // 如果沒有搜尋條件，就計算全部書籍數量
         String sqlCount = "SELECT COUNT(*) AS cnt FROM book";
         PreparedStatement psCount = con.prepareStatement(sqlCount);
         ResultSet rsCount = psCount.executeQuery();
@@ -192,13 +190,22 @@
             String price = rs.getString("price");
             String date = rs.getString("date");
             String photo = rs.getString("photo");
-            if(photo == null || photo.trim().isEmpty()) {
-                photo = "assets/images/about.png";
+
+            // 多張圖片的情況：用逗號分隔
+            String displayPhoto = "assets/images/about.png"; // 預設圖片
+            if(photo != null && !photo.trim().isEmpty()) {
+                String[] photos = photo.split(",");
+                displayPhoto = photos[0].trim(); // 取第一張
+            }
+
+            // 修正相對路徑
+            if(!displayPhoto.startsWith("http") && !displayPhoto.startsWith("assets/") && !displayPhoto.startsWith("upload/")) {
+                displayPhoto = "upload/" + displayPhoto;
             }
     %>
         <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
             <div class="book-card">
-                <img src="<%= photo %>" alt="書籍圖片" class="book-img">
+                <img src="<%= displayPhoto %>" alt="書籍圖片" class="book-img" onerror="this.src='assets/images/about.png'">
                 <div class="book-info">
                     <div class="book-title"><%= title %></div>
                     <div class="book-author">作者：<%= author %></div>
