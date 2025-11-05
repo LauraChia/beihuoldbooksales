@@ -77,6 +77,37 @@
             font-size: 13px;
             color: #888;
         }
+        /* 無結果樣式 */
+        .no-results {
+            text-align: center;
+            padding: 80px 20px;
+            margin: 150px auto 100px;
+            max-width: 600px;
+        }
+        .no-results i {
+            font-size: 80px;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+        .no-results h4 {
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .no-results p {
+            color: #999;
+            font-size: 14px;
+        }
+        .search-info {
+            background-color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin: 120px auto 20px;
+            max-width: 1200px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .search-info strong {
+            color: #d9534f;
+        }
     </style>
 </head>
 
@@ -87,6 +118,13 @@
     // 取得搜尋參數
     String type = request.getParameter("type");
     String query = request.getParameter("query");
+    
+    // 搜尋類型的中文顯示
+    String typeDisplay = "";
+    if("titleBook".equals(type)) typeDisplay = "書名";
+    else if("author".equals(type)) typeDisplay = "作者";
+    else if("ISBN".equals(type)) typeDisplay = "ISBN";
+    else if("department".equals(type)) typeDisplay = "系所";
 
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
     Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
@@ -99,41 +137,85 @@
     sql += " ORDER BY createdAt DESC";
 
     ResultSet rs = smt.executeQuery(sql);
-%>
-
-<div class="container mt-5">
-    <h3 class="text-center mb-4">搜尋結果</h3>
-</div>
-
-<div class="book-grid">
-<%
-    while(rs.next()) {
-        String bookId = rs.getString("bookId");
-        String title = rs.getString("titleBook");
-        String author = rs.getString("author");
-        String price = rs.getString("price");
-        String date = rs.getString("date");
-        String photo = rs.getString("photo");
-        if(photo == null || photo.trim().isEmpty()) {
-            photo = "assets/images/about.png"; // 預設圖片
+    
+ 	// 計算結果數量
+    int resultCount = 0;
+    if(query != null && !query.trim().isEmpty() && type != null && !type.trim().isEmpty()) {
+        String sqlCount = "SELECT COUNT(*) AS cnt FROM book WHERE " + type + " LIKE ?";
+        PreparedStatement psCount = con.prepareStatement(sqlCount);
+        psCount.setString(1, "%" + query + "%");
+        ResultSet rsCount = psCount.executeQuery();
+        if(rsCount.next()) {
+            resultCount = rsCount.getInt("cnt");
         }
-%>
-    <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
-        <div class="book-card">
-            <img src="<%= photo %>" alt="書籍圖片" class="book-img">
-            <div class="book-info">
-                <div class="book-title"><%= title %></div>
-                <div class="book-author">作者：<%= author %></div>
-                <div class="book-price">NT$<%= (int) Float.parseFloat(price) %></div>
-                <div class="book-date">出版日期：<%= date != null ? date.split(" ")[0] : "" %></div>
-            </div>
-        </div>
-    </a>
-<%
+        rsCount.close();
+        psCount.close();
+    } else {
+        // 如果沒有搜尋條件，就計算全部書籍數量
+        String sqlCount = "SELECT COUNT(*) AS cnt FROM book";
+        PreparedStatement psCount = con.prepareStatement(sqlCount);
+        ResultSet rsCount = psCount.executeQuery();
+        if(rsCount.next()) {
+            resultCount = rsCount.getInt("cnt");
+        }
+        rsCount.close();
+        psCount.close();
     }
+%>
+
+<!-- 搜尋資訊顯示 -->
+<% if(query != null && !query.trim().isEmpty()) { %>
+<div class="search-info">
+    搜尋「<strong><%= typeDisplay %></strong>」包含「<strong><%= query %></strong>」
+    - 找到 <strong><%= resultCount %></strong> 筆結果
+</div>
+<% } %>
+
+<% if(resultCount == 0) { %>
+    <!-- 無結果顯示 -->
+    <div class="no-results">
+        <i class="fas fa-search"></i>
+        <h4>找不到相符的書籍</h4>
+        <p>請嘗試使用其他關鍵字或搜尋條件</p>
+        <a href="index.jsp" class="btn btn-primary mt-3">
+            <i class="fas fa-home me-2"></i>返回首頁
+        </a>
+    </div>
+<% } else { %>
+    <!-- 有結果時顯示書籍列表 -->
+    <div class="book-grid">
+    <%
+        while(rs.next()) {
+            String bookId = rs.getString("bookId");
+            String title = rs.getString("titleBook");
+            String author = rs.getString("author");
+            String price = rs.getString("price");
+            String date = rs.getString("date");
+            String photo = rs.getString("photo");
+            if(photo == null || photo.trim().isEmpty()) {
+                photo = "assets/images/about.png";
+            }
+    %>
+        <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
+            <div class="book-card">
+                <img src="<%= photo %>" alt="書籍圖片" class="book-img">
+                <div class="book-info">
+                    <div class="book-title"><%= title %></div>
+                    <div class="book-author">作者：<%= author %></div>
+                    <div class="book-price">NT$<%= (int) Float.parseFloat(price) %></div>
+                    <div class="book-date">出版日期：<%= date != null ? date.split(" ")[0] : "" %></div>
+                </div>
+            </div>
+        </a>
+    <%
+        }
+    %>
+    </div>
+<% } %>
+
+<%
     con.close();
 %>
-</div>
 
 <!-- Footer Start -->
 <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
