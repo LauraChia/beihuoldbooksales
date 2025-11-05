@@ -1,4 +1,3 @@
-@ -1,53 +1,145 @@
 <%@page contentType="text/html" pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
@@ -26,7 +25,7 @@
         rs = ps.executeQuery();
 
         if (rs.next()) {
-        	username = rs.getString("username");
+         username = rs.getString("username");
             name = rs.getString("name");
             email = rs.getString("email");
 
@@ -49,6 +48,7 @@
     <meta charset="utf-8">
     <title>個人資料 - 北護二手書拍賣網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
         body {
             background-color: #f5f5f5;
@@ -144,10 +144,18 @@
 </head>
 <body>
     <%@ include file="menu.jsp" %>
-@ -63,26 +155,104 @@
-            <a href="editProfile.jsp" class="btn btn-primary">編輯資料</a>
-        </div>
-    </div>
+<div class="container mt-5 pt-5">
+        <div class="card p-4 shadow-sm">
+   <h4 class="mb-4">個人資料</h4>
+             <p>帳號：<%= username %></p>
+             <p>使用者名稱：<%= name %></p>
+             <p>電子郵件：<%= email %></p>
+ 
+             <a href="editProfile.jsp" class="btn btn-primary">編輯資料</a>
+         </div>
+     </div>
+    
+            
     
     <div class="card-section">
         <h4 class="mb-4">我的上架紀錄</h4>
