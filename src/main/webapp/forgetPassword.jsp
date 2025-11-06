@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="utf-8">
-    <title>忘記密碼 - 北護二手書拍賣網</title>
+    <title>忘記密碼 - 北護二手書交易網</title>
     <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body style="background-color:#d8f3dc;"> <!-- 淺綠色背景 -->

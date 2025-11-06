@@ -13,7 +13,7 @@
 <html lang="zh">
 <head>
     <meta charset="utf-8">
-    <title>上架書籍 - 二手書拍賣網</title>
+    <title>上架書籍 - 二手書交易網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { 
@@ -219,7 +219,6 @@
                         <option value="全新">全新</option>
                         <option value="二手">二手</option>
                         <option value="三手以上">三手以上</option>
-                        <option value="舊">舊</option>
                         <option value="其他">其他</option>
                     </select>
                     <input type="text" id="otherConditionInput" name="otherCondition"

@@ -1,4 +1,3 @@
-@ -1,125 +1,126 @@
 <%@page contentType="text/html"%>
 <%@page pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
@@ -7,7 +6,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>二手書拍賣網</title>
+    <title>二手書交易網</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- Google Fonts -->
@@ -34,7 +33,7 @@
             <div class="container">
                 <!-- 網站標題 -->
                 <a href="index.jsp" class="navbar-brand">
-                    <h1 class="text-primary display-6">二手書拍賣網</h1>
+                    <h1 class="text-primary display-6">二手書交易網</h1>
                 </a>
 
                 <!-- 漢堡選單按鈕 -->

@@ -47,7 +47,7 @@
 <html lang="zh">
 <head>
     <meta charset="utf-8">
-    <title>個人資料 - 北護二手書拍賣網</title>
+    <title>個人資料 - 北護二手書交易網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     
     <style>

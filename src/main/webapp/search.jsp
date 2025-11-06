@@ -7,7 +7,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>二手書拍賣網 - 搜尋結果</title>
+    <title>二手書交易網 - 搜尋結果</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Google Fonts -->
