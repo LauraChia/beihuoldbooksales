@@ -140,17 +140,6 @@
             background: rgba(200, 35, 51, 1);
             transform: scale(1.1);
         }
-        .image-number {
-            position: absolute;
-            bottom: 8px;
-            left: 8px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-        }
         .upload-limit {
             text-align: center;
             color: #666;
@@ -321,18 +310,35 @@
             previewContainer.innerHTML = '';
             imageCountSpan.textContent = selectedFiles.length;
 
+         // 為每個文件創建預覽
             selectedFiles.forEach((file, index) => {
+                // 創建預覽元素容器
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                
+                // 先添加佔位內容
+                div.innerHTML = `
+                    <img src="" alt="載入中..." style="display:none;">
+                    <button type="button" class="remove-btn" onclick="removeImage(${index})">×</button>
+                `;
+                
+                // 立即添加到容器中
+                previewContainer.appendChild(div);
+                
+                // 讀取圖片
                 const reader = new FileReader();
+                const img = div.querySelector('img');
+                
                 reader.onload = function(e) {
-                    const div = document.createElement('div');
-                    div.className = 'preview-item';
-                    div.innerHTML = `
-                        <img src="${e.target.result}" alt="預覽${index + 1}">
-                        <span class="image-number">${index + 1}</span>
-                        <button type="button" class="remove-btn" onclick="removeImage(${index})">×</button>
-                    `;
-                    previewContainer.appendChild(div);
+                    img.src = e.target.result;
+                    img.style.display = 'block';
                 };
+                
+                reader.onerror = function() {
+                    console.error('讀取圖片失敗:', file.name);
+                    img.alt = '載入失敗';
+                };
+                
                 reader.readAsDataURL(file);
             });
         }
@@ -414,5 +420,27 @@
             }
         });
     </script>
+    <!-- Footer Start -->
+<div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">專題資訊</h5>
+                <p class="mb-2">題目：北護二手書拍賣系統</p>
+                <p class="mb-2">系所：健康事業管理系</p>
+                <p class="mb-2">專題組員：黃郁心、賈子瑩、許宇翔、闕紫彤</p>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">快速連結</h5>
+                <a class="btn btn-link" href="index.jsp">首頁</a>
+                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8" target="_blank" rel="noopener noreferrer">系統使用回饋表單</a>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid text-center border-top border-secondary py-3">
+        <p class="mb-0">&copy; 2025年 國北護二手書拍賣網. @All Rights Reserved.</p>
+    </div>
+</div>
+<!-- Footer End -->
 </body>
 </html>

@@ -126,7 +126,7 @@
 
 <body>
 <%@ include file="menu.jsp"%>
-<br><br><br><br>
+<br>
 
 <%
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");

@@ -76,40 +76,36 @@
     <!-- Navbar End -->
 
     <!-- 搜尋 Modal Start -->
-    <!-- 搜尋 Modal Start -->
-<div class="modal fade" id="searchModal" tabindex="-1">
-    <div class="modal-dialog modal-fullscreen">
-        <div class="modal-content rounded-0">
-            <div class="modal-header">
-                <h5 class="modal-title">搜尋書籍</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body d-flex align-items-center">
-                <form action="search.jsp" method="get" class="input-group w-75 mx-auto">
-                    <!-- 下拉式搜尋分類 -->
-                    <select name="type" class="form-select p-3" style="max-width: 180px;">
-                        <option value="titleBook">書名</option>
-                        <option value="author">作者</option>
-                        <option value="ISBN">ISBN</option>
-                        <option value="department">系所</option>
-                    </select>
-
-                    <!-- 搜尋文字 -->
-                    <input type="search" name="query" class="form-control p-3" placeholder="請輸入關鍵字">
-
-                    <!-- 送出按鈕 -->
-                    <button type="submit" class="btn btn-primary p-3">
-                        <i class="fa fa-search"></i>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- 搜尋 Modal End -->
-
-    <!-- 搜尋 Modal End -->
-
+	<div class="modal fade" id="searchModal" tabindex="-1">
+	    <div class="modal-dialog modal-fullscreen">
+	        <div class="modal-content rounded-0">
+	            <div class="modal-header">
+	                <h5 class="modal-title">搜尋書籍</h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+	            </div>
+	            <div class="modal-body d-flex align-items-center">
+	                <form action="search.jsp" method="get" class="input-group w-75 mx-auto">
+	                    <!-- 下拉式搜尋分類 -->
+	                    <select name="type" class="form-select p-3" style="max-width: 180px;">
+	                        <option value="titleBook">書名</option>
+	                        <option value="author">作者</option>
+	                        <option value="ISBN">ISBN</option>
+	                        <option value="department">系所</option>
+	                    </select>
+	
+	                    <!-- 搜尋文字 -->
+	                    <input type="search" name="query" class="form-control p-3" placeholder="請輸入關鍵字">
+					    
+	                    <!-- 送出按鈕 -->
+	                    <button type="submit" class="btn btn-primary p-3">
+	                        <i class="fa fa-search"></i>
+	                    </button>
+	                </form>
+	            </div>
+	        </div>
+	    </div>
+	</div>
+	<!-- 搜尋 Modal End -->
     
 	<!-- 使用者名稱顯示 -->
 	<div class="container mt-4">

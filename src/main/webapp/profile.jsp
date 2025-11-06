@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
+<%@page import="java.util.*"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
 <%
@@ -79,12 +80,15 @@
             text-decoration: none;
             color: inherit;
         }
+        /* ✅ 修改：增加 background-color */
         .book-images {
             position: relative;
             width: 100%;
             height: 260px;
             overflow: hidden;
+            background-color: #f0f0f0;
         }
+        /* ✅ 修改：改用 opacity 淡入淡出效果 */
         .book-img {
             width: 100%;
             height: 260px;
@@ -92,15 +96,11 @@
             position: absolute;
             top: 0;
             left: 0;
-            transition: opacity 0.3s ease;
-        }
-        .book-img.img-second {
+            transition: opacity 0.5s ease;
             opacity: 0;
         }
-        .book-card:hover .book-img.img-first {
-            opacity: 0;
-        }
-        .book-card:hover .book-img.img-second {
+        /* ✅ 新增：active 狀態顯示圖片 */
+        .book-img.active {
             opacity: 1;
         }
         .book-info {
@@ -140,6 +140,35 @@
             font-size: 12px;
             z-index: 10;
         }
+        /* ✅ 新增：圓點指示器 */
+        .image-dots {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            z-index: 10;
+        }
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.5);
+            transition: background-color 0.3s;
+        }
+        .dot.active {
+            background-color: white;
+        }
+        /* ✅ 新增：無圖片樣式 */
+        .no-image {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -173,6 +202,7 @@
                 rs2 = ps2.executeQuery();
 
                 boolean hasBooks = false;
+                int cardIndex = 0; // ✅ 新增：卡片索引
         %>
         <div class="book-grid">
         <%
@@ -185,23 +215,56 @@
                     String date = rs2.getString("date") != null ? rs2.getString("date") : "";
                     String photoStr = rs2.getString("photo");
                     
-                    String[] photos = new String[2];
+                    // ✅ 修改：改用 List 處理多張圖片
+                    List<String> photoList = new ArrayList<>();
                     if (photoStr != null && !photoStr.trim().isEmpty()) {
                         String[] photoArray = photoStr.split(",");
-                        photos[0] = photoArray[0].trim();
-                        photos[1] = photoArray.length > 1 ? photoArray[1].trim() : photos[0];
-                    } else {
-                        photos[0] = "assets/images/about.png";
-                        photos[1] = "assets/images/about.png";
+                        for (String photo : photoArray) {
+                            String trimmedPhoto = photo.trim();
+                            // 確保路徑正確
+                            if (!trimmedPhoto.startsWith("assets/")) {
+                                trimmedPhoto = "assets/images/member/" + trimmedPhoto;
+                            }
+                            photoList.add(trimmedPhoto);
+                        }
                     }
+                    
+                    // 如果沒有圖片,使用預設圖
+                    if (photoList.isEmpty()) {
+                        photoList.add("assets/images/about.png");
+                    }
+                    
+                    int photoCount = photoList.size();
+                    String cardId = "profile-card-" + cardIndex; // ✅ 新增：唯一卡片 ID
+                    cardIndex++;
         %>
             <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
-                <div class="book-card">
-                    <div class="book-images">
-                        <img src="<%= photos[0] %>" class="book-img img-first">
-                        <img src="<%= photos[1] %>" class="book-img img-second">
-                        <% if(!photos[0].equals(photos[1])) { %>
-                            <span class="image-indicator">1/2</span>
+                <!-- ✅ 修改：加入 data-card-id 屬性 -->
+                <div class="book-card" data-card-id="<%= cardId %>">
+                    <!-- ✅ 修改：加入唯一 ID -->
+                    <div class="book-images" id="<%= cardId %>">
+                        <% if (photoList.isEmpty()) { %>
+                            <!-- ✅ 新增：無圖片顯示 -->
+                            <div class="no-image">無圖片</div>
+                        <% } else { %>
+                            <!-- ✅ 修改：動態產生所有圖片 -->
+                            <% for (int i = 0; i < photoList.size(); i++) { %>
+                                <img src="<%= photoList.get(i) %>" 
+                                     alt="書籍圖片<%= (i+1) %>" 
+                                     class="book-img <%= (i == 0) ? "active" : "" %>"
+                                     onerror="this.src='assets/images/about.png'">
+                            <% } %>
+                            
+                            <!-- ✅ 修改：只在多張圖片時顯示指示器 -->
+                            <% if (photoCount > 1) { %>
+                                <span class="image-indicator"><span class="current-img">1</span>/<%= photoCount %></span>
+                                <!-- ✅ 新增：圓點指示器 -->
+                                <div class="image-dots">
+                                    <% for (int i = 0; i < photoCount; i++) { %>
+                                        <span class="dot <%= (i == 0) ? "active" : "" %>"></span>
+                                    <% } %>
+                                </div>
+                            <% } %>
                         <% } %>
                     </div>
                     <div class="book-info">
@@ -234,6 +297,58 @@
     </div>
 </div>
 
+<!-- ✅ 新增：圖片輪播 JavaScript -->
+<script>
+// 自動輪播圖片
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.book-card');
+    
+    cards.forEach(card => {
+        const cardId = card.getAttribute('data-card-id');
+        const container = document.getElementById(cardId);
+        const images = container.querySelectorAll('.book-img');
+        const dots = container.querySelectorAll('.dot');
+        const indicator = container.querySelector('.current-img');
+        
+        if (images.length <= 1) return; // 只有一張圖片不需要輪播
+        
+        let currentIndex = 0;
+        let intervalId = null;
+        
+        function showImage(index) {
+            images.forEach(img => img.classList.remove('active'));
+            dots.forEach(dot => dot.classList.remove('active'));
+            
+            images[index].classList.add('active');
+            dots[index].classList.add('active');
+            
+            if (indicator) {
+                indicator.textContent = index + 1;
+            }
+        }
+        
+        function nextImage() {
+            currentIndex = (currentIndex + 1) % images.length;
+            showImage(currentIndex);
+        }
+        
+        // 滑鼠移入時開始輪播
+        card.addEventListener('mouseenter', function() {
+            intervalId = setInterval(nextImage, 800); // 每0.8秒切換
+        });
+        
+        // 滑鼠移出時停止輪播並回到第一張
+        card.addEventListener('mouseleave', function() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+            currentIndex = 0;
+            showImage(0);
+        });
+    });
+});
+</script>
 
 <!-- Footer Start -->
 <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
