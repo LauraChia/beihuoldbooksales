@@ -11,7 +11,7 @@
     String userId = (String) session.getAttribute("userId");
     String username = "";
     String name = ""; 
-    String email = "";
+    String contact = "";
     String password = "";
 
     Connection con = null;
@@ -20,7 +20,7 @@
     
     try {
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-        String sql = "SELECT username, name, email, password FROM users WHERE userId = ?";
+        String sql = "SELECT username, name, contact, password FROM users WHERE userId = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userId);
         rs = ps.executeQuery();
@@ -28,13 +28,13 @@
         if (rs.next()) {
             username = rs.getString("username");
             name = rs.getString("name");
-            email = rs.getString("email");
+            contact = rs.getString("contact");
             password = rs.getString("password");
         }
 
         // ✅ 避免顯示 null
         if (name == null) name = "";
-        if (email == null) email = "";
+        if (contact == null) contact = "";
         if (password == null) password = "";
     } catch (Exception e) {
         e.printStackTrace();
@@ -66,13 +66,13 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">使用者名稱</label>
+                    <label class="form-label">暱稱</label>
                     <input type="text" name="name" class="form-control" value="<%= name %>">
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">電子郵件</label>
-                    <input type="email" name="email" class="form-control" value="<%= email %>">
+                    <label class="form-label">聯絡方式</label>
+                    <input type="contact" name="contact" class="form-control" value="<%= contact %>">
                 </div>
 
                 <div class="mb-3">

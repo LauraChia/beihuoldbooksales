@@ -1,9 +1,11 @@
 <%@page contentType="text/html" pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
 <%@page import="java.util.*"%>
+<%@page import="java.text.SimpleDateFormat"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
 <%
+    // ✅ 修正：統一使用 "userId"
     if (session.getAttribute("userId") == null) {
         response.sendRedirect("login.jsp");
         return;
@@ -12,7 +14,10 @@
     String userAccessId = (String) session.getAttribute("userId");
     String username = "";
     String name = "";
-    String email = "";
+    String contact = "";
+    String department = "";
+    String lastLogin = "";
+    String lastLogout = "";
 
     Connection con = null;
     PreparedStatement ps = null;
@@ -20,20 +25,31 @@
 
     try {
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-        String sql = "SELECT username, name, email FROM users WHERE userId = ?";
+        String sql = "SELECT username, name, contact, department, lastLogin, lastLogout FROM users WHERE userId = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userAccessId);
         rs = ps.executeQuery();
 
         if (rs.next()) {
-         username = rs.getString("username");
+            username = rs.getString("username");
             name = rs.getString("name");
-            email = rs.getString("email");
+            contact = rs.getString("contact");
+            department = rs.getString("department");
+            
+            // ✅ 修正：正確取得 lastLogin 和 lastLogout
+            Timestamp loginTimestamp = rs.getTimestamp("lastLogin");
+            Timestamp logoutTimestamp = rs.getTimestamp("lastLogout");
+            
+            // 格式化時間顯示
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            lastLogin = (loginTimestamp != null) ? sdf.format(loginTimestamp) : "尚未登入";
+            lastLogout = (logoutTimestamp != null) ? sdf.format(logoutTimestamp) : "尚未登出";
 
             // ✅ 避免 null 顯示
             if (username == null) username = "";
             if (name == null) name = "";
-            if (email == null) email = "";
+            if (contact == null) contact = "";
+            if (department == null) department = "";
         }
     } catch (Exception e) {
         e.printStackTrace();
@@ -80,7 +96,6 @@
             text-decoration: none;
             color: inherit;
         }
-        /* ✅ 修改：增加 background-color */
         .book-images {
             position: relative;
             width: 100%;
@@ -88,7 +103,6 @@
             overflow: hidden;
             background-color: #f0f0f0;
         }
-        /* ✅ 修改：改用 opacity 淡入淡出效果 */
         .book-img {
             width: 100%;
             height: 260px;
@@ -99,7 +113,6 @@
             transition: opacity 0.5s ease;
             opacity: 0;
         }
-        /* ✅ 新增：active 狀態顯示圖片 */
         .book-img.active {
             opacity: 1;
         }
@@ -140,7 +153,6 @@
             font-size: 12px;
             z-index: 10;
         }
-        /* ✅ 新增：圓點指示器 */
         .image-dots {
             position: absolute;
             bottom: 8px;
@@ -160,7 +172,6 @@
         .dot.active {
             background-color: white;
         }
-        /* ✅ 新增：無圖片樣式 */
         .no-image {
             display: flex;
             align-items: center;
@@ -173,18 +184,20 @@
 </head>
 <body>
     <%@ include file="menu.jsp" %>
-<div class="container mt-5 pt-5">
-        <div class="card p-4 shadow-sm">
-   <h4 class="mb-4">個人資料</h4>
-             <p>帳號：<%= username %></p>
-             <p>使用者名稱：<%=name %></p>
-             <p>電子郵件：<%= email %></p>
- 
-             <a href="editProfile.jsp" class="btn btn-primary">編輯資料</a>
-         </div>
-     </div>
     
+    <div class="container mt-5 pt-5">
+        <div class="card p-4 shadow-sm">
+            <h4 class="mb-4">個人資料</h4>
+            <p><strong>帳號：</strong><%= username %></p>
+            <p><strong>暱稱：</strong><%= name %></p>
+            <p><strong>聯絡方式：</strong><%= contact %></p>
+            <p><strong>就讀系所：</strong><%= department %></p>
+            <p><strong>上次登入：</strong><%= lastLogin %></p>
+            <p><strong>上次登出：</strong><%= lastLogout %></p>
             
+            <a href="editProfile.jsp" class="btn btn-primary">編輯資料</a>
+        </div>
+    </div>
     
     <div class="card-section">
         <h4 class="mb-4">我的上架紀錄</h4>
@@ -202,7 +215,7 @@
                 rs2 = ps2.executeQuery();
 
                 boolean hasBooks = false;
-                int cardIndex = 0; // ✅ 新增：卡片索引
+                int cardIndex = 0;
         %>
         <div class="book-grid">
         <%
@@ -215,13 +228,11 @@
                     String date = rs2.getString("date") != null ? rs2.getString("date") : "";
                     String photoStr = rs2.getString("photo");
                     
-                    // ✅ 修改：改用 List 處理多張圖片
                     List<String> photoList = new ArrayList<>();
                     if (photoStr != null && !photoStr.trim().isEmpty()) {
                         String[] photoArray = photoStr.split(",");
                         for (String photo : photoArray) {
                             String trimmedPhoto = photo.trim();
-                            // 確保路徑正確
                             if (!trimmedPhoto.startsWith("assets/")) {
                                 trimmedPhoto = "assets/images/member/" + trimmedPhoto;
                             }
@@ -229,25 +240,20 @@
                         }
                     }
                     
-                    // 如果沒有圖片,使用預設圖
                     if (photoList.isEmpty()) {
                         photoList.add("assets/images/about.png");
                     }
                     
                     int photoCount = photoList.size();
-                    String cardId = "profile-card-" + cardIndex; // ✅ 新增：唯一卡片 ID
+                    String cardId = "profile-card-" + cardIndex;
                     cardIndex++;
         %>
             <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
-                <!-- ✅ 修改：加入 data-card-id 屬性 -->
                 <div class="book-card" data-card-id="<%= cardId %>">
-                    <!-- ✅ 修改：加入唯一 ID -->
                     <div class="book-images" id="<%= cardId %>">
                         <% if (photoList.isEmpty()) { %>
-                            <!-- ✅ 新增：無圖片顯示 -->
                             <div class="no-image">無圖片</div>
                         <% } else { %>
-                            <!-- ✅ 修改：動態產生所有圖片 -->
                             <% for (int i = 0; i < photoList.size(); i++) { %>
                                 <img src="<%= photoList.get(i) %>" 
                                      alt="書籍圖片<%= (i+1) %>" 
@@ -255,10 +261,8 @@
                                      onerror="this.src='assets/images/about.png'">
                             <% } %>
                             
-                            <!-- ✅ 修改：只在多張圖片時顯示指示器 -->
                             <% if (photoCount > 1) { %>
                                 <span class="image-indicator"><span class="current-img">1</span>/<%= photoCount %></span>
-                                <!-- ✅ 新增：圓點指示器 -->
                                 <div class="image-dots">
                                     <% for (int i = 0; i < photoCount; i++) { %>
                                         <span class="dot <%= (i == 0) ? "active" : "" %>"></span>
@@ -276,7 +280,7 @@
                 </div>
             </a>
         <%
-                } // while
+                }
 
                 if(!hasBooks) {
         %>
@@ -295,11 +299,9 @@
             }
         %>
     </div>
-</div>
 
-<!-- ✅ 新增：圖片輪播 JavaScript -->
+<!-- 圖片輪播 JavaScript -->
 <script>
-// 自動輪播圖片
 document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.book-card');
     
@@ -310,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const dots = container.querySelectorAll('.dot');
         const indicator = container.querySelector('.current-img');
         
-        if (images.length <= 1) return; // 只有一張圖片不需要輪播
+        if (images.length <= 1) return;
         
         let currentIndex = 0;
         let intervalId = null;
@@ -332,12 +334,10 @@ document.addEventListener('DOMContentLoaded', function() {
             showImage(currentIndex);
         }
         
-        // 滑鼠移入時開始輪播
         card.addEventListener('mouseenter', function() {
-            intervalId = setInterval(nextImage, 800); // 每0.8秒切換
+            intervalId = setInterval(nextImage, 800);
         });
         
-        // 滑鼠移出時停止輪播並回到第一張
         card.addEventListener('mouseleave', function() {
             if (intervalId) {
                 clearInterval(intervalId);
