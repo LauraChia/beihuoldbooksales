@@ -147,6 +147,7 @@
         String date = rs.getString("date");
         String photoStr = rs.getString("photo");
         
+        
         // 分割圖片路徑 - 支援多張圖片
         List<String> photoList = new ArrayList<>();
         if (photoStr != null && !photoStr.trim().isEmpty()) {

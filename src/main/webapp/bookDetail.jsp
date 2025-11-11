@@ -237,15 +237,18 @@
         <h2><%= rs.getString("titleBook") %></h2>
 
         <div class="price">NT$<%= (int) Float.parseFloat(rs.getString("price")) %></div>
+        <div class="info-item">書名：<%= rs.getString("titleBook") %></div>
         <div class="info-item">作者：<%= rs.getString("author") %></div>
         <div class="info-item">出版日期：<%= rs.getString("date").split(" ")[0] %></div>
+        <div class="info-item">書籍版本：<%= rs.getString("edition") %></div>
         <div class="info-item">ISBN：<%= rs.getString("ISBN") %></div>
-        <div class="info-item">系所：<%= rs.getString("department") %></div>
-        <div class="info-item">狀態：<%= rs.getString("condition") %></div>
+        <div class="info-item">使用書籍系所：<%= rs.getString("department") %></div>
+        <div class="info-item">書籍狀況：<%= rs.getString("condition") %></div>
         <div class="info-item">有無筆記：<%= rs.getString("remarks") %></div>
-        <div class="info-item">賣家：<%= rs.getString("sellerName") %></div>
-        <div class="info-item">聯絡方式：<%= rs.getString("contact") %></div>
-        <div class="info-item">上架日期：<%= rs.getString("createdAt").split(" ")[0] %></div>
+        <div class="info-item">授課老師：<%= rs.getString("teacher") %></div>
+        <div class="info-item">偏好聯絡方式：<%= rs.getString("contact") %></div>
+        <div class="info-item">上架天數：<%= rs.getString("createdAt").split(" ")[0] %></div>
+        <div class="info-item">上架本數：<%= rs.getString("quantity") %></div>
         <div class="info-item">審核狀態：<span class="<%= statusClass %>"><%= statusText %></span></div>
 
         <a class="btn btn-link" href="index.jsp">回首頁</a>
@@ -315,6 +318,7 @@
                 <h5 class="text-white mb-4">專題資訊</h5>
                 <p class="mb-2">題目:北護二手書拍賣系統</p>
                 <p class="mb-2">系所：健康事業管理系</p>
+                <p class="mb-2">專題組員：黃郁心、賈子瑩、許宇翔、闕紫彤</p>
             </div>
             <div class="col-md-6 col-lg-3">
                 <h5 class="text-white mb-4">快速連結</h5>
@@ -324,7 +328,7 @@
         </div>
     </div>
     <div class="container-fluid text-center border-top border-secondary py-3">
-        <p class="mb-0">&copy; 2025年 二手書拍賣網. All Rights Reserved.</p>
+        <p class="mb-0">&copy; 2025年 二手書交易網. @All Rights Reserved.</p>
     </div>
 </div>
 <!-- Footer End -->
