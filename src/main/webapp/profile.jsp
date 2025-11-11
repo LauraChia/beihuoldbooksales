@@ -177,7 +177,7 @@
         <div class="card p-4 shadow-sm">
    <h4 class="mb-4">個人資料</h4>
              <p>帳號：<%= username %></p>
-             <p>使用者名稱：<%= name %></p>
+             <p>使用者名稱：<%=name %></p>
              <p>電子郵件：<%= email %></p>
  
              <a href="editProfile.jsp" class="btn btn-primary">編輯資料</a>
@@ -358,10 +358,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h5 class="text-white mb-4">專題資訊</h5>
                 <p class="mb-2">題目：北護二手書拍賣系統</p>
                 <p class="mb-2">系所：健康事業管理系</p>
+                <p class="mb-2">專題組員：黃郁心、賈子瑩、許宇翔、闕紫彤</p>
             </div>
             <div class="col-md-6 col-lg-3">
                 <h5 class="text-white mb-4">快速連結</h5>
-                <a class="btn btn-link" href="#">首頁</a>
+                <a class="btn btn-link" href="index.jsp">首頁</a>
                 <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
             </div>
         </div>
