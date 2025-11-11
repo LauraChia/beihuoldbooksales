@@ -12,7 +12,7 @@ if(request.getParameter("username") !=null &&
 		    request.getParameter("password")+"'"; 
 	ResultSet paperrs = smt.executeQuery(getpaperdata);
 	if(paperrs.next()){
-		session.setAttribute("accessId",request.getParameter("username"));
+		session.setAttribute("accessId",request.getParameter("userId"));
 		//session.setMaxInactiveInterval(20); 自動登出
 		response.sendRedirect("index.jsp");
 	}else
