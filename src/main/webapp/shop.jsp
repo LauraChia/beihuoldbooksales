@@ -87,7 +87,7 @@
                     <div class="upload-icon">📷</div>
                     <div class="upload-text">點擊或拖曳圖片到此處上傳</div>
                     <div class="upload-hint">支援 JPG、PNG、GIF 格式，最多上傳 6 張圖片</div>
-                    <div class="upload-hint">提示文字：正面、反面、側面</div>
+                    <div class="upload-hint">請上傳書籍的：正面、反面、側面</div>
                 </div>
                 <input type="file" name="photo" id="photoInput" accept="image/*" multiple required>
                 <div class="image-preview-container" id="previewContainer"></div>
@@ -98,7 +98,7 @@
         <!-- 偏好聯絡方式 -->
         <div class="form-group">
             <label>偏好聯絡方式：<span style="color:red">*</span></label>
-            <input type="text" name="contact" placeholder="例如：Line ID、Email、手機號碼" required>
+            <input type="text" name="contact" placeholder="例如：Line、Email、IG、FB" required>
         </div>
 
         <!-- 使用書籍系所 -->

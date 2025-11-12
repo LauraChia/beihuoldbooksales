@@ -241,13 +241,14 @@
 <div class="info-item">作者：<%= (rs.getString("author") != null && !rs.getString("author").trim().isEmpty()) ? rs.getString("author") : "無" %></div>
 <div class="info-item">出版日期：<%= (rs.getString("date") != null && !rs.getString("date").trim().isEmpty()) ? rs.getString("date").split(" ")[0] : "無" %></div>
 <div class="info-item">書籍版本：<%= (rs.getString("edition") != null && !rs.getString("edition").trim().isEmpty()) ? rs.getString("edition") : "無" %></div>
-<div class="info-item">ISBN：<%= (rs.getString("ISBN") != null && !rs.getString("ISBN").trim().isEmpty()) ? rs.getString("ISBN") : "無" %></div>
 <div class="info-item">使用書籍系所：<%= (rs.getString("department") != null && !rs.getString("department").trim().isEmpty()) ? rs.getString("department") : "" %></div>
 <div class="info-item">書籍狀況：<%= (rs.getString("condition") != null && !rs.getString("condition").trim().isEmpty()) ? rs.getString("condition") : "無" %></div>
 <div class="info-item">有無筆記：<%= (rs.getString("remarks") != null && !rs.getString("remarks").trim().isEmpty()) ? rs.getString("remarks") : "無" %></div>
 <div class="info-item">授課老師：<%= (rs.getString("teacher") != null && !rs.getString("teacher").trim().isEmpty()) ? rs.getString("teacher") : "無" %></div>
-<div class="info-item">偏好聯絡方式：<%= (rs.getString("contact") != null && !rs.getString("contact").trim().isEmpty()) ? rs.getString("contact") : "無" %></div>
-<div class="info-item">上架天數：<%= (rs.getString("createdAt") != null && !rs.getString("createdAt").trim().isEmpty()) ? rs.getString("createdAt").split(" ")[0] : "無" %></div>
+<div class="info-item">ISBN：<%= (rs.getString("ISBN") != null && !rs.getString("ISBN").trim().isEmpty()) ? rs.getString("ISBN") : "無" %></div>
+<div class="info-item">賣家：<%= (rs.getString("sellerName") != null && !rs.getString("sellerName").trim().isEmpty()) ? rs.getString("sellerName") : "無" %></div>
+<div class="info-item">偏好聯絡方式(請私訊)：<%= (rs.getString("contact") != null && !rs.getString("contact").trim().isEmpty()) ? rs.getString("contact") : "無" %></div>
+<div class="info-item">上架日期：<%= (rs.getString("createdAt") != null && !rs.getString("createdAt").trim().isEmpty()) ? rs.getString("createdAt").split(" ")[0] : "無" %></div>
 <div class="info-item">上架本數：<%= (rs.getString("quantity") != null && !rs.getString("quantity").trim().isEmpty()) ? rs.getString("quantity") : 1 %></div>
 <div class="info-item">審核狀態：<span class="<%= statusClass %>"><%= (statusText != null && !statusText.trim().isEmpty()) ? statusText : "無" %></span></div>
 
