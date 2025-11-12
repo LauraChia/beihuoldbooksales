@@ -42,7 +42,7 @@
                 } else {
         %>
                     <div class="alert alert-danger">
-                        查無此使用者，請確認輸入的帳號或電子郵件是否正確。
+                        查無此使用者，請確認輸入的電子郵件是否正確。
                     </div>
                     <a href="forgetPassword.jsp" class="btn btn-secondary w-100 mt-3">返回</a>
         <%

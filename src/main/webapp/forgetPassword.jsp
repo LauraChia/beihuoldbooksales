@@ -61,7 +61,7 @@
         <div class="card-body">
             <form action="resetPassword.jsp" method="post">
                 <div class="mb-3">
-                    <label for="input" class="form-label">請輸入註冊時的電子郵件或帳號：</label>
+                    <label for="input" class="form-label">請輸入註冊時的帳號：</label>
                     <input type="text" class="form-control" id="input" name="input" required>
                 </div>
                 <button type="submit" class="btn btn-success w-100">查詢</button>
@@ -74,26 +74,26 @@
 </div>
 
 <!-- Footer Start -->
-<footer>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <h5>專題資訊</h5>
-                <p>題目：北護二手書拍賣系統</p>
-                <p>系所：健康事業管理系</p>
-                <p>專題組員：黃郁心、賈子瑩、許宇翔、闕紫彤</p>
+<div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">專題資訊</h5>
+                <p class="mb-2">題目：北護二手書拍賣系統</p>
+                <p class="mb-2">系所：健康事業管理系</p>
+                <p class="mb-2">專題組員：黃郁心、賈子瑩、許宇翔、闕紫彤</p>
             </div>
-            <div class="col-md-6">
-                <h5>快速連結</h5>
-                <a href="index.jsp">首頁</a><br>
-                <a href="https://forms.gle/JP4LyWAVgKSvzzUM8" target="_blank">系統使用回饋表單</a>
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">快速連結</h5>
+                <a class="btn btn-link" href="index.jsp">首頁</a>
+                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
             </div>
-        </div>
-        <div class="text-center mt-3">
-            &copy; 2025 國北護二手書拍賣網. All Rights Reserved.
         </div>
     </div>
-</footer>
+    <div class="container-fluid text-center border-top border-secondary py-3">
+        <p class="mb-0">&copy; 2025 二手書拍賣網. All Rights Reserved.</p>
+    </div>
+</div>
 <!-- Footer End -->
 
 </body>
