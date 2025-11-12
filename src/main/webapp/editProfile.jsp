@@ -124,6 +124,7 @@
                 <!-- 隱藏欄位,用來傳送最終的 contact 值 -->
                 <input type="hidden" name="contact" id="finalContact">
                 
+
                 <div class="mb-3">
                     <label for="college" class="form-label">就讀系所 <span class="text-danger">*</span></label>
                     <div class="department-row">
@@ -133,7 +134,6 @@
                             <option value="健康科技學院" <%= selectedCollege.equals("健康科技學院") ? "selected" : "" %>>健康科技學院</option>
                             <option value="人類發展與健康學院" <%= selectedCollege.equals("人類發展與健康學院") ? "selected" : "" %>>人類發展與健康學院</option>
                             <option value="智慧健康照護跨領域學院" <%= selectedCollege.equals("智慧健康照護跨領域學院") ? "selected" : "" %>>智慧健康照護跨領域學院</option>
-                            <option value="通識教育中心" <%= selectedCollege.equals("通識教育中心") ? "selected" : "" %>>通識教育中心</option>
                         </select>
                         <select class="form-select" id="department" name="department" required>
                             <option value="">請先選擇學院</option>
