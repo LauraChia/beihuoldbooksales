@@ -88,7 +88,6 @@
 	                    <select name="type" class="form-select p-3" style="max-width: 180px;">
 	                        <option value="titleBook">書名</option>
 	                        <option value="author">作者</option>
-	                        <option value="ISBN">ISBN</option>
 	                        <option value="department">系所</option>
 	                    </select>
 	
