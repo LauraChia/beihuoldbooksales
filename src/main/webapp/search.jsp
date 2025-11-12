@@ -185,7 +185,71 @@
 
     String sql = "SELECT * FROM book";
     if(query != null && !query.trim().isEmpty() && type != null && !type.trim().isEmpty()) {
-        sql += " WHERE " + type + " LIKE '%" + query + "%'";
+        // 如果是搜尋系所，加入簡稱對應
+        if("department".equals(type)) {
+            // 建立系所簡稱對應表
+            Map<String, String[]> deptMap = new HashMap<>();
+            
+            // 護理學院
+            deptMap.put("護理", new String[]{"護理"});
+            deptMap.put("護理系", new String[]{"護理"});
+            deptMap.put("護理學系", new String[]{"護理"});
+            deptMap.put("助產", new String[]{"助產"});
+            deptMap.put("助產系", new String[]{"助產"});
+            deptMap.put("醫護", new String[]{"醫護教育"});
+            deptMap.put("醫護系", new String[]{"醫護教育"});
+            
+            // 健康科技學院
+            deptMap.put("資管", new String[]{"資訊管理"});
+            deptMap.put("資管系", new String[]{"資訊管理"});
+            deptMap.put("資訊管理系", new String[]{"資訊管理"});
+            deptMap.put("健管", new String[]{"健康事業管理"});
+            deptMap.put("健管系", new String[]{"健康事業管理"});
+            deptMap.put("健康事業管理系", new String[]{"健康事業管理"});
+            deptMap.put("長照", new String[]{"長期照護"});
+            deptMap.put("長照系", new String[]{"長期照護"});
+            deptMap.put("長期照護系", new String[]{"長期照護"});
+            deptMap.put("休閒", new String[]{"休閒產業"});
+            deptMap.put("休閒系", new String[]{"休閒產業"});
+            deptMap.put("語聽", new String[]{"語言治療", "聽力"});
+            deptMap.put("語聽系", new String[]{"語言治療", "聽力"});
+            
+            // 人類發展與健康學院
+            deptMap.put("嬰幼", new String[]{"嬰幼兒保育"});
+            deptMap.put("嬰幼系", new String[]{"嬰幼兒保育"});
+            deptMap.put("嬰幼兒保育系", new String[]{"嬰幼兒保育"});
+            deptMap.put("幼保", new String[]{"嬰幼兒保育"});
+            deptMap.put("幼保系", new String[]{"嬰幼兒保育"});
+            deptMap.put("運保", new String[]{"運動保健"});
+            deptMap.put("運保系", new String[]{"運動保健"});
+            deptMap.put("運動保健系", new String[]{"運動保健"});
+            deptMap.put("生死", new String[]{"生死與健康心理諮商"});
+            deptMap.put("生死系", new String[]{"生死與健康心理諮商"});
+            
+            // 智慧健康照護跨領域學院
+            deptMap.put("人工智慧", new String[]{"人工智慧"});
+            deptMap.put("AI", new String[]{"人工智慧"});
+            deptMap.put("大數據", new String[]{"大數據"});
+            
+            // 通識教育中心
+            deptMap.put("通識", new String[]{"通識教育"});
+            
+            // 檢查是否為簡稱
+            if(deptMap.containsKey(query)) {
+                String[] keywords = deptMap.get(query);
+                sql += " WHERE (";
+                for(int i = 0; i < keywords.length; i++) {
+                    if(i > 0) sql += " OR ";
+                    sql += type + " LIKE '%" + keywords[i] + "%'";
+                }
+                sql += ")";
+            } else {
+                // 不是簡稱，使用原本的模糊搜尋
+                sql += " WHERE " + type + " LIKE '%" + query + "%'";
+            }
+        } else {
+            sql += " WHERE " + type + " LIKE '%" + query + "%'";
+        }
     }
     sql += " ORDER BY createdAt DESC";
 
@@ -194,15 +258,79 @@
     // 計算結果數量
     int resultCount = 0;
     if(query != null && !query.trim().isEmpty() && type != null && !type.trim().isEmpty()) {
-        String sqlCount = "SELECT COUNT(*) AS cnt FROM book WHERE " + type + " LIKE ?";
-        PreparedStatement psCount = con.prepareStatement(sqlCount);
-        psCount.setString(1, "%" + query + "%");
-        ResultSet rsCount = psCount.executeQuery();
-        if(rsCount.next()) {
-            resultCount = rsCount.getInt("cnt");
+        String sqlCount = "";
+        
+        // 如果是搜尋系所，使用相同的簡稱邏輯
+        if("department".equals(type)) {
+            Map<String, String[]> deptMap = new HashMap<>();
+            // 護理學院
+            deptMap.put("護理", new String[]{"護理"});
+            deptMap.put("助產", new String[]{"助產"});
+            deptMap.put("醫護", new String[]{"醫護教育"});
+            
+            // 健康科技學院
+            deptMap.put("資管", new String[]{"資訊管理"});
+            deptMap.put("健管", new String[]{"健康事業管理"});
+            deptMap.put("長照", new String[]{"長期照護"});
+            deptMap.put("休閒", new String[]{"休閒產業"});
+            deptMap.put("語聽", new String[]{"語言治療", "聽力"});
+            
+            // 人類發展與健康學院
+            deptMap.put("嬰幼", new String[]{"嬰幼兒保育"});
+            deptMap.put("幼保", new String[]{"嬰幼兒保育"});
+            deptMap.put("幼保系", new String[]{"嬰幼兒保育"});
+            deptMap.put("運保", new String[]{"運動保健"});
+            deptMap.put("生死", new String[]{"生死與健康心理諮商"});
+            
+            // 智慧健康照護跨領域學院
+            deptMap.put("人工智慧", new String[]{"人工智慧"});
+            deptMap.put("AI", new String[]{"人工智慧"});
+            deptMap.put("大數據", new String[]{"大數據"});
+            
+            // 通識教育中心
+            deptMap.put("通識", new String[]{"通識教育"});
+            
+            if(deptMap.containsKey(query)) {
+                String[] keywords = deptMap.get(query);
+                sqlCount = "SELECT COUNT(*) AS cnt FROM book WHERE (";
+                for(int i = 0; i < keywords.length; i++) {
+                    if(i > 0) sqlCount += " OR ";
+                    sqlCount += type + " LIKE ?";
+                }
+                sqlCount += ")";
+                
+                PreparedStatement psCount = con.prepareStatement(sqlCount);
+                for(int i = 0; i < keywords.length; i++) {
+                    psCount.setString(i + 1, "%" + keywords[i] + "%");
+                }
+                ResultSet rsCount = psCount.executeQuery();
+                if(rsCount.next()) {
+                    resultCount = rsCount.getInt("cnt");
+                }
+                rsCount.close();
+                psCount.close();
+            } else {
+                sqlCount = "SELECT COUNT(*) AS cnt FROM book WHERE " + type + " LIKE ?";
+                PreparedStatement psCount = con.prepareStatement(sqlCount);
+                psCount.setString(1, "%" + query + "%");
+                ResultSet rsCount = psCount.executeQuery();
+                if(rsCount.next()) {
+                    resultCount = rsCount.getInt("cnt");
+                }
+                rsCount.close();
+                psCount.close();
+            }
+        } else {
+            sqlCount = "SELECT COUNT(*) AS cnt FROM book WHERE " + type + " LIKE ?";
+            PreparedStatement psCount = con.prepareStatement(sqlCount);
+            psCount.setString(1, "%" + query + "%");
+            ResultSet rsCount = psCount.executeQuery();
+            if(rsCount.next()) {
+                resultCount = rsCount.getInt("cnt");
+            }
+            rsCount.close();
+            psCount.close();
         }
-        rsCount.close();
-        psCount.close();
     } else {
         String sqlCount = "SELECT COUNT(*) AS cnt FROM book";
         PreparedStatement psCount = con.prepareStatement(sqlCount);

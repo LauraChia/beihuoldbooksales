@@ -236,20 +236,20 @@
     <div class="detail-info">
         <h2><%= rs.getString("titleBook") %></h2>
 
-        <div class="price">NT$<%= (int) Float.parseFloat(rs.getString("price")) %></div>
-        <div class="info-item">書名：<%= rs.getString("titleBook") %></div>
-        <div class="info-item">作者：<%= rs.getString("author") %></div>
-        <div class="info-item">出版日期：<%= rs.getString("date").split(" ")[0] %></div>
-        <div class="info-item">書籍版本：<%= rs.getString("edition") %></div>
-        <div class="info-item">ISBN：<%= rs.getString("ISBN") %></div>
-        <div class="info-item">使用書籍系所：<%= rs.getString("department") %></div>
-        <div class="info-item">書籍狀況：<%= rs.getString("condition") %></div>
-        <div class="info-item">有無筆記：<%= rs.getString("remarks") %></div>
-        <div class="info-item">授課老師：<%= rs.getString("teacher") %></div>
-        <div class="info-item">偏好聯絡方式：<%= rs.getString("contact") %></div>
-        <div class="info-item">上架天數：<%= rs.getString("createdAt").split(" ")[0] %></div>
-        <div class="info-item">上架本數：<%= rs.getString("quantity") %></div>
-        <div class="info-item">審核狀態：<span class="<%= statusClass %>"><%= statusText %></span></div>
+<div class="price">NT$<%= (rs.getString("price") != null && !rs.getString("price").trim().isEmpty()) ? (int) Float.parseFloat(rs.getString("price")) : 0 %></div>
+<div class="info-item">書名：<%= (rs.getString("titleBook") != null && !rs.getString("titleBook").trim().isEmpty()) ? rs.getString("titleBook") : "無" %></div>
+<div class="info-item">作者：<%= (rs.getString("author") != null && !rs.getString("author").trim().isEmpty()) ? rs.getString("author") : "無" %></div>
+<div class="info-item">出版日期：<%= (rs.getString("date") != null && !rs.getString("date").trim().isEmpty()) ? rs.getString("date").split(" ")[0] : "無" %></div>
+<div class="info-item">書籍版本：<%= (rs.getString("edition") != null && !rs.getString("edition").trim().isEmpty()) ? rs.getString("edition") : "無" %></div>
+<div class="info-item">ISBN：<%= (rs.getString("ISBN") != null && !rs.getString("ISBN").trim().isEmpty()) ? rs.getString("ISBN") : "無" %></div>
+<div class="info-item">使用書籍系所：<%= (rs.getString("department") != null && !rs.getString("department").trim().isEmpty()) ? rs.getString("department") : "" %></div>
+<div class="info-item">書籍狀況：<%= (rs.getString("condition") != null && !rs.getString("condition").trim().isEmpty()) ? rs.getString("condition") : "無" %></div>
+<div class="info-item">有無筆記：<%= (rs.getString("remarks") != null && !rs.getString("remarks").trim().isEmpty()) ? rs.getString("remarks") : "無" %></div>
+<div class="info-item">授課老師：<%= (rs.getString("teacher") != null && !rs.getString("teacher").trim().isEmpty()) ? rs.getString("teacher") : "無" %></div>
+<div class="info-item">偏好聯絡方式：<%= (rs.getString("contact") != null && !rs.getString("contact").trim().isEmpty()) ? rs.getString("contact") : "無" %></div>
+<div class="info-item">上架天數：<%= (rs.getString("createdAt") != null && !rs.getString("createdAt").trim().isEmpty()) ? rs.getString("createdAt").split(" ")[0] : "無" %></div>
+<div class="info-item">上架本數：<%= (rs.getString("quantity") != null && !rs.getString("quantity").trim().isEmpty()) ? rs.getString("quantity") : 1 %></div>
+<div class="info-item">審核狀態：<span class="<%= statusClass %>"><%= (statusText != null && !statusText.trim().isEmpty()) ? statusText : "無" %></span></div>
 
         <a class="btn btn-link" href="index.jsp">回首頁</a>
     </div>
