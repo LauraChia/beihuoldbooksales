@@ -120,10 +120,10 @@
         </div>
 
         <!-- 上架天數 -->
-        <div class="form-group">
-            <label>上架天數：<span style="color:red">*</span></label>
-            <input type="number" name="shelfDays" min="1" placeholder="預設30天（上限60天）" required>
-        </div>
+		<div class="form-group">
+		    <label>上架天數：<span style="color:red">*</span></label>
+		    <input type="number" name="shelfDays" min="1" max="60" placeholder="上限60天" required>
+		</div>
 
         <!-- 書籍狀況 -->
         <div class="form-group">
@@ -256,6 +256,7 @@
         updatePreview();
     });
 
+    
     document.getElementById('resetBtn').addEventListener('click', function() {
         setTimeout(() => { selectedFiles = []; previewContainer.innerHTML = ''; imageCountSpan.textContent = '0'; }, 10);
     });
