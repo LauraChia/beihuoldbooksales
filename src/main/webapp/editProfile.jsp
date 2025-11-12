@@ -100,12 +100,12 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">暱稱</label>
+                    <label class="form-label">暱稱 <span class="text-danger">*</span></label>
                     <input type="text" name="name" class="form-control" value="<%= name %>">
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">聯絡方式</label>
+                    <label class="form-label">聯絡方式 <span class="text-danger">*</span></label>
                     <select name="contactType" id="contactType" class="form-select" onchange="toggleCustomContact()">
                         <option value="">請選擇</option>
                         <option value="LINE" <%= contactType.equals("LINE") ? "selected" : "" %>>LINE</option>
@@ -116,7 +116,7 @@
                 </div>
 
                 <div class="mb-3" id="customContactDiv" style="display: <%= contactType.equals("其他") ? "block" : "none" %>;">
-                    <label class="form-label">請輸入聯絡方式</label>
+                    <label class="form-label">請輸入聯絡方式 <span class="text-danger">*</span></label>
                     <input type="text" name="customContact" id="customContact" class="form-control" 
                            placeholder="例如:電話、Email等" value="<%= customContact %>">
                 </div>
@@ -142,7 +142,7 @@
                 </div>
                 
                 <div class="mb-3">
-                    <label class="form-label">密碼</label>
+                    <label class="form-label">密碼 <span class="text-danger">*</span></label>
                     <input type="password" name="password" class="form-control" value="<%= password %>">
                 </div>
 
@@ -163,7 +163,7 @@
             </div>
             <div class="col-md-6 col-lg-3">
                 <h5 class="text-white mb-4">快速連結</h5>
-                <a class="btn btn-link" href="#">首頁</a>
+                <a class="btn btn-link" href="index.jsp">首頁</a>
                 <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
             </div>
         </div>

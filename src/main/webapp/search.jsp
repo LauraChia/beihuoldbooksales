@@ -176,7 +176,6 @@
     String typeDisplay = "";
     if("titleBook".equals(type)) typeDisplay = "書名";
     else if("author".equals(type)) typeDisplay = "作者";
-    else if("ISBN".equals(type)) typeDisplay = "ISBN";
     else if("department".equals(type)) typeDisplay = "系所";
 
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
