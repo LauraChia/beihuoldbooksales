@@ -78,7 +78,7 @@
             <label>書籍版本：</label>
             <input type="text" name="edition" placeholder="選填">
         </div>
-
+        
         <!-- 書籍照片 -->
         <div class="form-group" style="flex-direction: column; align-items: stretch;">
             <label style="width: 100%;">書籍照片：<span style="color:red">*</span></label>
@@ -131,14 +131,9 @@
             <input type="text" name="condition" placeholder="例如：全新 / 二手 / 有使用痕跡 / 其他" />
         </div>
 
-        <!-- 賣家 -->
-        <div class="form-group">
-            <label>賣家：</label>
-            <input type="text" name="sellerName"  required>
-        </div>
         <!-- 有無筆記 -->
         <div class="form-group">
-            <label>有無筆記：</label>
+            <label>有無筆記：<span style="color:red">*</span></label>
             <select name="remarks">
                 <option value="有">有</option>
                 <option value="無">無</option>
@@ -146,16 +141,16 @@
         </div>
 
         <!-- 授課老師 -->
-        <div class="form-group">
-            <label>授課老師：</label>
-            <input type="text" name="teacher" placeholder="選填">
-        </div>
+<div class="form-group">
+    <label for="teacher">授課老師：<span style="color:red">*</span></label>
+    <input type="text" id="teacher" name="teacher" required>
+</div>
 
-        <!-- 使用課程 -->
-        <div class="form-group">
-            <label>使用課程：</label>
-            <input type="text" name="course" placeholder="選填">
-        </div>
+<!-- 使用課程 -->
+<div class="form-group">
+    <label for="course">使用課程：</label>
+    <input type="text" id="course" name="course" required>
+</div>
 
         <!-- ISBN -->
         <div class="form-group">

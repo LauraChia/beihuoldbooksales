@@ -89,6 +89,8 @@
 	                        <option value="titleBook">書名</option>
 	                        <option value="author">作者</option>
 	                        <option value="department">系所</option>
+	                        <option value="teacher">授課老師</option>
+	                        <option value="course">使用課程</option>
 	                    </select>
 	
 	                    <!-- 搜尋文字 -->

@@ -177,6 +177,8 @@
     if("titleBook".equals(type)) typeDisplay = "書名";
     else if("author".equals(type)) typeDisplay = "作者";
     else if("department".equals(type)) typeDisplay = "系所";
+    else if("teacher".equals(type)) typeDisplay = "授課老師";
+    else if("course".equals(type)) typeDisplay = "使用課程";
 
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
     Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
