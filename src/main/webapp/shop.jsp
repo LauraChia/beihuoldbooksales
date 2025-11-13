@@ -131,6 +131,11 @@
             <input type="text" name="condition" placeholder="例如：全新 / 二手 / 有使用痕跡 / 其他" />
         </div>
 
+        <!-- 賣家 -->
+        <div class="form-group">
+            <label>賣家：</label>
+            <input type="text" name="sellerName"  required>
+        </div>
         <!-- 有無筆記 -->
         <div class="form-group">
             <label>有無筆記：</label>

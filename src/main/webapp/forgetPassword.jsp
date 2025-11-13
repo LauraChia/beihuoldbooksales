@@ -79,7 +79,7 @@
         <div class="row g-5">
             <div class="col-md-6 col-lg-3">
                 <h5 class="text-white mb-4">專題資訊</h5>
-                <p class="mb-2">題目：北護二手書拍賣系統</p>
+                <p class="mb-2">題目：國北護二手書交易網</p>
                 <p class="mb-2">系所：健康事業管理系</p>
                 <p class="mb-2">專題組員：黃郁心、賈子瑩、許宇翔、闕紫彤</p>
             </div>
@@ -91,7 +91,7 @@
         </div>
     </div>
     <div class="container-fluid text-center border-top border-secondary py-3">
-        <p class="mb-0">&copy; 2025 二手書拍賣網. All Rights Reserved.</p>
+        <p class="mb-0">&copy; 2025年 國北護二手書交易網. All Rights Reserved.</p>
     </div>
 </div>
 <!-- Footer End -->
