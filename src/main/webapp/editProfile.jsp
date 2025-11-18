@@ -11,7 +11,6 @@
     String userId = (String) session.getAttribute("userId");
     String username = "";
     String name = "";
-    String contact = "";
     String department = "";
     String password = "";
 
@@ -21,7 +20,7 @@
 
     try {
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-        String sql = "SELECT username, name, contact, department, password FROM users WHERE userId = ?";
+        String sql = "SELECT username, name, department, password FROM users WHERE userId = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userId);
         rs = ps.executeQuery();
@@ -29,14 +28,12 @@
         if (rs.next()) {
             username = rs.getString("username");
             name = rs.getString("name");
-            contact = rs.getString("contact");
             department = rs.getString("department");
             password = rs.getString("password");
         }
 
         // ✅ 避免顯示 null
         if (name == null) name = "";
-        if (contact == null) contact = "";
         if (department == null) department = "";
         if (password == null) password = "";
     } catch (Exception e) {
@@ -45,17 +42,6 @@
         if (rs != null) try { rs.close(); } catch (Exception e) {}
         if (ps != null) try { ps.close(); } catch (Exception e) {}
         if (con != null) try { con.close(); } catch (Exception e) {}
-    }
-
-    // 判斷現有的聯絡方式是預設選項還是自訂的
-    String contactType = "";
-    String customContact = "";
-    
-    if (contact.equals("LINE") || contact.equals("IG") || contact.equals("FB")) {
-        contactType = contact;
-    } else if (!contact.isEmpty()) {
-        contactType = "其他";
-        customContact = contact;
     }
     
     // 根據系所判斷所屬學院
@@ -103,27 +89,6 @@
                     <label class="form-label">暱稱 <span class="text-danger">*</span></label>
                     <input type="text" name="name" class="form-control" value="<%= name %>">
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">聯絡方式 <span class="text-danger">*</span></label>
-                    <select name="contactType" id="contactType" class="form-select" onchange="toggleCustomContact()">
-                        <option value="">請選擇</option>
-                        <option value="LINE" <%= contactType.equals("LINE") ? "selected" : "" %>>LINE</option>
-                        <option value="IG" <%= contactType.equals("IG") ? "selected" : "" %>>IG</option>
-                        <option value="FB" <%= contactType.equals("FB") ? "selected" : "" %>>FB</option>
-                        <option value="其他" <%= contactType.equals("其他") ? "selected" : "" %>>其他</option>
-                    </select>
-                </div>
-
-                <div class="mb-3" id="customContactDiv" style="display: <%= contactType.equals("其他") ? "block" : "none" %>;">
-                    <label class="form-label">請輸入聯絡方式 <span class="text-danger">*</span></label>
-                    <input type="text" name="customContact" id="customContact" class="form-control" 
-                           placeholder="例如:電話、Email等" value="<%= customContact %>">
-                </div>
-
-                <!-- 隱藏欄位,用來傳送最終的 contact 值 -->
-                <input type="hidden" name="contact" id="finalContact">
-                
 
                 <div class="mb-3">
                     <label for="college" class="form-label">就讀系所 <span class="text-danger">*</span></label>
