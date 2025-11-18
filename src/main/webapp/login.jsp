@@ -25,6 +25,7 @@ if(request.getParameter("username") != null &&
             // ✅ 統一使用 "userId" 作為 session 屬性名稱
             session.setAttribute("userId", paperrs.getString("userId"));
             session.setAttribute("username", paperrs.getString("username"));
+            session.setAttribute("name", paperrs.getString("name"));
             
             // ✅ 更新登入時間 - MS Access 使用 Now() 而非 NOW()
             String updateLoginTime = "UPDATE users SET lastLogin=Now() WHERE userId=?";
