@@ -12,11 +12,13 @@
     
     // ✅ 修改1: 改為接收正確的參數名稱 (name, contact, password)
     String name = request.getParameter("name");
+    String contact = request.getParameter("contact");  // ← 新增: 接收 contact 參數
     String department = request.getParameter("department");
     String password = request.getParameter("password");
 
     // ✅ 修改2: 加入 contact 的 null 檢查
     if (name == null) name = "";
+    if (contact == null) contact = "";  // ← 新增
     if (department == null) department = "";
     if (password == null) password = "";
 
@@ -30,6 +32,7 @@
         String sql = "UPDATE users SET name = ?, contact = ?, department = ?, password = ? WHERE userId = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, name);
+        ps.setString(2, contact);     // ← 新增: 更新 contact
         ps.setString(3, department);
         ps.setString(4, password);
         ps.setString(5, userId);

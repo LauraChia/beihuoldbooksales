@@ -248,6 +248,7 @@
 <div class="info-item">授課老師：<%= (rs.getString("teacher") != null && !rs.getString("teacher").trim().isEmpty()) ? rs.getString("teacher") : "無" %></div>
 <div class="info-item">ISBN：<%= (rs.getString("ISBN") != null && !rs.getString("ISBN").trim().isEmpty()) ? rs.getString("ISBN") : "無" %></div>
 <div class="info-item">賣家：<%= (rs.getString("sellerName") != null && !rs.getString("sellerName").trim().isEmpty()) ? rs.getString("sellerName") : "無" %></div>
+<div class="info-item">偏好聯絡方式(請私訊)：<%= (rs.getString("contact") != null && !rs.getString("contact").trim().isEmpty()) ? rs.getString("contact") : "無" %></div>
 <div class="info-item">上架日期：<%= (rs.getString("createdAt") != null && !rs.getString("createdAt").trim().isEmpty()) ? rs.getString("createdAt").split(" ")[0] : "無" %></div>
 <div class="info-item">上架本數：<%= (rs.getString("quantity") != null && !rs.getString("quantity").trim().isEmpty()) ? rs.getString("quantity") : 1 %></div>
 <div class="info-item">審核狀態：<span class="<%= statusClass %>"><%= (statusText != null && !statusText.trim().isEmpty()) ? statusText : "無" %></span></div>
