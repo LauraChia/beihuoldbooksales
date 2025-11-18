@@ -11,7 +11,6 @@
     String userId = (String) session.getAttribute("userId");
     String username = "";
     String name = "";
-    String contact = "";
     String department = "";
     String password = "";
 
@@ -21,7 +20,7 @@
 
     try {
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-        String sql = "SELECT username, name, contact, department, password FROM users WHERE userId = ?";
+        String sql = "SELECT username, name, department, password FROM users WHERE userId = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userId);
         rs = ps.executeQuery();
@@ -29,14 +28,12 @@
         if (rs.next()) {
             username = rs.getString("username");
             name = rs.getString("name");
-            contact = rs.getString("contact");
             department = rs.getString("department");
             password = rs.getString("password");
         }
 
         // ✅ 避免顯示 null
         if (name == null) name = "";
-        if (contact == null) contact = "";
         if (department == null) department = "";
         if (password == null) password = "";
     } catch (Exception e) {
@@ -51,12 +48,6 @@
     String contactType = "";
     String customContact = "";
     
-    if (contact.equals("LINE") || contact.equals("IG") || contact.equals("FB")) {
-        contactType = contact;
-    } else if (!contact.isEmpty()) {
-        contactType = "其他";
-        customContact = contact;
-    }
     
     // 根據系所判斷所屬學院
     String selectedCollege = "";
