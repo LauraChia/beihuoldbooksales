@@ -165,7 +165,7 @@
 </head>
 
 <body>
-    <%@ include file="menu.jsp" %>
+	<%@ include file="menu.jsp" %>
 
 <%
     // 取得搜尋參數

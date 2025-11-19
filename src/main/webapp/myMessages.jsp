@@ -1,0 +1,481 @@
+<%@page contentType="text/html" pageEncoding="utf-8"%>
+<%@page import="java.sql.*"%>
+<%@page import="java.util.*"%>
+<%@page import="java.text.SimpleDateFormat"%>
+<jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="utf-8">
+    <title>我的訊息 - 北護二手書交易網</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: "Microsoft JhengHei", sans-serif;
+            padding-top: 80px;
+        }
+        .messages-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .page-header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .stat-item {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .filter-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        .message-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            border-left: 4px solid transparent;
+        }
+        .message-card:hover {
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+        .message-card.unread {
+            border-left-color: #dc3545;
+            background: #fff8f8;
+        }
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .buyer-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .buyer-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .buyer-details h5 {
+            margin: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .buyer-details small {
+            color: #666;
+        }
+        .message-time {
+            color: #999;
+            font-size: 14px;
+        }
+        .book-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .book-info img {
+            width: 60px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+        .book-details h6 {
+            margin: 0;
+            color: #667eea;
+            font-weight: 600;
+        }
+        .message-content {
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .contact-info {
+            background: #e8f5e9;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .contact-info i {
+            color: #4caf50;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-mark-read {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-mark-read:hover {
+            background: #218838;
+        }
+        .btn-view-book {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-view-book:hover {
+            background: #5568d3;
+        }
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-delete:hover {
+            background: #c82333;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 12px;
+        }
+        .empty-state i {
+            font-size: 80px;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+        .badge-unread {
+            background: #dc3545;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<%@ include file="menu.jsp"%>
+
+<%
+    // 檢查登入
+    String sellerId = (String) session.getAttribute("userId");
+    if (sellerId == null || sellerId.trim().isEmpty()) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
+    
+    Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+    Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
+    
+    // 統計資料
+    Statement smt = con.createStatement();
+    String statsSQL = "SELECT " +
+                     "(SELECT COUNT(*) FROM messages WHERE sellerId = " + sellerId + ") as total, " +
+                     "(SELECT COUNT(*) FROM messages WHERE sellerId = " + sellerId + " AND isRead = No) as unread";
+    ResultSet statsRs = smt.executeQuery(statsSQL);
+    statsRs.next();
+    int totalMessages = statsRs.getInt("total");
+    int unreadMessages = statsRs.getInt("unread");
+    statsRs.close();
+    
+    // 取得篩選條件
+    String filter = request.getParameter("filter");
+    if (filter == null) filter = "all";
+    
+    // 查詢訊息
+    String sql = "SELECT m.*, " +
+                "b.titleBook, b.photo, b.price, " +
+                "u.name as buyerName, u.username as buyerEmail " +
+                "FROM (messages m " +
+                "JOIN book b ON m.bookId = b.bookId) " +
+                "JOIN users u ON m.buyerId = u.userId " +
+                "WHERE m.sellerId = " + sellerId;
+    
+    if (filter.equals("unread")) {
+        sql += " AND m.isRead = No";
+    }
+    
+    sql += " ORDER BY m.sentAt DESC";
+    
+    ResultSet rs = smt.executeQuery(sql);
+%>
+
+<div class="messages-container">
+    <!-- 頁面標題 -->
+    <div class="page-header">
+        <h1><i class="fas fa-inbox"></i> 我的訊息</h1>
+        <div class="stats-bar">
+            <div class="stat-item">
+                <i class="fas fa-envelope"></i> 總訊息數: <strong><%= totalMessages %></strong>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-envelope-open"></i> 未讀: <strong><%= unreadMessages %></strong>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 篩選按鈕 -->
+    <div class="filter-tabs">
+        <button class="filter-btn <%= filter.equals("all") ? "active" : "" %>" 
+                onclick="location.href='myMessages.jsp?filter=all'">
+            <i class="fas fa-list"></i> 全部訊息
+        </button>
+        <button class="filter-btn <%= filter.equals("unread") ? "active" : "" %>" 
+                onclick="location.href='myMessages.jsp?filter=unread'">
+            <i class="fas fa-envelope"></i> 未讀訊息 
+            <% if (unreadMessages > 0) { %>
+                <span class="badge-unread"><%= unreadMessages %></span>
+            <% } %>
+        </button>
+    </div>
+    
+    <!-- 訊息列表 -->
+    <%
+        boolean hasMessages = false;
+        while (rs.next()) {
+            hasMessages = true;
+            
+            int messageId = rs.getInt("messageId");
+            String bookTitle = rs.getString("titleBook");
+            String photo = rs.getString("photo");
+            String price = rs.getString("price");
+            String message = rs.getString("message");
+            String buyerName = rs.getString("buyerName");
+            String buyerEmail = rs.getString("buyerEmail");
+            String contactInfo = rs.getString("contactInfo");
+            boolean isRead = rs.getBoolean("isRead");
+            Timestamp sentAt = rs.getTimestamp("sentAt");
+            int bookId = rs.getInt("bookId");
+            
+            // 處理圖片路徑
+            if (photo != null && !photo.trim().isEmpty()) {
+                String[] photoArray = photo.split(",");
+                photo = photoArray[0].trim();
+                if (!photo.startsWith("assets/")) {
+                    photo = "assets/images/member/" + photo;
+                }
+            } else {
+                photo = "assets/images/about.png";
+            }
+            
+            // 格式化時間
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+            String timeStr = sdf.format(sentAt);
+            
+            // 計算時間差
+            long diff = System.currentTimeMillis() - sentAt.getTime();
+            String timeAgo = "";
+            if (diff < 60000) {
+                timeAgo = "剛剛";
+            } else if (diff < 3600000) {
+                timeAgo = (diff / 60000) + "分鐘前";
+            } else if (diff < 86400000) {
+                timeAgo = (diff / 3600000) + "小時前";
+            } else {
+                timeAgo = (diff / 86400000) + "天前";
+            }
+    %>
+    
+    <div class="message-card <%= !isRead ? "unread" : "" %>">
+        <div class="message-header">
+            <div class="buyer-info">
+                <div class="buyer-avatar">
+                    <%= buyerName != null ? buyerName.substring(0, 1) : "?" %>
+                </div>
+                <div class="buyer-details">
+                    <h5><%= buyerName != null ? buyerName : "匿名買家" %></h5>
+                    <small><i class="fas fa-envelope"></i> <%= buyerEmail != null ? buyerEmail : "" %></small>
+                </div>
+            </div>
+            <div class="message-time">
+                <% if (!isRead) { %>
+                    <span class="badge-unread">未讀</span>
+                <% } %>
+                <div><i class="far fa-clock"></i> <%= timeAgo %></div>
+                <small><%= timeStr %></small>
+            </div>
+        </div>
+        
+        <!-- 書籍資訊 -->
+        <div class="book-info">
+            <img src="<%= photo %>" alt="書籍封面" onerror="this.src='assets/images/about.png'">
+            <div class="book-details">
+                <h6><i class="fas fa-book"></i> <%= bookTitle %></h6>
+                <div class="text-danger"><strong>NT$ <%= price != null ? (int)Float.parseFloat(price) : 0 %></strong></div>
+            </div>
+        </div>
+        
+        <!-- 買家訊息 -->
+        <div class="message-content">
+            <strong>📝 買家留言：</strong><br>
+            <%= message != null ? message : "" %>
+        </div>
+        
+        <!-- 買家聯絡方式 -->
+        <% if (contactInfo != null && !contactInfo.trim().isEmpty()) { %>
+        <div class="contact-info">
+            <i class="fas fa-phone-alt"></i>
+            <strong>買家聯絡方式：</strong><%= contactInfo %>
+        </div>
+        <% } %>
+        
+        <!-- 操作按鈕 -->
+        <div class="action-buttons">
+            <% if (!isRead) { %>
+            <button class="btn-mark-read" onclick="markAsRead(<%= messageId %>)">
+                <i class="fas fa-check"></i> 標記已讀
+            </button>
+            <% } %>
+            <button class="btn-view-book" onclick="location.href='bookdetails.jsp?bookId=<%= bookId %>'">
+                <i class="fas fa-eye"></i> 查看書籍
+            </button>
+            <button class="btn-delete" onclick="deleteMessage(<%= messageId %>)">
+                <i class="fas fa-trash"></i> 刪除
+            </button>
+        </div>
+    </div>
+    
+    <%
+        }
+        
+        if (!hasMessages) {
+    %>
+    <!-- 空狀態 -->
+    <div class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <h3>目前沒有訊息</h3>
+        <p>當有買家對您的書籍感興趣時，訊息會顯示在這裡</p>
+        <button class="btn btn-primary" onclick="location.href='index.jsp'">
+            返回首頁
+        </button>
+    </div>
+    <%
+        }
+        
+        con.close();
+    %>
+</div>
+
+<script>
+function markAsRead(messageId) {
+    if (confirm('確定要標記為已讀嗎？')) {
+        fetch('markMessageRead.jsp?messageId=' + messageId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('操作失敗: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('系統錯誤: ' + error);
+        });
+    }
+}
+
+function deleteMessage(messageId) {
+    if (confirm('確定要刪除這則訊息嗎？\n刪除後將無法復原！')) {
+        fetch('deleteMessage.jsp?messageId=' + messageId)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ 訊息已刪除');
+                location.reload();
+            } else {
+                alert('❌ 刪除失敗: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('❌ 系統錯誤: ' + error);
+        });
+    }
+}
+</script>
+
+<!-- Footer -->
+<div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
+    <div class="container py-5">
+        <div class="row g-5">
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">專題資訊</h5>
+                <p class="mb-2">題目:北護二手書拍賣系統</p>
+                <p class="mb-2">系所：健康事業管理系</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
