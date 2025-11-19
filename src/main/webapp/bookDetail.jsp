@@ -235,11 +235,13 @@
         }
         .modal-content {
             background-color: #fefefe;
-            margin: 10% auto;
+            margin: 5% auto;
             padding: 30px;
             border-radius: 10px;
             width: 90%;
             max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             animation: slideIn 0.3s;
         }
@@ -353,7 +355,7 @@
 	String bookId = request.getParameter("bookId");
 
 	// 檢查使用者是否登入 - 改用你的 session 變數名稱
-	String loggedInUserId = (String) session.getAttribute("userId");
+	loggedInUserId = (String) session.getAttribute("userId");
 	String loggedInUserEmail = (String) session.getAttribute("username"); // 改為 username (因為你的 username 就是 email)
 	boolean isLoggedIn = (loggedInUserId != null && !loggedInUserId.trim().isEmpty());
 	
@@ -487,7 +489,7 @@
     </div>
 </div>
 
-<!-- 聯絡賣家的 Modal -->
+<!-- 聯絡賣家的 Modal (修改版 - 加上聯絡方式) -->
 <div id="contactModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -505,12 +507,39 @@
                 
                 <div class="form-group">
                     <label>書籍名稱：</label>
-                    <input type="text" class="form-control" value="<%= rs.getString("titleBook") %>" readonly>
+                    <input type="text" class="form-control" value="<%= rs.getString("titleBook") %>" readonly style="background-color: #f0f0f0;">
                 </div>
                 
                 <div class="form-group">
                     <label>給賣家的訊息：<span style="color: red;">*</span></label>
-                    <textarea name="message" id="messageText" rows="5" placeholder="例如：您好，我對這本書很感興趣，想了解更多細節..." required></textarea>
+                    <textarea name="message" id="messageText" rows="5" placeholder="例如：您好，我對這本書很感興趣，想了解更多細節...
+
+建議內容：
+• 表達購買意願
+• 詢問書籍狀況
+• 詢問面交時間地點
+• 其他問題" required></textarea>
+                    <small style="color: #666;">至少需要10個字元</small>
+                </div>
+                
+                <!-- 🆕 新增：買家聯絡方式 -->
+                <div class="form-group">
+                    <label>您的聯絡方式 (選填)：<i class="fas fa-info-circle" title="提供聯絡方式可讓賣家更快聯繫您"></i></label>
+                    <input type="text" 
+                           name="contactInfo" 
+                           id="contactInfo" 
+                           class="form-control" 
+                           placeholder="例如：手機 0912-345-678 或 Line ID: yourlineid"
+                           maxlength="100">
+                    <small style="color: #28a745;">
+                        <i class="fas fa-check-circle"></i> 
+                        建議提供手機或 Line ID，方便賣家與您聯繫！
+                    </small>
+                </div>
+                
+                <div class="alert alert-info" style="background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; margin-top: 15px;">
+                    <i class="fas fa-shield-alt"></i> 
+                    <strong>隱私提醒：</strong>您的聯絡方式只會顯示給此書籍的賣家，請放心填寫。
                 </div>
             </form>
         </div>
@@ -522,90 +551,94 @@
 </div>
 
 <script>
-	const isLoggedIn = <%= isLoggedIn %>;
-	const isOwnBook = <%= isOwnBook %>;
-    
-    let currentImageIndex = 0;
-    const images = document.querySelectorAll('.book-image');
-    const thumbnails = document.querySelectorAll('.thumbnail');
-    const totalImages = images.length;
+		// 🔴 必須加上這些變數和函數！
+		const isLoggedIn = <%= isLoggedIn %>;
+		const isOwnBook = <%= isOwnBook %>;
+		
+		let currentImageIndex = 0;
+		const images = document.querySelectorAll('.book-image');
+		const thumbnails = document.querySelectorAll('.thumbnail');
+		const totalImages = images.length;
+		
+		function showImage(index) {
+		    images.forEach(img => img.classList.remove('active'));
+		    thumbnails.forEach(thumb => thumb.classList.remove('active'));
+		    
+		    currentImageIndex = index;
+		    images[currentImageIndex].classList.add('active');
+		    if (thumbnails.length > 0) {
+		        thumbnails[currentImageIndex].classList.add('active');
+		    }
+		    
+		    const counter = document.getElementById('current-image');
+		    if (counter) {
+		        counter.textContent = currentImageIndex + 1;
+		    }
+		}
+		
+		function changeImage(direction) {
+		    let newIndex = currentImageIndex + direction;
+		    
+		    if (newIndex >= totalImages) {
+		        newIndex = 0;
+		    } else if (newIndex < 0) {
+		        newIndex = totalImages - 1;
+		    }
+		    
+		    showImage(newIndex);
+		}
+		
+		document.addEventListener('keydown', function(e) {
+		    if (totalImages > 1) {
+		        if (e.key === 'ArrowLeft') {
+		            changeImage(-1);
+		        } else if (e.key === 'ArrowRight') {
+		            changeImage(1);
+		        }
+		    }
+		});
+		
+		// 處理聯絡賣家
+		function handleContactSeller() {
+		    if (!isLoggedIn) {
+		        if (confirm('您需要先登入才能聯絡賣家\n\n是否前往登入頁面？')) {
+		            window.location.href = 'login.jsp?redirect=' + encodeURIComponent(window.location.href);
+		        }
+		        return;
+		    }
+		    
+		    if (isOwnBook) {
+		        alert('這是您自己的書籍，無法聯絡自己');
+		        return;
+		    }
+		    
+		    openModal();
+		}
+		
+		function openModal() {
+		    document.getElementById('contactModal').style.display = 'block';
+		    document.body.style.overflow = 'hidden';
+		}
+		
+		function closeModal() {
+		    document.getElementById('contactModal').style.display = 'none';
+		    document.body.style.overflow = 'auto';
+		    document.getElementById('messageText').value = '';
+		    document.getElementById('contactInfo').value = ''; // 🆕 清空聯絡方式
+		}
+		
+		// 點擊 modal 外部關閉
+		window.onclick = function(event) {
+		    const modal = document.getElementById('contactModal');
+		    if (event.target == modal) {
+		        closeModal();
+		    }
+		}
 
-    function showImage(index) {
-        images.forEach(img => img.classList.remove('active'));
-        thumbnails.forEach(thumb => thumb.classList.remove('active'));
-        
-        currentImageIndex = index;
-        images[currentImageIndex].classList.add('active');
-        if (thumbnails.length > 0) {
-            thumbnails[currentImageIndex].classList.add('active');
-        }
-        
-        const counter = document.getElementById('current-image');
-        if (counter) {
-            counter.textContent = currentImageIndex + 1;
-        }
-    }
-
-    function changeImage(direction) {
-        let newIndex = currentImageIndex + direction;
-        
-        if (newIndex >= totalImages) {
-            newIndex = 0;
-        } else if (newIndex < 0) {
-            newIndex = totalImages - 1;
-        }
-        
-        showImage(newIndex);
-    }
-
-    document.addEventListener('keydown', function(e) {
-        if (totalImages > 1) {
-            if (e.key === 'ArrowLeft') {
-                changeImage(-1);
-            } else if (e.key === 'ArrowRight') {
-                changeImage(1);
-            }
-        }
-    });
-    
-    // 處理聯絡賣家
-    function handleContactSeller() {
-        if (!isLoggedIn) {
-            if (confirm('您需要先登入才能聯絡賣家\n\n是否前往登入頁面？')) {
-                window.location.href = 'login.jsp?redirect=' + encodeURIComponent(window.location.href);
-            }
-            return;
-        }
-        
-        if (isOwnBook) {
-            alert('這是您自己的書籍，無法聯絡自己');
-            return;
-        }
-        
-        openModal();
-    }
-    
-    function openModal() {
-        document.getElementById('contactModal').style.display = 'block';
-        document.body.style.overflow = 'hidden';
-    }
-    
-    function closeModal() {
-        document.getElementById('contactModal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-        document.getElementById('messageText').value = '';
-    }
-    
-    // 點擊 modal 外部關閉
-    window.onclick = function(event) {
-        const modal = document.getElementById('contactModal');
-        if (event.target == modal) {
-            closeModal();
-        }
-    }
-    
+    // 🆕 修改發送訊息函數，加上聯絡方式
     function sendMessage() {
         const messageText = document.getElementById('messageText').value.trim();
+        const contactInfo = document.getElementById('contactInfo').value.trim(); // 取得聯絡方式
         
         if (!messageText) {
             alert('請輸入訊息內容');
@@ -627,6 +660,7 @@
         console.log('sellerId:', sellerId);
         console.log('sellerEmail:', sellerEmail);
         console.log('message:', messageText);
+        console.log('contactInfo:', contactInfo); // 🆕 新增 log
         
         // 檢查必要欄位
         if (!bookId || !sellerId) {
@@ -641,6 +675,7 @@
         formData.append('sellerId', sellerId);
         formData.append('sellerEmail', sellerEmail || '');
         formData.append('message', messageText);
+        formData.append('contactInfo', contactInfo); // 🆕 加上聯絡方式
         
         // 顯示載入中
         const sendBtn = document.querySelector('.btn-send');

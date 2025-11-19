@@ -221,6 +221,14 @@
             font-size: 12px;
             font-weight: bold;
         }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 </head>
 <body>
@@ -228,47 +236,72 @@
 <%@ include file="menu.jsp"%>
 
 <%
-    // 檢查登入
+    // === 1. 驗證登入狀態 ===
     String sellerId = (String) session.getAttribute("userId");
     if (sellerId == null || sellerId.trim().isEmpty()) {
         response.sendRedirect("login.jsp");
         return;
     }
     
-    Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-    Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
+    // === 2. 建立資料庫連線 ===
+    Connection con = null;
+    PreparedStatement pstmt = null;
+    PreparedStatement pstmtUnread = null;
+    PreparedStatement pstmtMessages = null;
+    ResultSet totalRs = null;
+    ResultSet unreadRs = null;
+    ResultSet rs = null;
     
-    // 統計資料
-    Statement smt = con.createStatement();
-    String statsSQL = "SELECT " +
-                     "(SELECT COUNT(*) FROM messages WHERE sellerId = " + sellerId + ") as total, " +
-                     "(SELECT COUNT(*) FROM messages WHERE sellerId = " + sellerId + " AND isRead = No) as unread";
-    ResultSet statsRs = smt.executeQuery(statsSQL);
-    statsRs.next();
-    int totalMessages = statsRs.getInt("total");
-    int unreadMessages = statsRs.getInt("unread");
-    statsRs.close();
+    int totalMessages = 0;
+    int unreadMessages = 0;
     
-    // 取得篩選條件
-    String filter = request.getParameter("filter");
-    if (filter == null) filter = "all";
-    
-    // 查詢訊息
-    String sql = "SELECT m.*, " +
-                "b.titleBook, b.photo, b.price, " +
-                "u.name as buyerName, u.username as buyerEmail " +
-                "FROM (messages m " +
-                "JOIN book b ON m.bookId = b.bookId) " +
-                "JOIN users u ON m.buyerId = u.userId " +
-                "WHERE m.sellerId = " + sellerId;
-    
-    if (filter.equals("unread")) {
-        sql += " AND m.isRead = No";
-    }
-    
-    sql += " ORDER BY m.sentAt DESC";
-    
-    ResultSet rs = smt.executeQuery(sql);
+    try {
+        // ✅ 統一使用標準連線方式
+        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+        con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
+        
+        // === 3. 查詢總訊息數 ===
+        String totalSQL = "SELECT COUNT(*) as total FROM messages WHERE sellerId = ?";
+        pstmt = con.prepareStatement(totalSQL);
+        pstmt.setString(1, sellerId);
+        totalRs = pstmt.executeQuery();
+        
+        if (totalRs.next()) {
+            totalMessages = totalRs.getInt("total");
+        }
+        
+        // === 4. 查詢未讀訊息數 ===
+        String unreadSQL = "SELECT COUNT(*) as unread FROM messages WHERE sellerId = ? AND isRead = false";
+        pstmtUnread = con.prepareStatement(unreadSQL);
+        pstmtUnread.setString(1, sellerId);
+        unreadRs = pstmtUnread.executeQuery();
+        
+        if (unreadRs.next()) {
+            unreadMessages = unreadRs.getInt("unread");
+        }
+        
+        // === 5. 取得篩選條件 ===
+        String filter = request.getParameter("filter");
+        if (filter == null) filter = "all";
+        
+        // === 6. 查詢訊息列表 (使用 PreparedStatement) ===
+        String sql = "SELECT m.messageId, m.buyerId, m.sellerId, m.bookId, m.message, m.contactInfo, m.isRead, m.sentAt, " +
+                    "b.titleBook, b.photo, b.price, " +
+                    "u.name as buyerName, u.username as buyerEmail " +
+                    "FROM (messages m " +
+                    "INNER JOIN book b ON m.bookId = b.bookId) " +
+                    "INNER JOIN users u ON m.buyerId = u.userId " +
+                    "WHERE m.sellerId = ?";
+        
+        if (filter.equals("unread")) {
+            sql += " AND m.isRead = false";
+        }
+        
+        sql += " ORDER BY m.sentAt DESC";
+        
+        pstmtMessages = con.prepareStatement(sql);
+        pstmtMessages.setString(1, sellerId);
+        rs = pstmtMessages.executeQuery();
 %>
 
 <div class="messages-container">
@@ -397,7 +430,7 @@
                 <i class="fas fa-check"></i> 標記已讀
             </button>
             <% } %>
-            <button class="btn-view-book" onclick="location.href='bookdetails.jsp?bookId=<%= bookId %>'">
+            <button class="btn-view-book" onclick="location.href='bookDetail.jsp?bookId=<%= bookId %>'">
                 <i class="fas fa-eye"></i> 查看書籍
             </button>
             <button class="btn-delete" onclick="deleteMessage(<%= messageId %>)">
@@ -423,7 +456,44 @@
     <%
         }
         
-        con.close();
+    } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+        System.err.println("找不到資料庫驅動程式: " + e.getMessage());
+    %>
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle"></i> 系統錯誤：找不到資料庫驅動程式
+        </div>
+    <%
+    } catch (SQLException e) {
+        e.printStackTrace();
+        System.err.println("SQL錯誤: " + e.getMessage());
+    %>
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle"></i> 資料庫錯誤：<%= e.getMessage() %>
+        </div>
+    <%
+    } catch (Exception e) {
+        e.printStackTrace();
+        System.err.println("系統錯誤: " + e.getMessage());
+    %>
+        <div class="error-message">
+            <i class="fas fa-exclamation-circle"></i> 系統發生錯誤，請稍後再試
+        </div>
+    <%
+    } finally {
+        // ✅ 確保所有資源正確關閉
+        try {
+            if (rs != null) rs.close();
+            if (totalRs != null) totalRs.close();
+            if (unreadRs != null) unreadRs.close();
+            if (pstmt != null) pstmt.close();
+            if (pstmtUnread != null) pstmtUnread.close();
+            if (pstmtMessages != null) pstmtMessages.close();
+            if (con != null) con.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     %>
 </div>
 
@@ -464,18 +534,28 @@ function deleteMessage(messageId) {
 }
 </script>
 
-<!-- Footer -->
+<!-- Footer Start -->
 <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
     <div class="container py-5">
         <div class="row g-5">
             <div class="col-md-6 col-lg-3">
                 <h5 class="text-white mb-4">專題資訊</h5>
-                <p class="mb-2">題目:北護二手書拍賣系統</p>
+                <p class="mb-2">題目：國北護二手書交易網</p>
                 <p class="mb-2">系所：健康事業管理系</p>
+                <p class="mb-2">專題組員：黃郁心、賈子瑩、許宇翔、闕紫彤</p>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">快速連結</h5>
+                <a class="btn btn-link" href="index.jsp">首頁</a>
+                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8" target="_blank" rel="noopener noreferrer">系統使用回饋表單</a>
             </div>
         </div>
     </div>
+    <div class="container-fluid text-center border-top border-secondary py-3">
+        <p class="mb-0">&copy; 2025年 國北護二手書交易網. @All Rights Reserved.</p>
+    </div>
 </div>
+<!-- Footer End -->
 
 </body>
 </html>
