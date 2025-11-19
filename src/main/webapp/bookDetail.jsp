@@ -353,7 +353,7 @@
 	String bookId = request.getParameter("bookId");
 
 	// 檢查使用者是否登入 - 改用你的 session 變數名稱
-	loggedInUserId = (String) session.getAttribute("userId");
+	String loggedInUserId = (String) session.getAttribute("userId");
 	String loggedInUserEmail = (String) session.getAttribute("username"); // 改為 username (因為你的 username 就是 email)
 	boolean isLoggedIn = (loggedInUserId != null && !loggedInUserId.trim().isEmpty());
 	
@@ -449,6 +449,7 @@
         <h2><%= rs.getString("titleBook") %></h2>
 
         <div class="price">NT$<%= (rs.getString("price") != null && !rs.getString("price").trim().isEmpty()) ? (int) Float.parseFloat(rs.getString("price")) : 0 %></div>
+        <div class="info-item">書名：<%= (rs.getString("titleBook") != null && !rs.getString("titleBook").trim().isEmpty()) ? rs.getString("titleBook") : "無" %></div>
         <div class="info-item">作者：<%= (rs.getString("author") != null && !rs.getString("author").trim().isEmpty()) ? rs.getString("author") : "無" %></div>
         <div class="info-item">出版日期：<%= (rs.getString("date") != null && !rs.getString("date").trim().isEmpty()) ? rs.getString("date").split(" ")[0] : "無" %></div>
         <div class="info-item">書籍版本：<%= (rs.getString("edition") != null && !rs.getString("edition").trim().isEmpty()) ? rs.getString("edition") : "無" %></div>
