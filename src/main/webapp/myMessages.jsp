@@ -15,15 +15,14 @@
         body {
             background-color: #f5f5f5;
             font-family: "Microsoft JhengHei", sans-serif;
-            padding-top: 80px;
         }
         .messages-container {
             max-width: 1200px;
-            margin: 40px auto;
+            margin: 1px auto;
             padding: 20px;
         }
         .page-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
             padding: 30px;
             border-radius: 15px;
@@ -63,13 +62,13 @@
             font-weight: 500;
         }
         .filter-btn:hover {
-            border-color: #667eea;
-            color: #667eea;
+            border-color: #28a745;
+    		color: #28a745;
         }
         .filter-btn.active {
-            background: #667eea;
+            background: #28a745;
             color: white;
-            border-color: #667eea;
+            border-color: #28a745;
         }
         .message-card {
             background: white;
@@ -103,7 +102,7 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -140,7 +139,7 @@
         }
         .book-details h6 {
             margin: 0;
-            color: #667eea;
+            color: #28a745;
             font-weight: 600;
         }
         .message-content {
@@ -179,7 +178,7 @@
             background: #218838;
         }
         .btn-view-book {
-            background: #667eea;
+            background: #28a745;
             color: white;
             border: none;
             padding: 8px 16px;
@@ -188,7 +187,7 @@
             transition: all 0.3s;
         }
         .btn-view-book:hover {
-            background: #5568d3;
+            background: #218838;
         }
         .btn-delete {
             background: #dc3545;
