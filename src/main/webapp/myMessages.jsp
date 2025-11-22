@@ -12,222 +12,327 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f5f5f5;
-            font-family: "Microsoft JhengHei", sans-serif;
-        }
-        .messages-container {
-            max-width: 1200px;
-            margin: 1px auto;
-            padding: 20px;
-        }
-        .page-header {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .page-header h1 {
-            margin: 0;
-            font-size: 32px;
-        }
-        .stats-bar {
-            display: flex;
-            gap: 20px;
-            margin-top: 15px;
-        }
-        .stat-item {
-            background: rgba(255,255,255,0.2);
-            padding: 10px 20px;
-            border-radius: 10px;
-        }
-        .filter-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .filter-btn {
-            padding: 10px 20px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 500;
-        }
-        .filter-btn:hover {
-            border-color: #28a745;
-    		color: #28a745;
-        }
-        .filter-btn.active {
-            background: #28a745;
-            color: white;
-            border-color: #28a745;
-        }
-        .message-card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            transition: all 0.3s;
-            border-left: 4px solid transparent;
-        }
-        .message-card:hover {
-            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-            transform: translateY(-2px);
-        }
-        .message-card.unread {
-            border-left-color: #dc3545;
-            background: #fff8f8;
-        }
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .buyer-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .buyer-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .buyer-details h5 {
-            margin: 0;
-            font-size: 18px;
-            color: #333;
-        }
-        .buyer-details small {
-            color: #666;
-        }
-        .message-time {
-            color: #999;
-            font-size: 14px;
-        }
-        .book-info {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        .book-info img {
-            width: 60px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-        .book-details h6 {
-            margin: 0;
-            color: #28a745;
-            font-weight: 600;
-        }
-        .message-content {
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-        .contact-info {
-            background: #e8f5e9;
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .contact-info i {
-            color: #4caf50;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-        .btn-mark-read {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-mark-read:hover {
-            background: #218838;
-        }
-        .btn-view-book {
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-view-book:hover {
-            background: #218838;
-        }
-        .btn-delete {
-            background: #dc3545;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-delete:hover {
-            background: #c82333;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            background: white;
-            border-radius: 12px;
-        }
-        .empty-state i {
-            font-size: 80px;
-            color: #ddd;
-            margin-bottom: 20px;
-        }
-        .badge-unread {
-            background: #dc3545;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .error-message {
-            background-color: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border: 1px solid #f5c6cb;
-        }
+		body {
+		    background-color: #f8f9fa;
+		    font-family: "Microsoft JhengHei", sans-serif;
+		}
+		
+		.messages-container {
+		    max-width: 1200px;
+		    margin: -80px auto 0;
+		    padding: 20px;
+		}
+		
+		/* 頁面標題 - 單一淺綠色 */
+		.page-header {
+		    background: #81c784;
+		    color: white;
+		    padding: 30px;
+		    border-radius: 15px;
+		    margin-bottom: 30px;
+		    box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
+		}
+		
+		.page-header h1 {
+		    margin: 0;
+		    font-size: 32px;
+		    font-weight: 600;
+		}
+		
+		.stats-bar {
+		    display: flex;
+		    gap: 20px;
+		    margin-top: 15px;
+		}
+		
+		.stat-item {
+		    background: rgba(255, 255, 255, 0.25);
+		    padding: 10px 20px;
+		    border-radius: 10px;
+		    backdrop-filter: blur(10px);
+		}
+		
+		/* 篩選標籤區 */
+		.filter-tabs {
+		    display: flex;
+		    gap: 10px;
+		    margin-bottom: 20px;
+		    background: white;
+		    padding: 15px;
+		    border-radius: 10px;
+		    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+		}
+		
+		.filter-btn {
+		    padding: 10px 20px;
+		    border: 2px solid #e0e0e0;
+		    background: white;
+		    border-radius: 8px;
+		    cursor: pointer;
+		    transition: all 0.3s;
+		    font-weight: 500;
+		    color: #666;
+		}
+		
+		.filter-btn:hover {
+		    border-color: #81c784;
+		    color: #66bb6a;
+		    background: #f1f8f4;
+		}
+		
+		.filter-btn.active {
+		    background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+		    color: white;
+		    border-color: transparent;
+		}
+		
+		/* 訊息卡片 */
+		.message-card {
+		    background: white;
+		    border-radius: 12px;
+		    padding: 25px;
+		    margin-bottom: 15px;
+		    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+		    transition: all 0.3s;
+		    border-left: 4px solid transparent;
+		}
+		
+		.message-card:hover {
+		    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+		    transform: translateY(-2px);
+		}
+		
+		.message-card.unread {
+		    border-left-color: #ff7043;
+		    background: linear-gradient(to right, #fff8f5 0%, #ffffff 100%);
+		}
+		
+		.message-header {
+		    display: flex;
+		    justify-content: space-between;
+		    align-items: center;
+		    margin-bottom: 15px;
+		}
+		
+		.buyer-info {
+		    display: flex;
+		    align-items: center;
+		    gap: 15px;
+		}
+		
+		/* 買家頭像 - 改用淺綠色漸層 */
+		.buyer-avatar {
+		    width: 50px;
+		    height: 50px;
+		    border-radius: 50%;
+		    background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+		    display: flex;
+		    align-items: center;
+		    justify-content: center;
+		    color: white;
+		    font-size: 20px;
+		    font-weight: bold;
+		    box-shadow: 0 2px 8px rgba(129, 199, 132, 0.3);
+		}
+		
+		.buyer-details h5 {
+		    margin: 0;
+		    font-size: 18px;
+		    color: #333;
+		}
+		
+		.buyer-details small {
+		    color: #666;
+		}
+		
+		.message-time {
+		    color: #999;
+		    font-size: 14px;
+		    text-align: right;
+		}
+		
+		/* 書籍資訊區塊 */
+		.book-info {
+		    background: #f8fdf9;
+		    padding: 15px;
+		    border-radius: 8px;
+		    margin-bottom: 15px;
+		    display: flex;
+		    align-items: center;
+		    gap: 15px;
+		    border: 1px solid #e8f5e9;
+		}
+		
+		.book-info img {
+		    width: 60px;
+		    height: 80px;
+		    object-fit: cover;
+		    border-radius: 5px;
+		}
+		
+		.book-details h6 {
+		    margin: 0;
+		    color: #66bb6a;
+		    font-weight: 600;
+		}
+		
+		/* 訊息內容 */
+		.message-content {
+		    padding: 15px;
+		    background: #f9f9f9;
+		    border-radius: 8px;
+		    margin-bottom: 15px;
+		    line-height: 1.6;
+		    border-left: 3px solid #81c784;
+		}
+		
+		/* 聯絡資訊 - 改用更柔和的綠色 */
+		.contact-info {
+		    background: linear-gradient(to right, #e8f5e9 0%, #f1f8f4 100%);
+		    padding: 10px 15px;
+		    border-radius: 8px;
+		    margin-bottom: 15px;
+		    display: flex;
+		    align-items: center;
+		    gap: 10px;
+		    border-left: 3px solid #81c784;
+		}
+		
+		.contact-info i {
+		    color: #66bb6a;
+		}
+		
+		/* 操作按鈕 */
+		.action-buttons {
+		    display: flex;
+		    gap: 10px;
+		    flex-wrap: wrap;
+		}
+		
+		.btn-mark-read {
+		    background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+		    color: white;
+		    border: none;
+		    padding: 8px 16px;
+		    border-radius: 6px;
+		    cursor: pointer;
+		    transition: all 0.3s;
+		    font-weight: 500;
+		}
+		
+		.btn-mark-read:hover {
+		    background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+		    box-shadow: 0 4px 12px rgba(129, 199, 132, 0.4);
+		    transform: translateY(-2px);
+		}
+		
+		.btn-view-book {
+		    background: white;
+		    color: #66bb6a;
+		    border: 2px solid #81c784;
+		    padding: 8px 16px;
+		    border-radius: 6px;
+		    cursor: pointer;
+		    transition: all 0.3s;
+		    font-weight: 500;
+		}
+		
+		.btn-view-book:hover {
+		    background: #f1f8f4;
+		    border-color: #66bb6a;
+		    transform: translateY(-2px);
+		}
+		
+		.btn-delete {
+		    background: white;
+		    color: #e57373;
+		    border: 2px solid #ef9a9a;
+		    padding: 8px 16px;
+		    border-radius: 6px;
+		    cursor: pointer;
+		    transition: all 0.3s;
+		    font-weight: 500;
+		}
+		
+		.btn-delete:hover {
+		    background: #ffebee;
+		    border-color: #e57373;
+		    transform: translateY(-2px);
+		}
+		
+		/* 空狀態 */
+		.empty-state {
+		    text-align: center;
+		    padding: 60px 20px;
+		    background: white;
+		    border-radius: 12px;
+		}
+		
+		.empty-state i {
+		    font-size: 80px;
+		    color: #c8e6c9;
+		    margin-bottom: 20px;
+		}
+		
+		.empty-state h3 {
+		    color: #66bb6a;
+		}
+		
+		/* 未讀徽章 */
+		.badge-unread {
+		    background: linear-gradient(135deg, #ff7043 0%, #ff5722 100%);
+		    color: white;
+		    padding: 4px 10px;
+		    border-radius: 12px;
+		    font-size: 12px;
+		    font-weight: bold;
+		    box-shadow: 0 2px 6px rgba(255, 112, 67, 0.3);
+		}
+		
+		/* 錯誤訊息 */
+		.error-message {
+		    background-color: #ffebee;
+		    color: #c62828;
+		    padding: 15px;
+		    border-radius: 8px;
+		    margin: 20px 0;
+		    border: 1px solid #ef9a9a;
+		}
+		
+		/* 響應式設計 */
+		@media (max-width: 768px) {
+		    .messages-container {
+		        margin-top: 20px;
+		        padding: 15px;
+		    }
+		    
+		    .page-header h1 {
+		        font-size: 24px;
+		    }
+		    
+		    .stats-bar {
+		        flex-direction: column;
+		        gap: 10px;
+		    }
+		    
+		    .message-header {
+		        flex-direction: column;
+		        align-items: flex-start;
+		        gap: 10px;
+		    }
+		    
+		    .message-time {
+		        text-align: left;
+		    }
+		    
+		    .action-buttons {
+		        flex-direction: column;
+		    }
+		    
+		    .action-buttons button {
+		        width: 100%;
+		    }
+		}
     </style>
 </head>
 <body>
@@ -303,7 +408,7 @@
         rs = pstmtMessages.executeQuery();
 %>
 
-<div class="messages-container">
+<div class="messages-container" >
     <!-- 頁面標題 -->
     <div class="page-header">
         <h1><i class="fas fa-inbox"></i> 我的訊息</h1>
