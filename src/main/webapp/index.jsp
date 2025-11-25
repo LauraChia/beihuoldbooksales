@@ -28,6 +28,7 @@
             overflow: hidden;
             transition: 0.2s ease-in-out;
             box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            position: relative
         }
         .book-card:hover {
             transform: translateY(-6px);
@@ -121,6 +122,33 @@
             color: #999;
             font-size: 14px;
         }
+        /* 🆕 收藏按鈕樣式 */
+	    .quick-favorite {
+	        position: absolute;
+	        top: 10px;
+	        right: 10px;
+	        background-color: rgba(255, 255, 255, 0.9);
+	        border: none;
+	        width: 36px;
+	        height: 36px;
+	        border-radius: 50%;
+	        cursor: pointer;
+	        font-size: 18px;
+	        transition: all 0.3s;
+	        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+	        z-index: 100;
+	        display: flex;
+	        align-items: center;
+	        justify-content: center;
+	    }
+	    .quick-favorite:hover {
+	        transform: scale(1.15);
+	        background-color: white;
+	    }
+	    .quick-favorite.favorited {
+	        background-color: #ff6b6b;
+	        color: white;
+	    }
     </style>
 </head>
 
@@ -134,6 +162,22 @@
     Statement smt = con.createStatement();
     String sql = "SELECT * FROM book ORDER BY createdAt DESC";
     ResultSet rs = smt.executeQuery(sql);
+    
+ 	// 🆕 取得使用者的收藏清單
+    String currentUserId = (String) session.getAttribute("userId");
+    boolean isLoggedIn = (loggedInUserId != null && !loggedInUserId.trim().isEmpty());
+    Set<String> favoritedBooks = new HashSet<>();
+    
+    if (isLoggedIn) {
+        String favSql = "SELECT bookId FROM favorites WHERE userId = '" + loggedInUserId + "'";
+        Statement favSmt = con.createStatement();
+        ResultSet favRs = favSmt.executeQuery(favSql);
+        while (favRs.next()) {
+            favoritedBooks.add(favRs.getString("bookId"));
+        }
+        favRs.close();
+        favSmt.close();
+    }
 %>
 
 <div class="book-grid">
@@ -147,6 +191,8 @@
         String date = rs.getString("date");
         String photoStr = rs.getString("photo");
         
+     // 🆕 檢查是否已收藏
+     boolean isFavorited = favoritedBooks.contains(bookId);
         
         // 分割圖片路徑 - 支援多張圖片
         List<String> photoList = new ArrayList<>();
@@ -171,37 +217,45 @@
         String cardId = "card-" + cardIndex;
         cardIndex++;
 %>
-    <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
-        <div class="book-card" data-card-id="<%= cardId %>">
-            <div class="book-images" id="<%= cardId %>">
-                <% if (photoList.isEmpty()) { %>
-                    <div class="no-image">無圖片</div>
-                <% } else { %>
-                    <% for (int i = 0; i < photoList.size(); i++) { %>
-                        <img src="<%= photoList.get(i) %>" 
-                             alt="書籍圖片<%= (i+1) %>" 
-                             class="book-img <%= (i == 0) ? "active" : "" %>"
-                             onerror="this.src='assets/images/about.png'">
-                    <% } %>
-                    
-                    <% if (photoCount > 1) { %>
-                        <span class="image-indicator"><span class="current-img">1</span>/<%= photoCount %></span>
-                        <div class="image-dots">
-                            <% for (int i = 0; i < photoCount; i++) { %>
-                                <span class="dot <%= (i == 0) ? "active" : "" %>"></span>
-                            <% } %>
-                        </div>
-                    <% } %>
-                <% } %>
-            </div>
-            <div class="book-info">
-                <div class="book-title"><%= title %></div>
-                <div class="book-author">作者：<%= author %></div>
-                <div class="book-price">NT$<%= (int) Float.parseFloat(price) %></div>
-                <div class="book-date">出版日期：<%= date != null ? date.split(" ")[0] : "" %></div>
-            </div>
-        </div>
-    </a>
+    	<div class="book-card" data-card-id="<%= cardId %>">
+	    <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
+	        <%-- 🆕 快速收藏按鈕 --%>
+	        <button class="quick-favorite <%= isFavorited ? "favorited" : "" %>" 
+	                onclick="quickToggleFavorite(event, '<%= bookId %>', this)"
+	                title="<%= isFavorited ? "取消收藏" : "加入收藏" %>"
+	                data-book-id="<%= bookId %>">
+	            <%= isFavorited ? "❤️" : "🤍" %>
+	        </button>
+	        
+	        <div class="book-images" id="<%= cardId %>">
+	            <% if (photoList.isEmpty()) { %>
+	                <div class="no-image">無圖片</div>
+	            <% } else { %>
+	                <% for (int i = 0; i < photoList.size(); i++) { %>
+	                    <img src="<%= photoList.get(i) %>" 
+	                         alt="書籍圖片<%= (i+1) %>" 
+	                         class="book-img <%= (i == 0) ? "active" : "" %>"
+	                         onerror="this.src='assets/images/about.png'">
+	                <% } %>
+	                
+	                <% if (photoCount > 1) { %>
+	                    <span class="image-indicator"><span class="current-img">1</span>/<%= photoCount %></span>
+	                    <div class="image-dots">
+	                        <% for (int i = 0; i < photoCount; i++) { %>
+	                            <span class="dot <%= (i == 0) ? "active" : "" %>"></span>
+	                        <% } %>
+	                    </div>
+	                <% } %>
+	            <% } %>
+	        </div>
+	        <div class="book-info">
+	            <div class="book-title"><%= title %></div>
+	            <div class="book-author">作者：<%= author %></div>
+	            <div class="book-price">NT$<%= (int) Float.parseFloat(price) %></div>
+	            <div class="book-date">出版日期：<%= date != null ? date.split(" ")[0] : "" %></div>
+	        </div>
+	    </a>
+	</div>
 <%
     }
     con.close();
@@ -258,6 +312,89 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+//🆕 快速收藏功能
+const isLoggedIn = <%= isLoggedIn %>;
+
+function quickToggleFavorite(event, bookId, button) {
+    // 阻止事件冒泡,避免觸發連結
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (!isLoggedIn) {
+        if (confirm('您需要先登入才能收藏書籍\n\n是否前往登入頁面？')) {
+            window.location.href = 'login.jsp?redirect=' + encodeURIComponent(window.location.href);
+        }
+        return;
+    }
+    
+    const isFavorited = button.classList.contains('favorited');
+    const action = isFavorited ? 'remove' : 'add';
+    
+    // 立即更新 UI (樂觀更新)
+    button.disabled = true;
+    
+    fetch('toggleFavorite.jsp', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'bookId=' + bookId + '&action=' + action
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // 更新按鈕狀態
+            button.classList.toggle('favorited');
+            button.textContent = button.classList.contains('favorited') ? '❤️' : '🤍';
+            button.title = button.classList.contains('favorited') ? '取消收藏' : '加入收藏';
+            
+            // 顯示提示
+            showQuickToast(button.classList.contains('favorited') ? '已加入收藏' : '已取消收藏', button);
+        } else {
+            alert('操作失敗: ' + (data.message || '未知錯誤'));
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('系統錯誤');
+    })
+    .finally(() => {
+        button.disabled = false;
+    });
+}
+
+function showQuickToast(message, button) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: absolute;
+        top: 50px;
+        right: 10px;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        z-index: 200;
+        pointer-events: none;
+        animation: toastFade 2s ease-out;
+    `;
+    
+    button.parentElement.appendChild(toast);
+    setTimeout(() => toast.remove(), 2000);
+}
+
+// 加入動畫
+const toastStyle = document.createElement('style');
+toastStyle.textContent = `
+    @keyframes toastFade {
+        0% { opacity: 0; transform: translateY(-10px); }
+        20% { opacity: 1; transform: translateY(0); }
+        80% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-10px); }
+    }
+`;
+document.head.appendChild(toastStyle);
 </script>
 
 <!-- Footer Start -->

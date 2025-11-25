@@ -344,6 +344,51 @@
             border: 1px solid #dc3545;
             color: #721c24;
         }
+        /* 收藏按鈕樣式 */
+	    .btn-favorite {
+	        background-color: #fff;
+	        color: #ff6b6b;
+	        padding: 12px 30px;
+	        border: 2px solid #ff6b6b;
+	        border-radius: 25px;
+	        font-size: 16px;
+	        cursor: pointer;
+	        transition: all 0.3s;
+	        display: inline-flex;
+	        align-items: center;
+	        gap: 8px;
+	        font-weight: 500;
+	    }
+	    .btn-favorite:hover {
+	        background-color: #ff6b6b;
+	        color: white;
+	        transform: translateY(-2px);
+	        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+	    }
+	    .btn-favorite.favorited {
+	        background-color: #ff6b6b;
+	        color: white;
+	        border-color: #ff6b6b;
+	    }
+	    .btn-favorite:disabled {
+	        background-color: #e0e0e0;
+	        border-color: #e0e0e0;
+	        color: #999;
+	        cursor: not-allowed;
+	        transform: none;
+	    }
+	    .favorite-icon {
+	        font-size: 18px;
+	        transition: transform 0.3s;
+	    }
+	    .btn-favorite:hover .favorite-icon {
+	        transform: scale(1.2);
+	    }
+	    .favorite-count {
+	        font-size: 13px;
+	        color: #666;
+	        margin-top: 5px;
+	    }
     </style>
 </head>
 
@@ -409,6 +454,28 @@
                 statusClass = "status-rejected";
             }
         }
+        
+        boolean isFavorited = false;
+        int favoriteCount = 0;
+        
+        if (isLoggedIn) {
+            // 檢查是否已收藏
+            String checkFavSql = "SELECT COUNT(*) as cnt FROM favorites " +
+                                "WHERE userId = '" + loggedInUserId + "' AND bookId = " + bookId;
+            ResultSet favRs = smt.executeQuery(checkFavSql);
+            if (favRs.next()) {
+                isFavorited = (favRs.getInt("cnt") > 0);
+            }
+            favRs.close();
+        }
+        
+        // 取得總收藏數
+        String countFavSql = "SELECT COUNT(*) as total FROM favorites WHERE bookId = " + bookId;
+        ResultSet countRs = smt.executeQuery(countFavSql);
+        if (countRs.next()) {
+            favoriteCount = countRs.getInt("total");
+        }
+        countRs.close();
 %>
 
 <div class="book-detail">
@@ -484,6 +551,22 @@
                     這是您的書籍
                 </button>
             <% } %>
+            
+            <%-- 🆕 收藏按鈕 --%>
+		    <div style="text-align: center;">
+		        <button class="btn-favorite <%= isFavorited ? "favorited" : "" %>" 
+		                onclick="toggleFavorite()"
+		                id="favoriteBtn"
+		                data-book-id="<%= bookId %>"
+		                data-favorited="<%= isFavorited %>">
+		            <span class="favorite-icon"><%= isFavorited ? "❤️" : "🤍" %></span>
+		            <span id="favoriteBtnText"><%= isFavorited ? "已收藏" : "加入收藏" %></span>
+		        </button>
+		        <div class="favorite-count">
+		            <span id="favoriteCount"><%= favoriteCount %></span> 人收藏
+		        </div>
+		    </div>
+            
             <a class="btn btn-link" href="index.jsp">回首頁</a>
         </div>
     </div>
@@ -724,6 +807,105 @@
             sendBtn.disabled = false;
         });
     }
+    
+ // 收藏功能
+    function toggleFavorite() {
+        if (!isLoggedIn) {
+            if (confirm('您需要先登入才能收藏書籍\n\n是否前往登入頁面？')) {
+                window.location.href = 'login.jsp?redirect=' + encodeURIComponent(window.location.href);
+            }
+            return;
+        }
+        
+        const btn = document.getElementById('favoriteBtn');
+        const bookId = btn.getAttribute('data-book-id');
+        const isFavorited = btn.getAttribute('data-favorited') === 'true';
+        const action = isFavorited ? 'remove' : 'add';
+        
+        // 顯示載入中
+        btn.disabled = true;
+        const originalText = document.getElementById('favoriteBtnText').textContent;
+        document.getElementById('favoriteBtnText').textContent = '處理中...';
+        
+        fetch('toggleFavorite.jsp', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'bookId=' + bookId + '&action=' + action
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 更新按鈕狀態
+                const newFavorited = !isFavorited;
+                btn.setAttribute('data-favorited', newFavorited);
+                btn.classList.toggle('favorited', newFavorited);
+                
+                // 更新圖示和文字
+                const icon = btn.querySelector('.favorite-icon');
+                icon.textContent = newFavorited ? '❤️' : '🤍';
+                document.getElementById('favoriteBtnText').textContent = newFavorited ? '已收藏' : '加入收藏';
+                
+                // 更新收藏數量
+                document.getElementById('favoriteCount').textContent = data.favoriteCount;
+                
+                // 顯示提示訊息
+                showToast(newFavorited ? '✅ 已加入收藏' : '✅ 已取消收藏');
+            } else {
+                alert('❌ 操作失敗: ' + (data.message || '未知錯誤'));
+                document.getElementById('favoriteBtnText').textContent = originalText;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ 系統錯誤');
+            document.getElementById('favoriteBtnText').textContent = originalText;
+        })
+        .finally(() => {
+            btn.disabled = false;
+        });
+    }
+
+    // 簡單的提示訊息
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10000;
+            font-size: 14px;
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => toast.remove(), 300);
+        }, 2000);
+    }
+
+    // 加入動畫樣式
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 
 <%

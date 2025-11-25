@@ -121,7 +121,7 @@
                                 <span class="badge-notification"><%= unreadCount %></span>
                             <% } %>
                         </a>
-                        
+                        <a href="myFavorites.jsp" class="nav-link">我的收藏</a>
                         <a href="profile.jsp" class="nav-link <%= currentPage.endsWith("profile.jsp") ? "nav-active" : "" %>">個人資料</a>
                         <a href="logout.jsp" class="nav-link">登出</a>
                     <% } else { %>
