@@ -124,12 +124,8 @@
 		    <label>上架天數：<span style="color:red">*</span></label>
 		    <input type="number" name="shelfDays" min="1" max="60" placeholder="上限60天" required>
 		</div>
-		<!-- 預計下架時間 -->
-        <div class="form-group">
-            <label>下架時間：<span style="color:red">*</span></label>
-            <input type="date" name="date" required>
-        </div>
-
+		
+		
         <!-- 書籍狀況 -->
         <div class="form-group">
             <label>書籍狀況：</label>
