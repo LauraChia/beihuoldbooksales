@@ -3,6 +3,68 @@
 <%@page import="java.util.*"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
+<%
+    // 取得當前使用者
+    String currentUserId = (String) session.getAttribute("userId");
+    
+    // 沒登入就不檢查
+    if (currentUserId == null || currentUserId.trim().isEmpty()) {
+        return;
+    }
+    
+    // 檢查是否已經提醒過（避免重複）
+    if (session.getAttribute("expiry_checked") != null) {
+        return;
+    }
+    
+    try {
+        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+        Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
+        Statement smt = con.createStatement();
+        
+        // 查詢該使用者超過30天的書籍
+        String sql = "SELECT bookId, titleBook, createdAt " +
+                     "FROM book " +
+                     "WHERE userId = '" + currentUserId + "' " +
+                     "AND isApproved = '已審核' " +
+                     "AND DateDiff('d', createdAt, Now()) >= 23";  // 23天以上就提醒
+        
+        ResultSet rs = smt.executeQuery(sql);
+        
+        int count = 0;
+        StringBuilder bookList = new StringBuilder();
+        
+        while (rs.next()) {
+            count++;
+            if (count <= 3) {  // 只顯示前3本
+                bookList.append("• ").append(rs.getString("titleBook")).append("\\n");
+            }
+        }
+        
+        rs.close();
+        smt.close();
+        con.close();
+        
+        // 如果有書要提醒
+        if (count > 0) {
+%>
+            <script>
+                alert('⏰ 提醒：您有 <%= count %> 本書籍已上架超過23天\n\n' +
+                      '<%= bookList.toString() %>' +
+                      '<%= count > 3 ? "... 及其他 " + (count-3) + " 本書籍\\n\\n" : "\\n" %>' +
+                      '建議您確認書籍狀態：\n' +
+                      '• 如已售出請下架\n' +
+                      '• 如需繼續販售可重新上架');
+            </script>
+<%
+            // 標記已提醒過
+            session.setAttribute("expiry_checked", "true");
+        }
+        
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+%>
 <html lang="zh">
 <head>
     <meta charset="utf-8">

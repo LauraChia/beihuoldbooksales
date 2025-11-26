@@ -411,6 +411,8 @@ document.head.appendChild(toastStyle);
                 <h5 class="text-white mb-4">快速連結</h5>
                 <a class="btn btn-link" href="index.jsp">首頁</a>
                 <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8" target="_blank" rel="noopener noreferrer">系統使用回饋表單</a>
+            <a class="btn btn-link" href="footer-guestbook.jsp" target="_blank" rel="noopener noreferrer">分享交流區留言板</a>
+            <a class="btn btn-link" href="informAgainst.jsp" target="_blank" rel="noopener noreferrer">舉報不佳上傳書籍區</a>
             </div>
         </div>
     </div>
