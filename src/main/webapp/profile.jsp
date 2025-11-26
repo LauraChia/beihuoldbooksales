@@ -68,6 +68,7 @@
     
     <style>
         body {
+        	padding-top: 50px;
             background-color: #f5f5f5;
             font-family: "Microsoft JhengHei", sans-serif;
         }

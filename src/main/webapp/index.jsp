@@ -19,7 +19,7 @@
             gap: 25px;
             padding: 40px;
             max-width: 1200px;
-            margin: 60px auto;
+            margin: 80px auto;
         }
         .book-card {
             background-color: white;

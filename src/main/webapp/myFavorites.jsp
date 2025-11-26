@@ -17,7 +17,7 @@
         
         .favorites-container {
             max-width: 1200px;
-            margin: -80px auto 0;
+            margin: -30px auto 0;
             padding: 20px;
         }
         

@@ -17,7 +17,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; font-family: "Microsoft JhengHei", sans-serif; }
-        .form-container { background:#fff; padding:30px; border-radius:8px; max-width:900px; margin:120px auto; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+        .form-container { background:#fff; padding:30px; border-radius:8px; max-width:900px; margin:150px auto; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
         .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
         label { display:inline-block; width:120px; margin-bottom:10px; vertical-align:top; font-weight: 500; padding-top: 6px; }
         input:not([type="file"]):not([type="submit"]):not([type="reset"]), select, textarea { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }

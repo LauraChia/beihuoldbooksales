@@ -71,10 +71,33 @@
 %>
 
 <html lang="zh">
+
 <head>
     <meta charset="utf-8">
     <title>編輯個人資料 - 北護二手書拍賣網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* 修正被 fixed navbar 遮住的問題 */
+        body {
+            padding-top: 50px;
+        }
+        
+        /* 系所選單並排顯示 */
+        .department-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding-top: 120px;
+            }
+            .department-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
