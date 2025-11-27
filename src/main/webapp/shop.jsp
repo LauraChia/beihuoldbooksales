@@ -119,11 +119,11 @@
             </div>
         </div>
 
-        <!-- 上架天數 -->
-		<div class="form-group">
-		    <label>上架天數：<span style="color:red">*</span></label>
-		    <input type="number" name="shelfDays" min="1" max="60" placeholder="上限60天" required>
-		</div>
+        <!-- 下架日期 -->
+        <div class="form-group">
+            <label>下架日期：<span style="color:red">*</span></label>
+            <input type="date" name="extiryDate" required>
+        </div>
 		
 		
         <!-- 書籍狀況 -->
@@ -159,11 +159,14 @@
             <input type="text" name="ISBN" placeholder="選填">
         </div>
 
+
         <!-- 上架本數 -->
         <div class="form-group">
             <label>上架本數：<span style="color:red">*</span></label>
             <input type="number" name="quantity" value="1" min="1" step="1" required>
         </div>
+        
+        
 
         <input type="hidden" name="username" value="<%= username %>">
         <input type="hidden" name="userId" value="<%= userId %>">

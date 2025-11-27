@@ -47,7 +47,7 @@ try {
     String otherCondition = multi.getParameter("otherCondition");
     String college = multi.getParameter("college");
     String department = multi.getParameter("department");
-    String shelfDays = multi.getParameter("shelfDays");
+    String extiryDate = multi.getParameter("extiryDate");
     String teacher = multi.getParameter("teacher");
     String course = multi.getParameter("course");
     String ISBN = multi.getParameter("ISBN");
@@ -143,10 +143,10 @@ try {
         paramValues.add(department != null ? department : "");
     }
     
-    if (availableColumns.contains("shelfdays")) {
-        sqlBuilder.append(", shelfDays");
+    if (availableColumns.contains("extiryDate")) {
+        sqlBuilder.append(", extiryDate");
         valuesBuilder.append(", ?");
-        paramValues.add(shelfDays != null ? shelfDays : "");
+        paramValues.add(extiryDate != null ? extiryDate : "");
     }
     
     if (availableColumns.contains("teacher")) {
