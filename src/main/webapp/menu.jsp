@@ -318,6 +318,9 @@
                         <a href="shop.jsp" class="nav-link <%= currentPage.endsWith("shop.jsp") ? "nav-active" : "" %>">
                             <i class="fas fa-book"></i> 我要賣書
                         </a>
+                        <a href="reviews.jsp" class="nav-link <%= currentPage.endsWith("reviews.jsp") ? "nav-active" : "" %>">
+					       <i class="fas fa-comments"></i> 使用心得分享
+					   </a>
                     </div>
 
                     <!-- 右側功能區 -->
