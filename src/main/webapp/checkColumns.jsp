@@ -61,14 +61,14 @@
             out.println("</table>");
             columns.close();
             
-            // 顯示前3筆資料作為範例
+            // 顯示所有資料
             try {
                 Statement stmt = con.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName + " LIMIT 3");
+                ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName);
                 ResultSetMetaData rsmd = rs.getMetaData();
                 int columnCount = rsmd.getColumnCount();
                 
-                out.println("<h4>範例資料（前3筆）：</h4>");
+                out.println("<h4>所有資料：</h4>");
                 out.println("<table>");
                 out.println("<tr>");
                 for (int i = 1; i <= columnCount; i++) {
@@ -76,19 +76,22 @@
                 }
                 out.println("</tr>");
                 
+                int rowCount = 0;
                 while (rs.next()) {
                     out.println("<tr>");
                     for (int i = 1; i <= columnCount; i++) {
                         out.println("<td>" + (rs.getString(i) != null ? rs.getString(i) : "NULL") + "</td>");
                     }
                     out.println("</tr>");
+                    rowCount++;
                 }
                 
                 out.println("</table>");
+                out.println("<p>共 " + rowCount + " 筆資料</p>");
                 rs.close();
                 stmt.close();
             } catch (Exception e) {
-                out.println("<p class='error'>無法讀取範例資料: " + e.getMessage() + "</p>");
+                out.println("<p class='error'>無法讀取資料: " + e.getMessage() + "</p>");
             }
         }
         
@@ -106,8 +109,3 @@
     
 </body>
 </html>
-```
-
-將這個檔案放在你的專案根目錄，然後在瀏覽器中訪問：
-```
-http://localhost:8080/你的專案名稱/checkColumns.jsp
