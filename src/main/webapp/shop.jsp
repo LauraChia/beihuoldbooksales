@@ -118,11 +118,17 @@
                 </select>
             </div>
         </div>
+<!-- 上架日期 -->
+        <div class="form-group">
+            <label>上架日期：<span style="color:red">*</span></label>
+            <input type="date" name="createdAt" required>
+        </div>
+
 
         <!-- 下架日期 -->
         <div class="form-group">
             <label>下架日期：<span style="color:red">*</span></label>
-            <input type="date" name="extiryDate" required>
+            <input type="date" name="expiryDate" required>
         </div>
 		
 		

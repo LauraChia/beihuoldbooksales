@@ -154,8 +154,41 @@
 
 <body>
 <%@ include file="menu.jsp"%>
-<br>
 
+<br>
+<%
+    // 自動下架：檢查每本書的 expiryDate 是否到期
+    try {
+        Connection con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
+
+        // 取得所有仍為「上架中」的書籍
+        String sql = "SELECT bookId, expiryDate FROM book WHERE status = '上架中'";
+        PreparedStatement ps = con.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+
+        while (rs.next()) {
+            Timestamp expiry = rs.getTimestamp("expiryDate");
+
+            if (expiry != null && now.after(expiry)) {
+                // 已過期 → 自動下架
+                String updateSql = "UPDATE book SET status = '已下架' WHERE bookId = ?";
+                PreparedStatement ups = con.prepareStatement(updateSql);
+                ups.setInt(1, rs.getInt("bookId"));
+                ups.executeUpdate();
+                ups.close();
+            }
+        }
+
+        rs.close();
+        ps.close();
+        con.close();
+
+    } catch (Exception e) {
+        out.println("自動下架錯誤：" + e.getMessage());
+    }
+%>
 <%
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
     Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
