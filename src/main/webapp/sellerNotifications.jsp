@@ -349,18 +349,18 @@
     <!-- 篩選按鈕 -->
     <div class="filter-tabs">
         <button class="filter-btn <%= filter.equals("all") ? "active" : "" %>" 
-                onclick="location.href='notifications.jsp?filter=all'">
+                onclick="location.href='sellerNotifications.jsp?filter=all'">
             <i class="fas fa-list"></i> 全部通知
         </button>
         <button class="filter-btn <%= filter.equals("unread") ? "active" : "" %>" 
-                onclick="location.href='notifications.jsp?filter=unread'">
+                onclick="location.href='sellerNotifications.jsp?filter=unread'">
             <i class="fas fa-envelope"></i> 未讀通知
             <% if (unreadNotifications > 0) { %>
                 <span class="badge-unread"><%= unreadNotifications %></span>
             <% } %>
         </button>
         <button class="filter-btn <%= filter.equals("read") ? "active" : "" %>" 
-                onclick="location.href='notifications.jsp?filter=read'">
+                onclick="location.href='sellerNotifications.jsp?filter=read'">
             <i class="fas fa-envelope-open"></i> 已讀通知
         </button>
     </div>

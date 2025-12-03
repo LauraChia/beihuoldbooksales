@@ -271,15 +271,18 @@
                     // 取得當前頁面和使用者資訊
                     String currentPage = request.getRequestURI();
                     int unreadCount = 0;
+                    int unreadNotificationCount = 0;
                     String loggedInUserId = (String) session.getAttribute("userId");
                     String userName = (String) session.getAttribute("name");
                     String userAccount = (String) session.getAttribute("username");
                     
-                    // 查詢未讀訊息數量
+                    // 查詢未讀訊息數量和未讀通知數量
                     if (loggedInUserId != null && !loggedInUserId.trim().isEmpty()) {
                         Connection menuCon = null;
                         PreparedStatement menuPstmt = null;
+                        PreparedStatement notifPstmt = null;
                         ResultSet menuRs = null;
+                        ResultSet notifRs = null;
                         
                         try {
                             Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
@@ -287,6 +290,7 @@
                                 (hitstd.group.tool.database.DBConfig) session.getAttribute("objDBConfig");
                             menuCon = DriverManager.getConnection("jdbc:ucanaccess://"+dbConfig.FilePath()+";");
                             
+                            // 查詢未讀訊息
                             String sql = "SELECT COUNT(*) as cnt FROM messages WHERE sellerId = ? AND isRead = No";
                             menuPstmt = menuCon.prepareStatement(sql);
                             menuPstmt.setString(1, loggedInUserId);
@@ -295,12 +299,24 @@
                             if (menuRs.next()) {
                                 unreadCount = menuRs.getInt("cnt");
                             }
+                            
+                            // 查詢未讀系統通知
+                            String notifSql = "SELECT COUNT(*) as cnt FROM notifications WHERE userId = ? AND isRead = false";
+                            notifPstmt = menuCon.prepareStatement(notifSql);
+                            notifPstmt.setString(1, loggedInUserId);
+                            notifRs = notifPstmt.executeQuery();
+                            
+                            if (notifRs.next()) {
+                                unreadNotificationCount = notifRs.getInt("cnt");
+                            }
                         } catch (Exception e) {
-                            System.out.println("查詢未讀訊息錯誤: " + e.getMessage());
+                            System.out.println("查詢未讀訊息/通知錯誤: " + e.getMessage());
                         } finally {
                             try {
                                 if (menuRs != null) menuRs.close();
+                                if (notifRs != null) notifRs.close();
                                 if (menuPstmt != null) menuPstmt.close();
+                                if (notifPstmt != null) notifPstmt.close();
                                 if (menuCon != null) menuCon.close();
                             } catch (Exception e) {
                                 e.printStackTrace();
@@ -319,8 +335,8 @@
                             <i class="fas fa-book"></i> 我要賣書
                         </a>
                         <a href="reviews.jsp" class="nav-link <%= currentPage.endsWith("reviews.jsp") ? "nav-active" : "" %>">
-					       <i class="fas fa-comments"></i> 使用心得分享
-					   </a>
+                           <i class="fas fa-comments"></i> 使用心得分享
+                       </a>
                     </div>
 
                     <!-- 右側功能區 -->
@@ -331,6 +347,18 @@
                         </button>
                         
                         <% if (userName != null) { %>
+                            <!-- 通知鈴鐺圖標 -->
+                            <div class="position-relative me-3">
+                                <a href="sellerNotifications.jsp" class="btn btn-md-square border border-secondary position-relative">
+                                    <i class="fas fa-bell text-primary"></i>
+                                    <% if (unreadNotificationCount > 0) { %>
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 10px;">
+                                            <%= unreadNotificationCount > 99 ? "99+" : unreadNotificationCount %>
+                                        </span>
+                                    <% } %>
+                                </a>
+                            </div>
+                            
                             <!-- 已登入：顯示使用者下拉選單 -->
                             <div class="user-dropdown">
                                 <div class="user-icon-wrapper" id="userDropdownToggle">
@@ -362,6 +390,14 @@
                                             <span class="dropdown-item-text">我的訊息</span>
                                             <% if (unreadCount > 0) { %>
                                                 <span class="menu-badge"><%= unreadCount %></span>
+                                            <% } %>
+                                        </a>
+                                        
+                                        <a href="sellerNotifications.jsp" class="dropdown-item-custom">
+                                            <i class="fas fa-bell"></i>
+                                            <span class="dropdown-item-text">系統通知</span>
+                                            <% if (unreadNotificationCount > 0) { %>
+                                                <span class="menu-badge"><%= unreadNotificationCount %></span>
                                             <% } %>
                                         </a>
                                         
