@@ -24,7 +24,7 @@
         
         // 查詢該使用者超過30天的書籍
         String sql = "SELECT bookId, titleBook, createdAt " +
-                     "FROM book " +
+                     "FROM books " +
                      "WHERE userId = '" + currentUserId + "' " +
                      "AND isApproved = '已審核' " +
                      "AND DateDiff('d', createdAt, Now()) >= 23";  // 23天以上就提醒
@@ -472,7 +472,7 @@
 	
 	// 修改 SQL - 因為你的 users 資料表中 username 就是 email
 	String sql = "SELECT b.*, u.name AS sellerName, u.username AS sellerEmail " +
-	        "FROM book b JOIN users u ON b.userId = u.userId " +
+	        "FROM books b JOIN users u ON b.userId = u.userId " +
 	        "WHERE b.bookId = " + bookId;
 	ResultSet rs = smt.executeQuery(sql);
 	
@@ -576,6 +576,7 @@
         <% } %>
     </div>
     
+</form>
     <div class="detail-info">
         <h2><%= rs.getString("titleBook") %></h2>
 
