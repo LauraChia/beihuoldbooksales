@@ -142,7 +142,7 @@ try {
     }
     
     // 🔥 關鍵修正：確保 createdAt 被加入
-    if (availableColumns.contains("createdat")) {
+    if (availableColumns.contains("createdAt")) {
         sqlBuilder.append(", createdAt");
         valuesBuilder.append(", ?");
         paramValues.add(createdAt != null && !createdAt.trim().isEmpty() ? createdAt : new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
@@ -150,7 +150,7 @@ try {
     }
     
     // 🔥 關鍵修正：確保 expiryDate 被加入
-    if (availableColumns.contains("expirydate")) {
+    if (availableColumns.contains("expiryDate")) {
         sqlBuilder.append(", expiryDate");
         valuesBuilder.append(", ?");
         paramValues.add(expiryDate != null && !expiryDate.trim().isEmpty() ? expiryDate : "");
@@ -169,7 +169,7 @@ try {
         paramValues.add(course != null ? course : "");
     }
     
-    if (availableColumns.contains("isbn")) {
+    if (availableColumns.contains("ISBN")) {
         sqlBuilder.append(", ISBN");
         valuesBuilder.append(", ?");
         paramValues.add(ISBN != null ? ISBN : "");
@@ -189,7 +189,7 @@ try {
     valuesBuilder.append(", ?");
     paramValues.add(photosPaths);
     
-    if (availableColumns.contains("isapproved")) {
+    if (availableColumns.contains("isApproved")) {
         sqlBuilder.append(", isApproved");
         valuesBuilder.append(", '待審核'");
     }

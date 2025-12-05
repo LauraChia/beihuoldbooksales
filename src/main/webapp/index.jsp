@@ -162,7 +162,7 @@
         Connection con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
 
         // 取得所有仍為「上架中」的書籍
-        String sql = "SELECT bookId, expiryDate FROM books WHERE status = '上架中'";
+        String sql = "SELECT bookId, expiryDate FROM book WHERE isDelisted = '上架中'";
         PreparedStatement ps = con.prepareStatement(sql);
         ResultSet rs = ps.executeQuery();
 
@@ -173,14 +173,15 @@
 
             if (expiry != null && now.after(expiry)) {
                 // 已過期 → 自動下架
-                String updateSql = "UPDATE books SET status = '已下架' WHERE bookId = ?";
+                String updateSql = "UPDATE book SET isDelisted = '已下架' WHERE bookId = ?";
                 PreparedStatement ups = con.prepareStatement(updateSql);
                 ups.setInt(1, rs.getInt("bookId"));
                 ups.executeUpdate();
                 ups.close();
             }
+            
         }
-
+       
         rs.close();
         ps.close();
         con.close();
@@ -193,7 +194,7 @@
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
     Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
     Statement smt = con.createStatement();
-    String sql = "SELECT * FROM books ORDER BY createdAt DESC";
+    String sql = "SELECT * FROM book ORDER BY createdAt DESC";
     ResultSet rs = smt.executeQuery(sql);
     
  	// 🆕 取得使用者的收藏清單
