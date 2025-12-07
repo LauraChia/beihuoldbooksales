@@ -1,5 +1,7 @@
 <%@page contentType="text/html" pageEncoding="utf-8"%>  
 <%@page import="java.sql.*"%>
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.util.Date"%>
 
 <%
     String userId = (String) session.getAttribute("userId");
@@ -8,6 +10,9 @@
         out.println("<script>alert('請先登入才能上架書籍！'); window.location.href='login.jsp';</script>");
         return;
     }
+    
+    // 取得今天的日期
+    String todayDate = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 %>
 
 <html lang="zh">
@@ -20,6 +25,7 @@
         .form-container { background:#fff; padding:30px; border-radius:8px; max-width:900px; margin:150px auto; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
         .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
         label { display:inline-block; width:120px; margin-bottom:10px; vertical-align:top; font-weight: 500; padding-top: 6px; }
+        label .required { color:red; margin-left: 2px; }
         input:not([type="file"]):not([type="submit"]):not([type="reset"]), select, textarea { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
 
         /* 圖片上傳樣式 */
@@ -51,37 +57,43 @@
 
         <!-- 書名 -->
         <div class="form-group">
-            <label>書名：<span style="color:red">*</span></label>
-            <input type="text" name="titleBook" required>
+            <label>書名：<span class="required">*</span></label>
+            <input type="text" name="title" required>
         </div>
 
         <!-- 作者 -->
         <div class="form-group">
-            <label>作者：<span style="color:red">*</span></label>
+            <label>作者：<span class="required">*</span></label>
             <input type="text" name="author" required>
         </div>
 
         <!-- 價格 -->
         <div class="form-group">
-            <label>價格：<span style="color:red">*</span></label>
+            <label>價格：<span class="required">*</span></label>
             <input type="number" name="price" min="0" required>
         </div>
 
         <!-- 出版日期 -->
         <div class="form-group">
-            <label>出版日期：<span style="color:red">*</span></label>
-            <input type="date" name="date" required>
+            <label>出版日期：<span class="required">*</span></label>
+            <input type="date" name="publishDate" required>
         </div>
 
         <!-- 書籍版本 -->
         <div class="form-group">
             <label>書籍版本：</label>
-            <input type="text" name="edition" placeholder="選填">
+            <input type="text" name="edition" placeholder="選填，例如：第三版">
+        </div>
+
+        <!-- ISBN -->
+        <div class="form-group">
+            <label>ISBN：</label>
+            <input type="text" name="ISBN" placeholder="選填">
         </div>
         
         <!-- 書籍照片 -->
         <div class="form-group" style="flex-direction: column; align-items: stretch;">
-            <label style="width: 100%;">書籍照片：<span style="color:red">*</span></label>
+            <label style="width: 100%;">書籍照片：<span class="required">*</span></label>
             <div class="upload-section">
                 <div class="upload-area" id="uploadArea" onclick="document.getElementById('photoInput').click()">
                     <div class="upload-icon">📷</div>
@@ -97,13 +109,13 @@
 
         <!-- 偏好聯絡方式 -->
         <div class="form-group">
-            <label>偏好聯絡方式：<span style="color:red">*</span></label>
+            <label>偏好聯絡方式：<span class="required">*</span></label>
             <input type="text" name="contact" placeholder="例如：Line、Email、IG、FB" required>
         </div>
 
         <!-- 使用書籍系所 -->
         <div class="form-group">
-            <label>使用書籍系所：<span style="color:red">*</span></label>
+            <label>使用書籍系所：<span class="required">*</span></label>
             <div style="flex: 1; display: flex; gap: 10px;">
                 <select id="college" name="college" onchange="updateDepartment()" style="flex: 1;" required>
                     <option value="">請選擇學院</option>
@@ -118,64 +130,52 @@
                 </select>
             </div>
         </div>
-<!-- 上架日期 -->
+
+        <!-- 授課老師 -->
         <div class="form-group">
-            <label>上架日期：<span style="color:red">*</span></label>
-            <input type="date" name="createdAt" required>
+            <label>授課老師：<span class="required">*</span></label>
+            <input type="text" name="teacher" required>
         </div>
 
-
-        <!-- 下架日期 -->
+        <!-- 使用課程 -->
         <div class="form-group">
-            <label>下架日期：<span style="color:red">*</span></label>
-            <input type="date" name="expiryDate" required>
+            <label>使用課程：<span class="required">*</span></label>
+            <input type="text" name="courseName" required>
         </div>
-		
+
+        <!-- 上架日期 (隱藏欄位，自動設定為今天) -->
+        <input type="hidden" name="listedAt" value="<%= todayDate %>">
+
+        <!-- 下架日期時間 -->
+        <div class="form-group">
+            <label>下架日期時間：<span class="required">*</span></label>
+            <input type="datetime-local" name="expiryDate" required>
+        </div>
 		
         <!-- 書籍狀況 -->
         <div class="form-group">
-            <label>書籍狀況：</label>
-            <input type="text" name="condition" placeholder="例如：全新 / 二手 / 有使用痕跡 / 其他" />
+            <label>書籍狀況：<span class="required">*</span></label>
+            <input type="text" name="condition" placeholder="例如：全新、二手-近全新、二手-良好、二手-有使用痕跡" required>
         </div>
 
         <!-- 有無筆記 -->
         <div class="form-group">
-            <label>有無筆記：<span style="color:red">*</span></label>
-            <select name="remarks">
+            <label>有無筆記：<span class="required">*</span></label>
+            <select name="remarks" required>
+                <option value="">請選擇</option>
                 <option value="有">有</option>
                 <option value="無">無</option>
             </select>
         </div>
 
-        <!-- 授課老師 -->
-<div class="form-group">
-    <label for="teacher">授課老師：<span style="color:red">*</span></label>
-    <input type="text" id="teacher" name="teacher" required>
-</div>
-
-<!-- 使用課程 -->
-<div class="form-group">
-    <label for="course">使用課程：</label>
-    <input type="text" id="course" name="course" required>
-</div>
-
-        <!-- ISBN -->
-        <div class="form-group">
-            <label>ISBN：</label>
-            <input type="text" name="ISBN" placeholder="選填">
-        </div>
-
-
         <!-- 上架本數 -->
         <div class="form-group">
-            <label>上架本數：<span style="color:red">*</span></label>
+            <label>上架本數：<span class="required">*</span></label>
             <input type="number" name="quantity" value="1" min="1" step="1" required>
         </div>
-        
-        
 
         <input type="hidden" name="username" value="<%= username %>">
-        <input type="hidden" name="userId" value="<%= userId %>">
+        <input type="hidden" name="sellerId" value="<%= userId %>">
 
         <div class="btn-container">
             <button type="submit" class="btn btn-primary btn-lg" style="min-width: 150px;">送出上架</button>
@@ -266,7 +266,6 @@
         updatePreview();
     });
 
-    
     document.getElementById('resetBtn').addEventListener('click', function() {
         setTimeout(() => { selectedFiles = []; previewContainer.innerHTML = ''; imageCountSpan.textContent = '0'; }, 10);
     });

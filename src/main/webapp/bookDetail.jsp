@@ -3,68 +3,6 @@
 <%@page import="java.util.*"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
-<%
-    // 取得當前使用者
-    String currentUserId = (String) session.getAttribute("userId");
-    
-    // 沒登入就不檢查
-    if (currentUserId == null || currentUserId.trim().isEmpty()) {
-        return;
-    }
-    
-    // 檢查是否已經提醒過（避免重複）
-    if (session.getAttribute("expiry_checked") != null) {
-        return;
-    }
-    
-    try {
-        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-        Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
-        Statement smt = con.createStatement();
-        
-        // 查詢該使用者超過30天的書籍
-        String sql = "SELECT bookId, titleBook, createdAt " +
-                     "FROM books " +
-                     "WHERE userId = '" + currentUserId + "' " +
-                     "AND isApproved = '已審核' " +
-                     "AND DateDiff('d', createdAt, Now()) >= 23";  // 23天以上就提醒
-        
-        ResultSet rs = smt.executeQuery(sql);
-        
-        int count = 0;
-        StringBuilder bookList = new StringBuilder();
-        
-        while (rs.next()) {
-            count++;
-            if (count <= 3) {  // 只顯示前3本
-                bookList.append("• ").append(rs.getString("titleBook")).append("\\n");
-            }
-        }
-        
-        rs.close();
-        smt.close();
-        con.close();
-        
-        // 如果有書要提醒
-        if (count > 0) {
-%>
-            <script>
-                alert('⏰ 提醒：您有 <%= count %> 本書籍已上架超過23天\n\n' +
-                      '<%= bookList.toString() %>' +
-                      '<%= count > 3 ? "... 及其他 " + (count-3) + " 本書籍\\n\\n" : "\\n" %>' +
-                      '建議您確認書籍狀態：\n' +
-                      '• 如已售出請下架\n' +
-                      '• 如需繼續販售可重新上架');
-            </script>
-<%
-            // 標記已提醒過
-            session.setAttribute("expiry_checked", "true");
-        }
-        
-    } catch (Exception e) {
-        e.printStackTrace();
-    }
-%>
 <html lang="zh">
 <head>
     <meta charset="utf-8">
@@ -232,17 +170,47 @@
         }
         .btn-favorite {
             background-color: #fff;
-            color: #d9534f;
+            color: #ff6b6b;
             padding: 12px 30px;
-            border: 2px solid #d9534f;
-            border-radius: 5px;
+            border: 2px solid #ff6b6b;
+            border-radius: 25px;
             font-size: 16px;
             cursor: pointer;
             transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
         }
         .btn-favorite:hover {
-            background-color: #d9534f;
+            background-color: #ff6b6b;
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+        .btn-favorite.favorited {
+            background-color: #ff6b6b;
+            color: white;
+            border-color: #ff6b6b;
+        }
+        .btn-favorite:disabled {
+            background-color: #e0e0e0;
+            border-color: #e0e0e0;
+            color: #999;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .favorite-icon {
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+        .btn-favorite:hover .favorite-icon {
+            transform: scale(1.2);
+        }
+        .favorite-count {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
         }
         
         /* Tooltip 樣式 */
@@ -348,7 +316,7 @@
             font-weight: bold;
             color: #555;
         }
-        .form-group textarea {
+        .form-group input.form-control, .form-group textarea {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -396,61 +364,11 @@
             border: 1px solid #ffc107;
             color: #856404;
         }
-        .alert-success {
-            background-color: #d4edda;
-            border: 1px solid #28a745;
-            color: #155724;
+        .alert-info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
         }
-        .alert-danger {
-            background-color: #f8d7da;
-            border: 1px solid #dc3545;
-            color: #721c24;
-        }
-        /* 收藏按鈕樣式 */
-	    .btn-favorite {
-	        background-color: #fff;
-	        color: #ff6b6b;
-	        padding: 12px 30px;
-	        border: 2px solid #ff6b6b;
-	        border-radius: 25px;
-	        font-size: 16px;
-	        cursor: pointer;
-	        transition: all 0.3s;
-	        display: inline-flex;
-	        align-items: center;
-	        gap: 8px;
-	        font-weight: 500;
-	    }
-	    .btn-favorite:hover {
-	        background-color: #ff6b6b;
-	        color: white;
-	        transform: translateY(-2px);
-	        box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-	    }
-	    .btn-favorite.favorited {
-	        background-color: #ff6b6b;
-	        color: white;
-	        border-color: #ff6b6b;
-	    }
-	    .btn-favorite:disabled {
-	        background-color: #e0e0e0;
-	        border-color: #e0e0e0;
-	        color: #999;
-	        cursor: not-allowed;
-	        transform: none;
-	    }
-	    .favorite-icon {
-	        font-size: 18px;
-	        transition: transform 0.3s;
-	    }
-	    .btn-favorite:hover .favorite-icon {
-	        transform: scale(1.2);
-	    }
-	    .favorite-count {
-	        font-size: 13px;
-	        color: #666;
-	        margin-top: 5px;
-	    }
     </style>
 </head>
 
@@ -459,27 +377,37 @@
 <br><br><br><br>
 
 <%
-	String bookId = request.getParameter("bookId");
-
-	// 檢查使用者是否登入 - 改用你的 session 變數名稱
-	loggedInUserId = (String) session.getAttribute("userId");
-	String loggedInUserEmail = (String) session.getAttribute("username"); // 改為 username (因為你的 username 就是 email)
-	boolean isLoggedIn = (loggedInUserId != null && !loggedInUserId.trim().isEmpty());
-	
-	Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-	Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
-	Statement smt = con.createStatement();
-	
-	// 修改 SQL - 因為你的 users 資料表中 username 就是 email
-	String sql = "SELECT b.*, u.name AS sellerName, u.username AS sellerEmail " +
-	        "FROM books b JOIN users u ON b.userId = u.userId " +
-	        "WHERE b.bookId = " + bookId;
-	ResultSet rs = smt.executeQuery(sql);
-	
-	if (rs.next()) {
-	    String sellerId = rs.getString("userId");
-	    String sellerEmail = rs.getString("sellerEmail");
-	    boolean isOwnBook = isLoggedIn && loggedInUserId.equals(sellerId);
+    String listingId = request.getParameter("listingId");
+    
+    // 檢查使用者是否登入
+    String currentUserId = (String) session.getAttribute("userId");
+    boolean isLoggedIn = (loggedInUserId != null && !loggedInUserId.trim().isEmpty());
+    
+    Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+    Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
+    
+    // 修改後的 SQL - 使用 JOIN 連接正規化的資料表
+    String sql = "SELECT " +
+                 "bl.listingId, bl.bookId, bl.sellerId, bl.price, bl.quantity, " +
+                 "bl.condition, bl.photo, bl.remarks, bl.Approved, bl.listedAt, bl.expiryDate, " +
+                 "b.title, b.author, b.ISBN, b.edition, b.createdAt AS publishDate, " +
+                 "u.name AS sellerName, u.username AS sellerEmail, " +
+                 "c.courseName, c.teacher, c.department " +
+                 "FROM bookListings bl " +
+                 "INNER JOIN books b ON bl.bookId = b.bookId " +
+                 "INNER JOIN users u ON bl.sellerId = u.userId " +
+                 "LEFT JOIN book_course_relations bcr ON b.bookId = bcr.bookId " +
+                 "LEFT JOIN courses c ON bcr.courseId = c.courseId " +
+                 "WHERE bl.listingId = " + listingId;
+    
+    Statement smt = con.createStatement();
+    ResultSet rs = smt.executeQuery(sql);
+    
+    if (rs.next()) {
+        String bookId = rs.getString("bookId");
+        String sellerId = rs.getString("sellerId");
+        String sellerEmail = rs.getString("sellerEmail");
+        boolean isOwnBook = isLoggedIn && loggedInUserId.equals(sellerId);
         
         // 分割圖片路徑 - 支援多張圖片
         String photoStr = rs.getString("photo");
@@ -503,25 +431,23 @@
         int totalImages = photoList.size();
         
         // 處理審核狀態
-        String approvalStatus = rs.getString("isApproved");
+        String approvalStatus = rs.getString("Approved");
         String statusText = "待審核";
         String statusClass = "status-pending";
 
-        if (approvalStatus != null) {
-            if (approvalStatus.equals("已審核") || approvalStatus.equals("approved")) {
-                statusText = "已審核";
-                statusClass = "status-approved";
-            } else if (approvalStatus.equals("未通過") || approvalStatus.equals("rejected")) {
-                statusText = "未通過";
-                statusClass = "status-rejected";
-            }
+        if ("TRUE".equalsIgnoreCase(approvalStatus) || "已審核".equals(approvalStatus)) {
+            statusText = "已審核";
+            statusClass = "status-approved";
+        } else if ("FALSE".equalsIgnoreCase(approvalStatus) || "未通過".equals(approvalStatus)) {
+            statusText = "未通過";
+            statusClass = "status-rejected";
         }
         
+        // 檢查是否已收藏
         boolean isFavorited = false;
         int favoriteCount = 0;
         
         if (isLoggedIn) {
-            // 檢查是否已收藏
             String checkFavSql = "SELECT COUNT(*) as cnt FROM favorites " +
                                 "WHERE userId = '" + loggedInUserId + "' AND bookId = " + bookId;
             ResultSet favRs = smt.executeQuery(checkFavSql);
@@ -538,6 +464,26 @@
             favoriteCount = countRs.getInt("total");
         }
         countRs.close();
+        
+        // 解析備註資訊
+        String remarks = rs.getString("remarks");
+        String contactInfo = "";
+        String hasNotes = "";
+        String additionalRemarks = "";
+        
+        if (remarks != null && !remarks.trim().isEmpty()) {
+            String[] remarksParts = remarks.split("\\|");
+            for (String part : remarksParts) {
+                part = part.trim();
+                if (part.startsWith("聯絡方式:")) {
+                    contactInfo = part.substring("聯絡方式:".length()).trim();
+                } else if (part.startsWith("筆記:")) {
+                    hasNotes = part.substring("筆記:".length()).trim();
+                } else {
+                    additionalRemarks = part;
+                }
+            }
+        }
 %>
 
 <div class="book-detail">
@@ -576,26 +522,31 @@
         <% } %>
     </div>
     
-</form>
     <div class="detail-info">
-        <h2><%= rs.getString("titleBook") %></h2>
+        <h2><%= rs.getString("title") %></h2>
 
-        <div class="price">NT$<%= (rs.getString("price") != null && !rs.getString("price").trim().isEmpty()) ? (int) Float.parseFloat(rs.getString("price")) : 0 %></div>
-        <div class="info-item">書名：<%= (rs.getString("titleBook") != null && !rs.getString("titleBook").trim().isEmpty()) ? rs.getString("titleBook") : "無" %></div>
-        <div class="info-item">作者：<%= (rs.getString("author") != null && !rs.getString("author").trim().isEmpty()) ? rs.getString("author") : "無" %></div>
-        <div class="info-item">出版日期：<%= (rs.getString("date") != null && !rs.getString("date").trim().isEmpty()) ? rs.getString("date").split(" ")[0] : "無" %></div>
-        <div class="info-item">書籍版本：<%= (rs.getString("edition") != null && !rs.getString("edition").trim().isEmpty()) ? rs.getString("edition") : "無" %></div>
-        <div class="info-item">使用書籍系所：<%= (rs.getString("department") != null && !rs.getString("department").trim().isEmpty()) ? rs.getString("department") : "" %></div>
-        <div class="info-item">使用課程：<%= (rs.getString("course") != null && !rs.getString("course").trim().isEmpty()) ? rs.getString("course") : "無" %></div>
-        <div class="info-item">書籍狀況：<%= (rs.getString("condition") != null && !rs.getString("condition").trim().isEmpty()) ? rs.getString("condition") : "無" %></div>
-        <div class="info-item">有無筆記：<%= (rs.getString("remarks") != null && !rs.getString("remarks").trim().isEmpty()) ? rs.getString("remarks") : "無" %></div>
-        <div class="info-item">授課老師：<%= (rs.getString("teacher") != null && !rs.getString("teacher").trim().isEmpty()) ? rs.getString("teacher") : "無" %></div>
-        <div class="info-item">ISBN：<%= (rs.getString("ISBN") != null && !rs.getString("ISBN").trim().isEmpty()) ? rs.getString("ISBN") : "無" %></div>
-        <div class="info-item">賣家：<%= (rs.getString("sellerName") != null && !rs.getString("sellerName").trim().isEmpty()) ? rs.getString("sellerName") : "無" %></div>
-        <div class="info-item">上架日期：<%= (rs.getString("createdAt") != null && !rs.getString("createdAt").trim().isEmpty()) ? rs.getString("createdAt").split(" ")[0] : "無" %></div>
-        <div class="info-item">下架日期：<%= (rs.getString("expiryDate") != null && !rs.getString("expiryDate").trim().isEmpty()) ? rs.getString("expiryDate").split(" ")[0] : "無" %></div>
-        <div class="info-item">上架本數：<%= (rs.getString("quantity") != null && !rs.getString("quantity").trim().isEmpty()) ? rs.getString("quantity") : 1 %></div>
-        <div class="info-item">審核狀態：<span class="<%= statusClass %>"><%= (statusText != null && !statusText.trim().isEmpty()) ? statusText : "無" %></span></div>
+        <div class="price">NT$<%= (int) Float.parseFloat(rs.getString("price")) %></div>
+        
+        <div class="info-item"><strong>作者：</strong><%= rs.getString("author") != null ? rs.getString("author") : "未提供" %></div>
+        <div class="info-item"><strong>出版日期：</strong><%= rs.getString("publishDate") != null ? rs.getString("publishDate").split(" ")[0] : "未提供" %></div>
+        <div class="info-item"><strong>書籍版本：</strong><%= rs.getString("edition") != null && !rs.getString("edition").trim().isEmpty() ? rs.getString("edition") : "未提供" %></div>
+        <div class="info-item"><strong>ISBN：</strong><%= rs.getString("ISBN") != null && !rs.getString("ISBN").trim().isEmpty() ? rs.getString("ISBN") : "未提供" %></div>
+        <div class="info-item"><strong>書籍狀況：</strong><%= rs.getString("condition") %></div>
+        <div class="info-item"><strong>有無筆記：</strong><%= hasNotes.isEmpty() ? "未提供" : hasNotes %></div>
+        <div class="info-item"><strong>使用系所：</strong><%= rs.getString("department") != null ? rs.getString("department") : "未提供" %></div>
+        <div class="info-item"><strong>使用課程：</strong><%= rs.getString("courseName") != null ? rs.getString("courseName") : "未提供" %></div>
+        <div class="info-item"><strong>授課老師：</strong><%= rs.getString("teacher") != null ? rs.getString("teacher") : "未提供" %></div>
+        <% if (!contactInfo.isEmpty()) { %>
+        <div class="info-item"><strong>偏好聯絡方式：</strong><%= contactInfo %></div>
+        <% } %>
+        <% if (!additionalRemarks.isEmpty()) { %>
+        <div class="info-item"><strong>備註說明：</strong><%= additionalRemarks %></div>
+        <% } %>
+        <div class="info-item"><strong>賣家：</strong><%= rs.getString("sellerName") %></div>
+        <div class="info-item"><strong>上架日期：</strong><%= rs.getString("listedAt").split(" ")[0] %></div>
+        <div class="info-item"><strong>下架日期：</strong><%= rs.getString("expiryDate").split(" ")[0] %></div>
+        <div class="info-item"><strong>上架本數：</strong><%= rs.getString("quantity") %></div>
+        <div class="info-item"><strong>審核狀態：</strong><span class="<%= statusClass %>"><%= statusText %></span></div>
 
         <!-- 購買按鈕區域 -->
         <div class="action-buttons">
@@ -616,27 +567,26 @@
                 </button>
             <% } %>
             
-            <%-- 🆕 收藏按鈕 --%>
-		    <div style="text-align: center;">
-		        <button class="btn-favorite <%= isFavorited ? "favorited" : "" %>" 
-		                onclick="toggleFavorite()"
-		                id="favoriteBtn"
-		                data-book-id="<%= bookId %>"
-		                data-favorited="<%= isFavorited %>">
-		            <span class="favorite-icon"><%= isFavorited ? "❤️" : "🤍" %></span>
-		            <span id="favoriteBtnText"><%= isFavorited ? "已收藏" : "加入收藏" %></span>
-		        </button>
-		        <div class="favorite-count">
-		            <span id="favoriteCount"><%= favoriteCount %></span> 人收藏
-		        </div>
-		    </div>
+            <div style="text-align: center;">
+                <button class="btn-favorite <%= isFavorited ? "favorited" : "" %>" 
+                        onclick="toggleFavorite()"
+                        id="favoriteBtn"
+                        data-book-id="<%= bookId %>"
+                        data-favorited="<%= isFavorited %>">
+                    <span class="favorite-icon"><%= isFavorited ? "❤️" : "🤍" %></span>
+                    <span id="favoriteBtnText"><%= isFavorited ? "已收藏" : "加入收藏" %></span>
+                </button>
+                <div class="favorite-count">
+                    <span id="favoriteCount"><%= favoriteCount %></span> 人收藏
+                </div>
+            </div>
             
             <a class="btn btn-link" href="index.jsp">回首頁</a>
         </div>
     </div>
 </div>
 
-<!-- 聯絡賣家的 Modal (修改版 - 加上聯絡方式) -->
+<!-- 聯絡賣家的 Modal -->
 <div id="contactModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -649,12 +599,13 @@
             </div>
             <form id="contactForm">
                 <input type="hidden" name="bookId" value="<%= bookId %>">
+                <input type="hidden" name="listingId" value="<%= listingId %>">
                 <input type="hidden" name="sellerId" value="<%= sellerId %>">
                 <input type="hidden" name="sellerEmail" value="<%= sellerEmail %>">
                 
                 <div class="form-group">
                     <label>書籍名稱：</label>
-                    <input type="text" class="form-control" value="<%= rs.getString("titleBook") %>" readonly style="background-color: #f0f0f0;">
+                    <input type="text" class="form-control" value="<%= rs.getString("title") %>" readonly style="background-color: #f0f0f0;">
                 </div>
                 
                 <div class="form-group">
@@ -669,9 +620,8 @@
                     <small style="color: #666;">至少需要10個字元</small>
                 </div>
                 
-                <!-- 🆕 新增：買家聯絡方式 -->
                 <div class="form-group">
-                    <label>您的聯絡方式 (選填)：<i class="fas fa-info-circle" title="提供聯絡方式可讓賣家更快聯繫您"></i></label>
+                    <label>您的聯絡方式 (選填)：</label>
                     <input type="text" 
                            name="contactInfo" 
                            id="contactInfo" 
@@ -679,13 +629,11 @@
                            placeholder="例如：手機 0912-345-678 或 Line ID: yourlineid"
                            maxlength="100">
                     <small style="color: #28a745;">
-                        <i class="fas fa-check-circle"></i> 
                         建議提供手機或 Line ID，方便賣家與您聯繫！
                     </small>
                 </div>
                 
-                <div class="alert alert-info" style="background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; margin-top: 15px;">
-                    <i class="fas fa-shield-alt"></i> 
+                <div class="alert alert-info" style="margin-top: 15px;">
                     <strong>隱私提醒：</strong>您的聯絡方式只會顯示給此書籍的賣家，請放心填寫。
                 </div>
             </form>
@@ -698,94 +646,90 @@
 </div>
 
 <script>
-		// 🔴 必須加上這些變數和函數！
-		const isLoggedIn = <%= isLoggedIn %>;
-		const isOwnBook = <%= isOwnBook %>;
-		
-		let currentImageIndex = 0;
-		const images = document.querySelectorAll('.book-image');
-		const thumbnails = document.querySelectorAll('.thumbnail');
-		const totalImages = images.length;
-		
-		function showImage(index) {
-		    images.forEach(img => img.classList.remove('active'));
-		    thumbnails.forEach(thumb => thumb.classList.remove('active'));
-		    
-		    currentImageIndex = index;
-		    images[currentImageIndex].classList.add('active');
-		    if (thumbnails.length > 0) {
-		        thumbnails[currentImageIndex].classList.add('active');
-		    }
-		    
-		    const counter = document.getElementById('current-image');
-		    if (counter) {
-		        counter.textContent = currentImageIndex + 1;
-		    }
-		}
-		
-		function changeImage(direction) {
-		    let newIndex = currentImageIndex + direction;
-		    
-		    if (newIndex >= totalImages) {
-		        newIndex = 0;
-		    } else if (newIndex < 0) {
-		        newIndex = totalImages - 1;
-		    }
-		    
-		    showImage(newIndex);
-		}
-		
-		document.addEventListener('keydown', function(e) {
-		    if (totalImages > 1) {
-		        if (e.key === 'ArrowLeft') {
-		            changeImage(-1);
-		        } else if (e.key === 'ArrowRight') {
-		            changeImage(1);
-		        }
-		    }
-		});
-		
-		// 處理聯絡賣家
-		function handleContactSeller() {
-		    if (!isLoggedIn) {
-		        if (confirm('您需要先登入才能聯絡賣家\n\n是否前往登入頁面？')) {
-		            window.location.href = 'login.jsp?redirect=' + encodeURIComponent(window.location.href);
-		        }
-		        return;
-		    }
-		    
-		    if (isOwnBook) {
-		        alert('這是您自己的書籍，無法聯絡自己');
-		        return;
-		    }
-		    
-		    openModal();
-		}
-		
-		function openModal() {
-		    document.getElementById('contactModal').style.display = 'block';
-		    document.body.style.overflow = 'hidden';
-		}
-		
-		function closeModal() {
-		    document.getElementById('contactModal').style.display = 'none';
-		    document.body.style.overflow = 'auto';
-		    document.getElementById('messageText').value = '';
-		    document.getElementById('contactInfo').value = ''; // 🆕 清空聯絡方式
-		}
-		
-		// 點擊 modal 外部關閉
-		window.onclick = function(event) {
-		    const modal = document.getElementById('contactModal');
-		    if (event.target == modal) {
-		        closeModal();
-		    }
-		}
+    const isLoggedIn = <%= isLoggedIn %>;
+    const isOwnBook = <%= isOwnBook %>;
+    
+    let currentImageIndex = 0;
+    const images = document.querySelectorAll('.book-image');
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    const totalImages = images.length;
+    
+    function showImage(index) {
+        images.forEach(img => img.classList.remove('active'));
+        thumbnails.forEach(thumb => thumb.classList.remove('active'));
+        
+        currentImageIndex = index;
+        images[currentImageIndex].classList.add('active');
+        if (thumbnails.length > 0) {
+            thumbnails[currentImageIndex].classList.add('active');
+        }
+        
+        const counter = document.getElementById('current-image');
+        if (counter) {
+            counter.textContent = currentImageIndex + 1;
+        }
+    }
+    
+    function changeImage(direction) {
+        let newIndex = currentImageIndex + direction;
+        
+        if (newIndex >= totalImages) {
+            newIndex = 0;
+        } else if (newIndex < 0) {
+            newIndex = totalImages - 1;
+        }
+        
+        showImage(newIndex);
+    }
+    
+    document.addEventListener('keydown', function(e) {
+        if (totalImages > 1) {
+            if (e.key === 'ArrowLeft') {
+                changeImage(-1);
+            } else if (e.key === 'ArrowRight') {
+                changeImage(1);
+            }
+        }
+    });
+    
+    function handleContactSeller() {
+        if (!isLoggedIn) {
+            if (confirm('您需要先登入才能聯絡賣家\n\n是否前往登入頁面？')) {
+                window.location.href = 'login.jsp?redirect=' + encodeURIComponent(window.location.href);
+            }
+            return;
+        }
+        
+        if (isOwnBook) {
+            alert('這是您自己的書籍，無法聯絡自己');
+            return;
+        }
+        
+        openModal();
+    }
+    
+    function openModal() {
+        document.getElementById('contactModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModal() {
+        document.getElementById('contactModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+        document.getElementById('messageText').value = '';
+        document.getElementById('contactInfo').value = '';
+    }
+    
+    window.onclick = function(event) {
+        const modal = document.getElementById('contactModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
 
-    // 🆕 修改發送訊息函數，加上聯絡方式
     function sendMessage() {
         const messageText = document.getElementById('messageText').value.trim();
-        const contactInfo = document.getElementById('contactInfo').value.trim(); // 取得聯絡方式
+        const contactInfo = document.getElementById('contactInfo').value.trim();
         
         if (!messageText) {
             alert('請輸入訊息內容');
@@ -797,34 +741,24 @@
             return;
         }
         
-        // 手動取得所有欄位值
         const bookId = document.querySelector('input[name="bookId"]').value;
+        const listingId = document.querySelector('input[name="listingId"]').value;
         const sellerId = document.querySelector('input[name="sellerId"]').value;
         const sellerEmail = document.querySelector('input[name="sellerEmail"]').value;
         
-        console.log('準備發送的資料:');
-        console.log('bookId:', bookId);
-        console.log('sellerId:', sellerId);
-        console.log('sellerEmail:', sellerEmail);
-        console.log('message:', messageText);
-        console.log('contactInfo:', contactInfo); // 🆕 新增 log
-        
-        // 檢查必要欄位
-        if (!bookId || !sellerId) {
+        if (!bookId || !listingId || !sellerId) {
             alert('❌ 系統錯誤：缺少必要資料');
-            console.error('缺少 bookId 或 sellerId');
             return;
         }
         
-        // 使用 URLSearchParams 建立表單資料
         const formData = new URLSearchParams();
         formData.append('bookId', bookId);
+        formData.append('listingId', listingId);
         formData.append('sellerId', sellerId);
         formData.append('sellerEmail', sellerEmail || '');
         formData.append('message', messageText);
-        formData.append('contactInfo', contactInfo); // 🆕 加上聯絡方式
+        formData.append('contactInfo', contactInfo);
         
-        // 顯示載入中
         const sendBtn = document.querySelector('.btn-send');
         const originalText = sendBtn.textContent;
         sendBtn.textContent = '發送中...';
@@ -837,18 +771,8 @@
             },
             body: formData.toString()
         })
-        .then(response => {
-            console.log('Response status:', response.status);
-            
-            if (!response.ok) {
-                throw new Error('HTTP error! status: ' + response.status);
-            }
-            
-            return response.text();
-        })
+        .then(response => response.text())
         .then(text => {
-            console.log('Response text:', text);
-            
             try {
                 const data = JSON.parse(text);
                 if (data.success) {
@@ -858,12 +782,10 @@
                     alert('❌ 發送失敗: ' + (data.message || '未知錯誤'));
                 }
             } catch (e) {
-                console.error('JSON parse error:', e);
-                alert('❌ 伺服器回傳格式錯誤\n\n回傳內容: ' + text.substring(0, 200));
+                alert('❌ 伺服器回傳格式錯誤');
             }
         })
         .catch(error => {
-            console.error('Fetch error:', error);
             alert('❌ 系統錯誤: ' + error.message);
         })
         .finally(() => {
@@ -872,7 +794,6 @@
         });
     }
     
- // 收藏功能
     function toggleFavorite() {
         if (!isLoggedIn) {
             if (confirm('您需要先登入才能收藏書籍\n\n是否前往登入頁面？')) {
@@ -886,7 +807,6 @@
         const isFavorited = btn.getAttribute('data-favorited') === 'true';
         const action = isFavorited ? 'remove' : 'add';
         
-        // 顯示載入中
         btn.disabled = true;
         const originalText = document.getElementById('favoriteBtnText').textContent;
         document.getElementById('favoriteBtnText').textContent = '處理中...';
@@ -901,20 +821,16 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // 更新按鈕狀態
                 const newFavorited = !isFavorited;
                 btn.setAttribute('data-favorited', newFavorited);
                 btn.classList.toggle('favorited', newFavorited);
                 
-                // 更新圖示和文字
                 const icon = btn.querySelector('.favorite-icon');
                 icon.textContent = newFavorited ? '❤️' : '🤍';
                 document.getElementById('favoriteBtnText').textContent = newFavorited ? '已收藏' : '加入收藏';
                 
-                // 更新收藏數量
                 document.getElementById('favoriteCount').textContent = data.favoriteCount;
                 
-                // 顯示提示訊息
                 showToast(newFavorited ? '✅ 已加入收藏' : '✅ 已取消收藏');
             } else {
                 alert('❌ 操作失敗: ' + (data.message || '未知錯誤'));
@@ -922,7 +838,6 @@
             }
         })
         .catch(error => {
-            console.error('Error:', error);
             alert('❌ 系統錯誤');
             document.getElementById('favoriteBtnText').textContent = originalText;
         })
@@ -931,7 +846,6 @@
         });
     }
 
-    // 簡單的提示訊息
     function showToast(message) {
         const toast = document.createElement('div');
         toast.textContent = message;
@@ -957,7 +871,6 @@
         }, 2000);
     }
 
-    // 加入動畫樣式
     const style = document.createElement('style');
     style.textContent = `
         @keyframes slideIn {
@@ -983,21 +896,23 @@
         <div class="row g-5">
             <div class="col-md-6 col-lg-3">
                 <h5 class="text-white mb-4">專題資訊</h5>
-                <p class="mb-2">題目:北護二手書拍賣系統</p>
+                <p class="mb-2">題目：國北護二手書交易網</p>
                 <p class="mb-2">系所：健康事業管理系</p>
                 <p class="mb-2">專題組員：黃郁心、賈子瑩、許宇翔、闕紫彤</p>
             </div>
             <div class="col-md-6 col-lg-3">
                 <h5 class="text-white mb-4">快速連結</h5>
                 <a class="btn btn-link" href="index.jsp">首頁</a>
-                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
+                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8" target="_blank" rel="noopener noreferrer">系統使用回饋表單</a>
+                <a class="btn btn-link" href="informAgainst.jsp" target="_blank" rel="noopener noreferrer">舉報不佳上傳書籍區</a>
             </div>
         </div>
     </div>
     <div class="container-fluid text-center border-top border-secondary py-3">
-        <p class="mb-0">&copy; 2025年 二手書交易網. @All Rights Reserved.</p>
+        <p class="mb-0">&copy; 2025年 國北護二手書交易網. @All Rights Reserved.</p>
     </div>
 </div>
 <!-- Footer End -->
+
 </body>
 </html>

@@ -3,6 +3,7 @@
 <%@page import="java.sql.*"%>
 <%@page import="java.io.*"%>
 <%@page import="java.util.*"%>
+<%@page import="java.text.*"%>
 <%@page import="com.oreilly.servlet.MultipartRequest"%>
 <%@page import="com.oreilly.servlet.multipart.DefaultFileRenamePolicy"%>
 <jsp:useBean id='objDBConfig' scope='application' class='hitstd.group.tool.database.DBConfig' />
@@ -20,6 +21,7 @@
 </head>
 <body>
 <%
+Connection con = null;
 try {
     // 設定上傳目錄和大小限制 (20MB)
     String uploadPath = objFolderConfig.FilePath();
@@ -35,36 +37,62 @@ try {
     // MultipartRequest 支援中文和多檔案
     MultipartRequest multi = new MultipartRequest(request, uploadPath, maxSize, "UTF-8", new DefaultFileRenamePolicy());
 
-    // 取得表單資料
-    String titleBook = multi.getParameter("titleBook");
+    // ========== 取得書籍基本資料 (books 表) ==========
+    String title = multi.getParameter("title");
     String author = multi.getParameter("author");
-    String price = multi.getParameter("price");
-    String date = multi.getParameter("date");
+    String publishDate = multi.getParameter("publishDate");
     String edition = multi.getParameter("edition");
-    String contact = multi.getParameter("contact");
-    String remarks = multi.getParameter("remarks");
-    String condition = multi.getParameter("condition");
-    String otherCondition = multi.getParameter("otherCondition");
-    String college = multi.getParameter("college");
-    String department = multi.getParameter("department");
-    String createdAt = multi.getParameter("createdAt");
-    String expiryDate = multi.getParameter("expiryDate");
-    String teacher = multi.getParameter("teacher");
-    String course = multi.getParameter("course");
     String ISBN = multi.getParameter("ISBN");
-    String userId = multi.getParameter("userId");
+
+    // ========== 取得上架詳情資料 (bookListings 表) ==========
+    String sellerId = multi.getParameter("sellerId");
+    String price = multi.getParameter("price");
     String quantity = multi.getParameter("quantity");
+    String condition = multi.getParameter("condition");
+    String remarks = multi.getParameter("remarks"); // 有無筆記
+    String contact = multi.getParameter("contact");
+    String listedAt = multi.getParameter("listedAt"); // 上架日期（來自隱藏欄位）
+    String expiryDateRaw = multi.getParameter("expiryDate");
 
-    // 🔍 DEBUG: 印出接收到的日期
-    out.println("<!-- 接收到的 createdAt: " + createdAt + " -->");
-    out.println("<!-- 接收到的 expiryDate: " + expiryDate + " -->");
-
-    // 如果選擇「其他」, 使用自訂書況
-    if ("其他".equals(condition) && otherCondition != null && !otherCondition.trim().isEmpty()) {
-        condition = otherCondition;
+    // ========== 處理下架日期時間格式 ==========
+    String expiryDate = expiryDateRaw;
+    if (expiryDateRaw != null && !expiryDateRaw.trim().isEmpty()) {
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            java.util.Date date = inputFormat.parse(expiryDateRaw);
+            expiryDate = outputFormat.format(date);
+            out.println("<!-- 轉換下架時間: " + expiryDateRaw + " -> " + expiryDate + " -->");
+        } catch (ParseException pe) {
+            out.println("<!-- 日期轉換失敗，使用原始值: " + expiryDateRaw + " -->");
+        }
     }
 
-    // 處理多個上傳的圖片檔案
+    // ========== 取得課程資料 (courses 表) ==========
+    String courseName = multi.getParameter("courseName");
+    String teacher = multi.getParameter("teacher");
+    String department = multi.getParameter("department");
+
+    // 組合備註資訊（包含聯絡方式和有無筆記）
+    StringBuilder fullRemarks = new StringBuilder();
+    if (contact != null && !contact.trim().isEmpty()) {
+        fullRemarks.append("聯絡方式: ").append(contact);
+    }
+    if (remarks != null && !remarks.trim().isEmpty()) {
+        if (fullRemarks.length() > 0) fullRemarks.append(" | ");
+        fullRemarks.append("筆記: ").append(remarks);
+    }
+
+    out.println("<!-- 接收到的資料 -->");
+    out.println("<!-- 書名: " + title + " -->");
+    out.println("<!-- 作者: " + author + " -->");
+    out.println("<!-- 出版日期: " + publishDate + " -->");
+    out.println("<!-- 上架日期: " + listedAt + " -->");
+    out.println("<!-- 下架日期時間: " + expiryDate + " -->");
+    out.println("<!-- 書籍狀況: " + condition + " -->");
+    out.println("<!-- 有無筆記: " + remarks + " -->");
+
+    // ========== 處理多個上傳的圖片檔案 ==========
     List<String> uploadedFiles = new ArrayList<>();
     Enumeration files = multi.getFileNames();
 
@@ -91,150 +119,187 @@ try {
     String photosPaths = String.join(",", uploadedFiles);
     out.println("<!-- 最終圖片路徑: " + photosPaths + " -->");
 
-    // 資料庫連線
+    // ========== 資料庫連線 ==========
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-    Connection con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
+    con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
+    con.setAutoCommit(false); // 開啟交易
 
-    // 先檢查資料表有哪些欄位
-    DatabaseMetaData metaData = con.getMetaData();
-    ResultSet columns = metaData.getColumns(null, null, "book", null);
-    List<String> availableColumns = new ArrayList<>();
-    while (columns.next()) {
-        availableColumns.add(columns.getString("COLUMN_NAME").toLowerCase());
-    }
-    columns.close();
+    int bookId = -1;
+    int courseId = -1;
 
-    out.println("<!-- 資料表欄位: " + availableColumns + " -->");
+    // ========== 1. 檢查或新增書籍 (books 表) ==========
+    String checkBookSQL = "SELECT bookId FROM books WHERE title = ? AND author = ?";
+    PreparedStatement checkBookStmt = con.prepareStatement(checkBookSQL);
+    checkBookStmt.setString(1, title);
+    checkBookStmt.setString(2, author);
+    ResultSet bookRs = checkBookStmt.executeQuery();
 
-    // 根據實際存在的欄位建立 SQL
-    StringBuilder sqlBuilder = new StringBuilder("INSERT INTO book(titleBook, author, price, [date]");
-    StringBuilder valuesBuilder = new StringBuilder("VALUES(?, ?, ?, ?");
-    
-    List<String> paramValues = new ArrayList<>();
-    paramValues.add(titleBook);
-    paramValues.add(author);
-    paramValues.add(price);
-    paramValues.add(date);
-    
-    // 動態添加可選欄位
-    if (availableColumns.contains("edition") && edition != null && !edition.trim().isEmpty()) {
-        sqlBuilder.append(", edition");
-        valuesBuilder.append(", ?");
-        paramValues.add(edition);
+    if (bookRs.next()) {
+        // 書籍已存在，取得 bookId
+        bookId = bookRs.getInt("bookId");
+        out.println("<!-- ✅ 書籍已存在，bookId: " + bookId + " -->");
+    } else {
+        // 新增書籍
+        String insertBookSQL = "INSERT INTO books(title, author, ISBN, edition, createdAt) VALUES(?, ?, ?, ?, ?)";
+        PreparedStatement insertBookStmt = con.prepareStatement(insertBookSQL, Statement.RETURN_GENERATED_KEYS);
+        insertBookStmt.setString(1, title);
+        insertBookStmt.setString(2, author);
+        insertBookStmt.setString(3, ISBN != null && !ISBN.trim().isEmpty() ? ISBN : null);
+        insertBookStmt.setString(4, edition != null && !edition.trim().isEmpty() ? edition : null);
+        insertBookStmt.setString(5, publishDate);
+        
+        insertBookStmt.executeUpdate();
+        
+        ResultSet generatedKeys = insertBookStmt.getGeneratedKeys();
+        if (generatedKeys.next()) {
+            bookId = generatedKeys.getInt(1);
+            out.println("<!-- ✅ 新增書籍成功，bookId: " + bookId + " -->");
+        }
+        generatedKeys.close();
+        insertBookStmt.close();
     }
-    
-    sqlBuilder.append(", contact, remarks, [condition]");
-    valuesBuilder.append(", ?, ?, ?");
-    paramValues.add(contact);
-    paramValues.add(remarks);
-    paramValues.add(condition);
-    
-    if (availableColumns.contains("college")) {
-        sqlBuilder.append(", college");
-        valuesBuilder.append(", ?");
-        paramValues.add(college != null ? college : "");
+    bookRs.close();
+    checkBookStmt.close();
+
+    // ========== 2. 檢查或新增課程 (courses 表) ==========
+    String checkCourseSQL = "SELECT courseId FROM courses WHERE courseName = ? AND teacher = ? AND department = ?";
+    PreparedStatement checkCourseStmt = con.prepareStatement(checkCourseSQL);
+    checkCourseStmt.setString(1, courseName);
+    checkCourseStmt.setString(2, teacher);
+    checkCourseStmt.setString(3, department);
+    ResultSet courseRs = checkCourseStmt.executeQuery();
+
+    if (courseRs.next()) {
+        // 課程已存在
+        courseId = courseRs.getInt("courseId");
+        out.println("<!-- ✅ 課程已存在，courseId: " + courseId + " -->");
+    } else {
+        // 新增課程
+        String insertCourseSQL = "INSERT INTO courses(courseName, teacher, department) VALUES(?, ?, ?)";
+        PreparedStatement insertCourseStmt = con.prepareStatement(insertCourseSQL, Statement.RETURN_GENERATED_KEYS);
+        insertCourseStmt.setString(1, courseName);
+        insertCourseStmt.setString(2, teacher);
+        insertCourseStmt.setString(3, department);
+        
+        insertCourseStmt.executeUpdate();
+        
+        ResultSet courseKeys = insertCourseStmt.getGeneratedKeys();
+        if (courseKeys.next()) {
+            courseId = courseKeys.getInt(1);
+            out.println("<!-- ✅ 新增課程成功，courseId: " + courseId + " -->");
+        }
+        courseKeys.close();
+        insertCourseStmt.close();
     }
+    courseRs.close();
+    checkCourseStmt.close();
+
+    // ========== 3. 新增書籍上架詳情 (bookListings 表) ==========
+    String insertListingSQL = "INSERT INTO bookListings(bookId, sellerId, price, quantity, [condition], photo, remarks, Approved, isDelisted, listedAt, expiryDate) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    PreparedStatement insertListingStmt = con.prepareStatement(insertListingSQL, Statement.RETURN_GENERATED_KEYS);
+    insertListingStmt.setInt(1, bookId);
+    insertListingStmt.setString(2, sellerId);
+    insertListingStmt.setString(3, price);
+    insertListingStmt.setString(4, quantity != null ? quantity : "1");
+    insertListingStmt.setString(5, condition);
+    insertListingStmt.setString(6, photosPaths);
+    insertListingStmt.setString(7, fullRemarks.toString());
+    insertListingStmt.setString(8, "待審核");
     
-    if (availableColumns.contains("department")) {
-        sqlBuilder.append(", department");
-        valuesBuilder.append(", ?");
-        paramValues.add(department != null ? department : "");
-    }
+    // 🔧 修正：使用 setBoolean() 而不是 setString()
+    insertListingStmt.setBoolean(9, false); // isDelisted: false = 未下架
     
-    // 🔥 關鍵修正：確保 createdAt 被加入
-    if (availableColumns.contains("createdAt")) {
-        sqlBuilder.append(", createdAt");
-        valuesBuilder.append(", ?");
-        paramValues.add(createdAt != null && !createdAt.trim().isEmpty() ? createdAt : new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date()));
-        out.println("<!-- ✅ 已加入 createdAt: " + createdAt + " -->");
-    }
+    insertListingStmt.setString(10, listedAt);
     
-    // 🔥 關鍵修正：確保 expiryDate 被加入
-    if (availableColumns.contains("expiryDate")) {
-        sqlBuilder.append(", expiryDate");
-        valuesBuilder.append(", ?");
-        paramValues.add(expiryDate != null && !expiryDate.trim().isEmpty() ? expiryDate : "");
-        out.println("<!-- ✅ 已加入 expiryDate: " + expiryDate + " -->");
-    }
-    
-    if (availableColumns.contains("teacher")) {
-        sqlBuilder.append(", teacher");
-        valuesBuilder.append(", ?");
-        paramValues.add(teacher != null ? teacher : "");
-    }
-    
-    if (availableColumns.contains("course")) {
-        sqlBuilder.append(", course");
-        valuesBuilder.append(", ?");
-        paramValues.add(course != null ? course : "");
-    }
-    
-    if (availableColumns.contains("ISBN")) {
-        sqlBuilder.append(", ISBN");
-        valuesBuilder.append(", ?");
-        paramValues.add(ISBN != null ? ISBN : "");
-    }
-    
-    sqlBuilder.append(", userId");
-    valuesBuilder.append(", ?");
-    paramValues.add(userId);
-    
-    if (availableColumns.contains("quantity")) {
-        sqlBuilder.append(", quantity");
-        valuesBuilder.append(", ?");
-        paramValues.add(quantity != null ? quantity : "1");
-    }
-    
-    sqlBuilder.append(", photo");
-    valuesBuilder.append(", ?");
-    paramValues.add(photosPaths);
-    
-    if (availableColumns.contains("isApproved")) {
-        sqlBuilder.append(", isApproved");
-        valuesBuilder.append(", '待審核'");
-    }
-    
-    sqlBuilder.append(") ");
-    valuesBuilder.append(")");
-    
-    String sql = sqlBuilder.toString() + valuesBuilder.toString();
-    out.println("<!-- SQL: " + sql + " -->");
-    out.println("<!-- 參數數量: " + paramValues.size() + " -->");
-    for (int i = 0; i < paramValues.size(); i++) {
-        out.println("<!-- 參數[" + i + "]: " + paramValues.get(i) + " -->");
+    // 使用 Timestamp 儲存下架日期時間
+    if (expiryDate != null && !expiryDate.trim().isEmpty()) {
+        insertListingStmt.setTimestamp(11, Timestamp.valueOf(expiryDate));
+    } else {
+        insertListingStmt.setNull(11, Types.TIMESTAMP);
     }
 
-    // 執行 SQL
-    PreparedStatement pstmt = con.prepareStatement(sql);
-    for (int i = 0; i < paramValues.size(); i++) {
-        pstmt.setString(i + 1, paramValues.get(i));
-    }
-
-    int rowsAffected = pstmt.executeUpdate();
-    out.println("<!-- 影響筆數: " + rowsAffected + " -->");
+    int listingRows = insertListingStmt.executeUpdate();
     
-    pstmt.close();
-    con.close();
+    ResultSet listingKeys = insertListingStmt.getGeneratedKeys();
+    int listingId = -1;
+    if (listingKeys.next()) {
+        listingId = listingKeys.getInt(1);
+        out.println("<!-- ✅ 新增上架詳情成功，listingId: " + listingId + " -->");
+    }
+    listingKeys.close();
+    insertListingStmt.close();
+
+    // ========== 4. 建立書籍與課程的關聯 (book_course_relations 表) ==========
+    String checkRelationSQL = "SELECT relationId FROM book_course_relations WHERE bookId = ? AND courseId = ?";
+    PreparedStatement checkRelationStmt = con.prepareStatement(checkRelationSQL);
+    checkRelationStmt.setInt(1, bookId);
+    checkRelationStmt.setInt(2, courseId);
+    ResultSet relationRs = checkRelationStmt.executeQuery();
+
+    if (!relationRs.next()) {
+        // 不存在關聯，新增
+        String insertRelationSQL = "INSERT INTO book_course_relations(bookId, courseId) VALUES(?, ?)";
+        PreparedStatement insertRelationStmt = con.prepareStatement(insertRelationSQL);
+        insertRelationStmt.setInt(1, bookId);
+        insertRelationStmt.setInt(2, courseId);
+        insertRelationStmt.executeUpdate();
+        insertRelationStmt.close();
+        out.println("<!-- ✅ 新增書籍-課程關聯成功 -->");
+    } else {
+        out.println("<!-- ✅ 書籍-課程關聯已存在 -->");
+    }
+    relationRs.close();
+    checkRelationStmt.close();
+
+    // ========== 提交交易 ==========
+    con.commit();
+    out.println("<!-- ✅ 所有資料已成功寫入資料庫 -->");
+    
+    // 格式化顯示日期時間
+    String displayExpiryDate = expiryDate;
+    try {
+        SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        java.util.Date date = dbFormat.parse(expiryDate);
+        displayExpiryDate = displayFormat.format(date);
+    } catch (Exception e) {
+        // 如果解析失敗，使用原始值
+    }
 %>
 <div class="success-box">
     <h3 style="color:green;">✅ 上傳成功！</h3>
-    <p><strong>書名：</strong><%= titleBook %></p>
+    <p><strong>書名：</strong><%= title %></p>
     <p><strong>作者：</strong><%= author %></p>
     <p><strong>價格：</strong>NT$<%= price %></p>
-    <p><strong>上架日期：</strong><%= createdAt %></p>
-    <p><strong>下架日期：</strong><%= expiryDate %></p>
+    <p><strong>課程：</strong><%= courseName %></p>
+    <p><strong>授課教師：</strong><%= teacher %></p>
+    <p><strong>系所：</strong><%= department %></p>
+    <p><strong>書籍狀況：</strong><%= condition %></p>
+    <p><strong>有無筆記：</strong><%= remarks %></p>
+    <p><strong>上架日期：</strong><%= listedAt %></p>
+    <p><strong>下架日期時間：</strong><%= displayExpiryDate %></p>
     <p><strong>已上傳圖片：</strong><%= uploadedFiles.size() %> 張</p>
     <p style="color:#666; margin-top:15px;">等待管理員審核中...</p>
 </div>
 
 <script>
     setTimeout(function() {
-        alert("✅ 書籍已成功上架！\n上架日期：<%= createdAt %>\n下架日期：<%= expiryDate %>\n已上傳 <%= uploadedFiles.size() %> 張圖片\n等待管理員審核中...");
+        alert("✅ 書籍已成功上架！\n書名：<%= title %>\n課程：<%= courseName %>\n書籍狀況：<%= condition %>\n有無筆記：<%= remarks %>\n上架日期：<%= listedAt %>\n下架日期時間：<%= displayExpiryDate %>\n已上傳 <%= uploadedFiles.size() %> 張圖片\n等待管理員審核中...");
         window.location.href = "index.jsp";
     }, 1000);
 </script>
 <%
 } catch (Exception e) {
+    // 發生錯誤時回滾交易
+    if (con != null) {
+        try {
+            con.rollback();
+            out.println("<!-- ❌ 交易已回滾 -->");
+        } catch (SQLException se) {
+            out.println("<!-- ❌ 回滾失敗: " + se.getMessage() + " -->");
+        }
+    }
+    
     out.println("<div class='error-box'>");
     out.println("<h3 style='color:red;'>❌ 上傳失敗</h3>");
     out.println("<p><strong>錯誤訊息：</strong>" + e.getMessage() + "</p>");
@@ -246,6 +311,16 @@ try {
     out.println("</pre>");
     
     out.println("<br><a href='shop.jsp' style='display:inline-block; padding:10px 20px; background:#007bff; color:#fff; text-decoration:none; border-radius:4px;'>返回上架頁面</a>");
+} finally {
+    // 關閉資料庫連線
+    if (con != null) {
+        try {
+            con.setAutoCommit(true);
+            con.close();
+        } catch (SQLException se) {
+            out.println("<!-- 關閉連線錯誤: " + se.getMessage() + " -->");
+        }
+    }
 }
 %>
 </body>
