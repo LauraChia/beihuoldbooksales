@@ -1,6 +1,8 @@
 <%@page contentType="text/html" pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
 <%@page import="java.util.*"%>
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.util.Date"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
 <html lang="zh">
@@ -544,7 +546,25 @@
         <% } %>
         <div class="info-item"><strong>賣家：</strong><%= rs.getString("sellerName") %></div>
         <div class="info-item"><strong>上架日期：</strong><%= rs.getString("listedAt").split(" ")[0] %></div>
-        <div class="info-item"><strong>下架日期：</strong><%= rs.getString("expiryDate").split(" ")[0] %></div>
+        <%
+	    // 格式化下架日期時間顯示
+	    String expiryDateStr = rs.getString("expiryDate");
+	    String displayExpiryDate = expiryDateStr;
+	    
+	    if (expiryDateStr != null && !expiryDateStr.trim().isEmpty()) {
+	        try {
+	            // 如果資料庫格式是 yyyy-MM-dd HH:mm:ss，轉換為更易讀的格式
+	            SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	            SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+	            java.util.Date date = dbFormat.parse(expiryDateStr);
+	            displayExpiryDate = displayFormat.format(date);
+	        } catch (Exception e) {
+	            // 如果解析失敗，直接使用原始值
+	            displayExpiryDate = expiryDateStr;
+	        }
+	    }
+		%>
+        <div class="info-item"><strong>下架日期時間：</strong><%= displayExpiryDate %></div>
         <div class="info-item"><strong>上架本數：</strong><%= rs.getString("quantity") %></div>
         <div class="info-item"><strong>審核狀態：</strong><span class="<%= statusClass %>"><%= statusText %></span></div>
 
