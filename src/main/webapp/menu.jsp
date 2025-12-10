@@ -406,7 +406,7 @@
                                             <span class="dropdown-item-text">我的收藏</span>
                                         </a>
                                         
-                                        <a href="#" class="dropdown-item-custom">
+                                       <a href="#" class="dropdown-item-custom">
                                            <i class="fas fa-store"></i>
                                             <span class="dropdown-item-text">我的上架</span>
                                         </a>
