@@ -462,6 +462,11 @@ document.head.appendChild(toastStyle);
                 <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8" target="_blank" rel="noopener noreferrer">系統使用回饋表單</a>
                 <a class="btn btn-link" href="informAgainst.jsp" target="_blank" rel="noopener noreferrer">舉報不佳上傳書籍區</a>
             </div>
+            <div class="col-md-6 col-lg-3">
+                <h5 class="text-white mb-4">管理員專區</h5>
+                <a class="btn btn-link" href="adminLogin.jsp">管理員</a>
+                
+            </div>
         </div>
     </div>
     <div class="container-fluid text-center border-top border-secondary py-3">
