@@ -418,7 +418,7 @@ if ("delete".equals(action) && announcementId != null) {
 <body>
     <div class="header">
         <div class="header-content">
-            <h1>📢 系統公告管理</h1>
+            <h1>📢 系統通知管理</h1>
             <div class="user-info">
                 <span>👤 <%= adminUser %></span>
                 <a href="adminDashboard.jsp" class="logout-btn">返回後台</a>
@@ -480,16 +480,16 @@ if ("delete".equals(action) && announcementId != null) {
         <div class="publish-card">
             <h2>
                 <i class="fas fa-bullhorn"></i>
-                發布系統公告
+                發布系統通知
             </h2>
             
             <form method="post" action="?action=publish">
                 <div class="form-group">
-                    <label class="form-label">公告內容 *</label>
+                    <label class="form-label">通知內容 *</label>
                     <textarea 
                         name="announcementMsg" 
                         class="form-control" 
-                        placeholder="請輸入要發送給所有用戶的系統公告內容..."
+                        placeholder="請輸入要發送給所有用戶的系統通知內容..."
                         required
                         maxlength="500"
                         id="announcementMsg"
@@ -500,7 +500,7 @@ if ("delete".equals(action) && announcementId != null) {
                 </div>
                 
                 <button type="submit" class="btn-publish">
-                    <i class="fas fa-paper-plane"></i> 發送公告給所有用戶
+                    <i class="fas fa-paper-plane"></i> 發送通知給所有用戶
                 </button>
                 
                 <div class="tips-box">

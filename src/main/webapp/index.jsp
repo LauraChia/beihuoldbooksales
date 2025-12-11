@@ -185,7 +185,6 @@
                      "bl.isDelisted " +
                      "FROM bookListings bl " +
                      "INNER JOIN books b ON bl.bookId = b.bookId " +
-                     "WHERE bl.isDelisted = FALSE " + 
                      "ORDER BY bl.listedAt DESC";
         
         smt = con.createStatement();
@@ -322,29 +321,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // ============ 自動執行過期書籍檢查 ============
-    fetch('autoExpireBooks.jsp')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                if (data.expiredCount > 0) {
-                    console.log('✓ 已自動下架 ' + data.expiredCount + ' 本過期書籍');
-                    console.log('下架書籍：', data.expiredBooks);
-                    
-                    // 選項：如果有書籍被下架，重新載入頁面以更新顯示
-                    // setTimeout(() => location.reload(), 1000);
-                } else {
-                    console.log('✓ 過期檢查完成，無需下架書籍');
-                }
-            } else {
-                console.warn('⚠ 自動下架檢查失敗:', data.error);
-            }
-        })
-        .catch(error => {
-            console.error('✗ 自動下架檢查錯誤:', error);
-        });
-    
-    // ============ 原有的圖片輪播功能 ============
     const cards = document.querySelectorAll('.book-card');
     
     cards.forEach(card => {

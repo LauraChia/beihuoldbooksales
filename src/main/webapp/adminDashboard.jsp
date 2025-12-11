@@ -146,8 +146,8 @@ String loginTime = (String) session.getAttribute("loginTime");
         }
         
         .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
+            background: #daf5cc;
+            border-left: 4px solid #9ac7c5;
             padding: 15px;
             border-radius: 5px;
             margin-top: 20px;
@@ -156,7 +156,7 @@ String loginTime = (String) session.getAttribute("loginTime");
         .info-box p {
             margin: 5px 0;
             font-size: 14px;
-            color: #1976d2;
+            color: 0b8a00;
         }
     </style>
 </head>
@@ -191,13 +191,13 @@ String loginTime = (String) session.getAttribute("loginTime");
             
             <a href="manageUsers.jsp" class="dashboard-card">
                 <div class="icon">👥</div>
-                <h3>會員管理</h3>
+                <h3>使用者管理</h3>
                 <p>管理使用者帳號資訊</p>
             </a>
             
             <a href="systemAnnouncement.jsp" class="dashboard-card">
                 <div class="icon">🏠</div>
-                <h3>系統公告</h3>
+                <h3>系統通知</h3>
                 <p>管理員公告平台的狀態</p>
             </a>
             
