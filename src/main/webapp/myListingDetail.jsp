@@ -18,33 +18,77 @@
     <meta charset="utf-8">
     <title>書籍詳情 - 我的上架</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f9f9f9;
+            background-color: #f8f9fa;
             font-family: "Microsoft JhengHei", sans-serif;
         }
         
+        /* 頁面標題 - 淺綠色 */
+        .page-header {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
+        }
+        
+        .page-header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 600;
+        }
+        
+        .page-header .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin: 10px 0 0 0;
+            font-size: 14px;
+        }
+        
+        .page-header .breadcrumb a {
+            color: white;
+            opacity: 0.9;
+            text-decoration: none;
+        }
+        
+        .page-header .breadcrumb a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        
+        .page-header .breadcrumb-item.active {
+            color: white;
+            opacity: 0.7;
+        }
+        
+        .page-header .breadcrumb-item + .breadcrumb-item::before {
+            color: white;
+            opacity: 0.7;
+        }
+        
         .back-button {
-            position: fixed;
-            top: 80px;
-            left: 20px;
             background-color: white;
-            border: 2px solid #667eea;
-            color: #667eea;
+            border: 2px solid #81c784;
+            color: #66bb6a;
             padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
             transition: all 0.3s;
-            z-index: 1000;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
         }
         
         .back-button:hover {
-            background-color: #667eea;
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
             color: white;
             transform: translateX(-5px);
+            box-shadow: 0 4px 12px rgba(129, 199, 132, 0.4);
         }
         
         .book-detail {
@@ -52,21 +96,24 @@
             justify-content: center;
             align-items: flex-start;
             gap: 40px;
-            padding: 80px;
+            padding: 0 40px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
         }
         
         .image-gallery {
             position: relative;
-            width: 350px;
+            width: 400px;
+            flex-shrink: 0;
         }
         
         .image-container {
             position: relative;
-            width: 350px;
-            height: 450px;
-            border-radius: 10px;
+            width: 100%;
+            height: 500px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
             background-color: #f0f0f0;
         }
         
@@ -85,7 +132,7 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(129, 199, 132, 0.9);
             color: white;
             border: none;
             width: 40px;
@@ -96,12 +143,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
             z-index: 10;
         }
         
         .image-nav:hover {
-            background-color: rgba(0,0,0,0.7);
+            background-color: #66bb6a;
+            transform: translateY(-50%) scale(1.1);
         }
         
         .image-nav.prev {
@@ -121,34 +169,36 @@
         }
         
         .thumbnail {
-            width: 70px;
-            height: 90px;
-            border-radius: 5px;
+            width: 80px;
+            height: 100px;
+            border-radius: 8px;
             object-fit: cover;
             cursor: pointer;
-            border: 2px solid transparent;
+            border: 3px solid transparent;
             transition: all 0.3s;
             flex-shrink: 0;
         }
         
         .thumbnail:hover {
             transform: scale(1.05);
+            border-color: #c8e6c9;
         }
         
         .thumbnail.active {
-            border-color: #667eea;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            border-color: #66bb6a;
+            box-shadow: 0 2px 8px rgba(102, 187, 106, 0.4);
         }
         
         .image-counter {
             position: absolute;
             bottom: 10px;
             right: 10px;
-            background-color: rgba(0,0,0,0.6);
+            background-color: rgba(102, 187, 106, 0.9);
             color: white;
-            padding: 5px 12px;
-            border-radius: 15px;
+            padding: 6px 14px;
+            border-radius: 20px;
             font-size: 14px;
+            font-weight: 500;
             z-index: 10;
         }
         
@@ -156,93 +206,95 @@
             position: absolute;
             top: 10px;
             left: 10px;
-            padding: 8px 15px;
+            padding: 8px 16px;
             border-radius: 8px;
             font-size: 14px;
             font-weight: bold;
             z-index: 10;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         
         .status-approved {
-            background-color: #4caf50;
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
             color: white;
         }
         
         .status-pending {
-            background-color: #ff9800;
+            background: linear-gradient(135deg, #ffb74d 0%, #ffa726 100%);
             color: white;
         }
         
         .status-rejected {
-            background-color: #f44336;
+            background: linear-gradient(135deg, #e57373 0%, #ef5350 100%);
             color: white;
         }
         
         .status-delisted {
-            background-color: #9e9e9e;
+            background: linear-gradient(135deg, #bdbdbd 0%, #9e9e9e 100%);
             color: white;
         }
         
         .detail-info {
-            max-width: 550px;
+            flex: 1;
+            max-width: 700px;
         }
         
         .detail-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
         
-        h2 {
+        .detail-header h2 {
             font-weight: bold;
-            margin: 0;
-            flex: 1;
-        }
-        
-        .status-indicator {
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            margin-left: 15px;
+            margin: 0 0 10px 0;
+            color: #333;
+            font-size: 28px;
         }
         
         .price {
-            font-size: 24px;
-            color: #d9534f;
+            font-size: 32px;
+            color: #e53935;
             font-weight: bold;
             margin: 15px 0;
         }
         
         .info-section {
             background-color: white;
-            border-radius: 10px;
-            padding: 20px;
+            border-radius: 12px;
+            padding: 25px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid #e0e0e0;
         }
         
         .info-section h3 {
             font-size: 18px;
             font-weight: bold;
-            color: #333;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
+            color: #66bb6a;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #c8e6c9;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .info-item {
-            margin: 12px 0;
+            margin: 14px 0;
             color: #555;
-            line-height: 1.6;
+            line-height: 1.8;
+            display: flex;
+            align-items: flex-start;
         }
         
         .info-item strong {
             color: #333;
-            min-width: 120px;
+            min-width: 140px;
             display: inline-block;
+            font-weight: 600;
+        }
+        
+        .info-item .value {
+            flex: 1;
         }
         
         .action-buttons {
@@ -253,7 +305,7 @@
         }
         
         .btn-action {
-            padding: 12px 30px;
+            padding: 14px 30px;
             border: none;
             border-radius: 8px;
             font-size: 16px;
@@ -266,84 +318,91 @@
         }
         
         .btn-edit {
-            background-color: #2196f3;
+            background: linear-gradient(135deg, #42a5f5 0%, #2196f3 100%);
             color: white;
         }
         
         .btn-edit:hover {
-            background-color: #1976d2;
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
         }
         
         .btn-delete {
-            background-color: #f44336;
+            background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
             color: white;
         }
         
         .btn-delete:hover {
-            background-color: #d32f2f;
+            background: linear-gradient(135deg, #e53935 0%, #d32f2f 100%);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
         }
         
         .btn-secondary {
-            background-color: #6c757d;
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
             color: white;
         }
         
         .btn-secondary:hover {
-            background-color: #5a6268;
+            background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(129, 199, 132, 0.4);
         }
         
         .alert {
-            padding: 15px 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
+            padding: 18px 25px;
+            margin: 0 40px 30px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            border-radius: 10px;
             animation: slideIn 0.3s;
+            border-left: 4px solid;
         }
         
         .alert-warning {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
+            background-color: #fff8e1;
+            border-color: #ffb74d;
+            color: #f57c00;
         }
         
         .alert-info {
-            background-color: #d1ecf1;
-            border-color: #bee5eb;
-            color: #0c5460;
+            background-color: #e3f2fd;
+            border-color: #42a5f5;
+            color: #1976d2;
         }
         
-        .alert-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
-            color: #155724;
+        .alert strong {
+            font-size: 16px;
+            display: block;
+            margin-bottom: 5px;
         }
         
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 15px;
-            margin-top: 20px;
+            margin-bottom: 25px;
         }
         
         .stat-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
             color: white;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 18px;
+            border-radius: 10px;
             text-align: center;
+            box-shadow: 0 2px 8px rgba(129, 199, 132, 0.3);
         }
         
         .stat-box .label {
-            font-size: 12px;
+            font-size: 13px;
             opacity: 0.9;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         
         .stat-box .value {
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
         }
         
@@ -361,26 +420,29 @@
             to { transform: translateY(0); opacity: 1; }
         }
         
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
             .book-detail {
                 flex-direction: column;
-                padding: 40px 20px;
+                padding: 0 20px 40px;
             }
             
             .image-gallery {
                 width: 100%;
-            }
-            
-            .image-container {
-                width: 100%;
+                max-width: 500px;
+                margin: 0 auto;
             }
             
             .detail-info {
                 width: 100%;
+                max-width: 100%;
             }
             
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .alert {
+                margin: 0 20px 30px;
             }
         }
     </style>
@@ -389,11 +451,18 @@
 <body>
 <%@ include file="menu.jsp"%>
 
-<button class="back-button" onclick="window.location.href='myListings.jsp'">
-    ← 返回我的上架
-</button>
-
-<br><br><br><br>
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-book-open"></i> 書籍詳情</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.jsp">首頁</a></li>
+                <li class="breadcrumb-item"><a href="myListings.jsp">我的上架</a></li>
+                <li class="breadcrumb-item active">書籍詳情</li>
+            </ol>
+        </nav>
+    </div>
+</div>
 
 <%
     String listingId = request.getParameter("listingId");
@@ -483,51 +552,33 @@
             }
         }
         
-        // ===== 註解掉統計資訊查詢 =====
-        /*
-        // 獲取統計資訊（瀏覽數、收藏數、訊息數）
-        String statsSql = "SELECT " +
-                         "(SELECT COUNT(*) FROM favorites WHERE bookId = " + bookId + ") as favoriteCount, " +
-                         "(SELECT COUNT(*) FROM messages WHERE listingId = " + listingId + ") as messageCount";
-        
-        ResultSet statsRs = smt.executeQuery(statsSql);
-        int favoriteCount = 0;
-        int messageCount = 0;
-        
-        if (statsRs.next()) {
-            favoriteCount = statsRs.getInt("favoriteCount");
-            messageCount = statsRs.getInt("messageCount");
-        }
-        statsRs.close();
-        */
-        
         // 設定預設值（不執行查詢）
         int favoriteCount = 0;
         int messageCount = 0;
 %>
 
 <% if (isDelisted != null && isDelisted) { %>
-<div class="container">
-    <div class="alert alert-warning">
-        <strong>⚠️ 此書籍已下架</strong><br>
-        此書籍已從平台下架，買家無法看到此商品。如需重新上架，請聯繫管理員。
-    </div>
+<div class="alert alert-warning">
+    <strong>⚠️ 此書籍已下架</strong><br>
+    此書籍已從平台下架，買家無法看到此商品。如需重新上架，請聯繫管理員。
 </div>
 <% } else if ("FALSE".equalsIgnoreCase(approvalStatus)) { %>
-<div class="container">
-    <div class="alert alert-warning">
-        <strong>⚠️ 審核未通過</strong><br>
-        此書籍未通過審核，買家無法看到此商品。請檢查上架內容是否符合規範，或聯繫管理員了解詳情。
-    </div>
+<div class="alert alert-warning">
+    <strong>⚠️ 審核未通過</strong><br>
+    此書籍未通過審核，買家無法看到此商品。請檢查上架內容是否符合規範，或聯繫管理員了解詳情。
 </div>
 <% } else if (!"TRUE".equalsIgnoreCase(approvalStatus)) { %>
-<div class="container">
-    <div class="alert alert-info">
-        <strong>ℹ️ 等待審核中</strong><br>
-        您的書籍正在等待管理員審核，審核通過後買家才能看到此商品。
-    </div>
+<div class="alert alert-info">
+    <strong>ℹ️ 等待審核中</strong><br>
+    您的書籍正在等待管理員審核，審核通過後買家才能看到此商品。
 </div>
 <% } %>
+
+<div style="max-width: 1400px; margin: 0 auto; padding: 0 40px;">
+    <button class="back-button" onclick="window.location.href='myListings.jsp'">
+        <i class="fas fa-arrow-left"></i> 返回我的上架
+    </button>
+</div>
 
 <div class="book-detail">
     <div class="image-gallery">
@@ -545,8 +596,12 @@
                 <% } %>
                 
                 <% if (totalImages > 1) { %>
-                    <button class="image-nav prev" onclick="changeImage(-1)">‹</button>
-                    <button class="image-nav next" onclick="changeImage(1)">›</button>
+                    <button class="image-nav prev" onclick="changeImage(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="image-nav next" onclick="changeImage(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                     <div class="image-counter">
                         <span id="current-image">1</span> / <%= totalImages %>
                     </div>
@@ -574,53 +629,75 @@
 
         <div class="price">NT$<%= (int) Float.parseFloat(rs.getString("price")) %></div>
         
-        <!-- ===== 註解掉統計資訊顯示 ===== -->
-        <!--
-        <div class="stats-grid">
-            <div class="stat-box">
-                <div class="label">收藏數</div>
-                <div class="value">❤️ <%= favoriteCount %></div>
-            </div>
-            <div class="stat-box">
-                <div class="label">訊息數</div>
-                <div class="value">💬 <%= messageCount %></div>
-            </div>
-            <div class="stat-box">
-                <div class="label">剩餘數量</div>
-                <div class="value">📦 <%= rs.getString("quantity") %></div>
-            </div>
-        </div>
-        -->
-        
         <!-- 基本資訊 -->
         <div class="info-section">
-            <h3>📚 基本資訊</h3>
-            <div class="info-item"><strong>作者：</strong><%= rs.getString("author") != null ? rs.getString("author") : "未提供" %></div>
-            <div class="info-item"><strong>出版日期：</strong><%= rs.getString("publishDate") != null ? rs.getString("publishDate").split(" ")[0] : "未提供" %></div>
-            <div class="info-item"><strong>書籍版本：</strong><%= rs.getString("edition") != null && !rs.getString("edition").trim().isEmpty() ? rs.getString("edition") : "未提供" %></div>
-            <div class="info-item"><strong>ISBN：</strong><%= rs.getString("ISBN") != null && !rs.getString("ISBN").trim().isEmpty() ? rs.getString("ISBN") : "未提供" %></div>
-            <div class="info-item"><strong>書籍狀況：</strong><%= rs.getString("condition") %></div>
-            <div class="info-item"><strong>有無筆記：</strong><%= hasNotes.isEmpty() ? "未提供" : hasNotes %></div>
+            <h3><i class="fas fa-book"></i> 基本資訊</h3>
+            <div class="info-item">
+                <strong>作者：</strong>
+                <span class="value"><%= rs.getString("author") != null ? rs.getString("author") : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>出版日期：</strong>
+                <span class="value"><%= rs.getString("publishDate") != null ? rs.getString("publishDate").split(" ")[0] : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>書籍版本：</strong>
+                <span class="value"><%= rs.getString("edition") != null && !rs.getString("edition").trim().isEmpty() ? rs.getString("edition") : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>ISBN：</strong>
+                <span class="value"><%= rs.getString("ISBN") != null && !rs.getString("ISBN").trim().isEmpty() ? rs.getString("ISBN") : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>書籍狀況：</strong>
+                <span class="value"><%= rs.getString("condition") %></span>
+            </div>
+            <div class="info-item">
+                <strong>有無筆記：</strong>
+                <span class="value"><%= hasNotes.isEmpty() ? "未提供" : hasNotes %></span>
+            </div>
+            <div class="info-item">
+                <strong>剩餘數量：</strong>
+                <span class="value"><%= rs.getString("quantity") %> 本</span>
+            </div>
         </div>
         
         <!-- 課程資訊 -->
         <div class="info-section">
-            <h3>🎓 課程資訊</h3>
-            <div class="info-item"><strong>使用系所：</strong><%= rs.getString("department") != null ? rs.getString("department") : "未提供" %></div>
-            <div class="info-item"><strong>使用課程：</strong><%= rs.getString("courseName") != null ? rs.getString("courseName") : "未提供" %></div>
-            <div class="info-item"><strong>授課老師：</strong><%= rs.getString("teacher") != null ? rs.getString("teacher") : "未提供" %></div>
+            <h3><i class="fas fa-graduation-cap"></i> 課程資訊</h3>
+            <div class="info-item">
+                <strong>使用系所：</strong>
+                <span class="value"><%= rs.getString("department") != null ? rs.getString("department") : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>使用課程：</strong>
+                <span class="value"><%= rs.getString("courseName") != null ? rs.getString("courseName") : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>授課老師：</strong>
+                <span class="value"><%= rs.getString("teacher") != null ? rs.getString("teacher") : "未提供" %></span>
+            </div>
         </div>
         
         <!-- 上架資訊 -->
         <div class="info-section">
-            <h3>📅 上架資訊</h3>
+            <h3><i class="fas fa-info-circle"></i> 上架資訊</h3>
             <% if (!contactInfo.isEmpty()) { %>
-            <div class="info-item"><strong>偏好聯絡方式：</strong><%= contactInfo %></div>
+            <div class="info-item">
+                <strong>偏好聯絡方式：</strong>
+                <span class="value"><%= contactInfo %></span>
+            </div>
             <% } %>
             <% if (!additionalRemarks.isEmpty()) { %>
-            <div class="info-item"><strong>備註說明：</strong><%= additionalRemarks %></div>
+            <div class="info-item">
+                <strong>備註說明：</strong>
+                <span class="value"><%= additionalRemarks %></span>
+            </div>
             <% } %>
-            <div class="info-item"><strong>上架日期：</strong><%= rs.getString("listedAt").split(" ")[0] %></div>
+            <div class="info-item">
+                <strong>上架日期：</strong>
+                <span class="value"><%= rs.getString("listedAt").split(" ")[0] %></span>
+            </div>
             <%
                 String expiryDateStr = rs.getString("expiryDate");
                 String displayExpiryDate = expiryDateStr;
@@ -636,22 +713,28 @@
                     }
                 }
             %>
-            <div class="info-item"><strong>下架日期時間：</strong><%= displayExpiryDate %></div>
-            <div class="info-item"><strong>審核狀態：</strong><span class="<%= statusClass.replace("status-", "") %>"><%= statusText %></span></div>
+            <div class="info-item">
+                <strong>下架日期時間：</strong>
+                <span class="value"><%= displayExpiryDate %></span>
+            </div>
+            <div class="info-item">
+                <strong>審核狀態：</strong>
+                <span class="value <%= statusClass.replace("status-", "") %>"><%= statusText %></span>
+            </div>
         </div>
 
         <!-- 操作按鈕 -->
         <div class="action-buttons">
             <button class="btn-action btn-edit" onclick="editListing()">
-                ✏️ 編輯書籍
+                <i class="fas fa-edit"></i> 編輯書籍
             </button>
             <% if (isDelisted == null || !isDelisted) { %>
             <button class="btn-action btn-delete" onclick="deleteListing()">
-                🗑️ 下架書籍
+                <i class="fas fa-trash"></i> 下架書籍
             </button>
             <% } %>
             <button class="btn-action btn-secondary" onclick="viewMessages()">
-                💬 查看訊息 <% if (messageCount > 0) { %>(<%= messageCount %>)<% } %>
+                <i class="fas fa-comments"></i> 查看訊息 <% if (messageCount > 0) { %>(<%= messageCount %>)<% } %>
             </button>
         </div>
     </div>
@@ -720,7 +803,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('✅ 書籍已成功下架');
+                    alert('✅書籍已成功下架');
                     window.location.reload();
                 } else {
                     alert('❌ 下架失敗: ' + (data.message || '未知錯誤'));

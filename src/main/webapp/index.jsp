@@ -185,6 +185,7 @@
                      "bl.isDelisted " +
                      "FROM bookListings bl " +
                      "INNER JOIN books b ON bl.bookId = b.bookId " +
+                     "WHERE bl.isDelisted = FALSE " +
                      "ORDER BY bl.listedAt DESC";
         
         smt = con.createStatement();

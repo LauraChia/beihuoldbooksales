@@ -17,24 +17,26 @@
     <meta charset="utf-8">
     <title>我的上架 - 北護二手書交易網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
             font-family: "Microsoft JhengHei", sans-serif;
         }
         
+        /* 頁面標題 - 淺綠色 */
         .page-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #81c784;
             color: white;
             padding: 40px 0;
             margin-bottom: 40px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
         }
         
         .page-header h1 {
             margin: 0;
             font-size: 32px;
-            font-weight: bold;
+            font-weight: 600;
         }
         
         .page-header p {
@@ -64,7 +66,7 @@
             background-color: white;
             padding: 10px 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -87,7 +89,7 @@
         .stat-item .value {
             font-size: 18px;
             font-weight: bold;
-            color: #333;
+            color: #66bb6a;
         }
         
         .sort-controls {
@@ -103,7 +105,7 @@
         
         .sort-select {
             padding: 8px 15px;
-            border: 2px solid #ddd;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
             background-color: white;
             font-size: 14px;
@@ -113,12 +115,12 @@
         }
         
         .sort-select:hover {
-            border-color: #667eea;
+            border-color: #81c784;
         }
         
         .sort-select:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #81c784;
+            box-shadow: 0 0 0 3px rgba(129, 199, 132, 0.1);
         }
         
         .filter-buttons {
@@ -128,23 +130,25 @@
         
         .filter-btn {
             padding: 8px 15px;
-            border: 2px solid #ddd;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
             background-color: white;
             cursor: pointer;
             transition: all 0.3s;
             font-size: 14px;
             font-weight: 500;
+            color: #666;
         }
         
         .filter-btn:hover {
-            border-color: #667eea;
-            color: #667eea;
+            border-color: #81c784;
+            color: #66bb6a;
+            background: #f1f8f4;
         }
         
         .filter-btn.active {
-            background-color: #667eea;
-            border-color: #667eea;
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            border-color: transparent;
             color: white;
         }
         
@@ -159,17 +163,17 @@
         
         .book-card {
             background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
             overflow: hidden;
             transition: 0.2s ease-in-out;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             position: relative;
         }
         
         .book-card:hover {
             transform: translateY(-6px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
         }
         
         .book-link {
@@ -209,26 +213,26 @@
             font-size: 12px;
             font-weight: bold;
             z-index: 10;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
         
         .status-approved {
-            background-color: #4caf50;
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
             color: white;
         }
         
         .status-pending {
-            background-color: #ff9800;
+            background: linear-gradient(135deg, #ffb74d 0%, #ffa726 100%);
             color: white;
         }
         
         .status-rejected {
-            background-color: #f44336;
+            background: linear-gradient(135deg, #e57373 0%, #ef5350 100%);
             color: white;
         }
         
         .status-delisted {
-            background-color: #9e9e9e;
+            background: linear-gradient(135deg, #bdbdbd 0%, #9e9e9e 100%);
             color: white;
         }
         
@@ -253,7 +257,7 @@
         }
         
         .book-price {
-            color: #d9534f;
+            color: #e53935;
             font-weight: bold;
             font-size: 15px;
         }
@@ -342,27 +346,30 @@
         }
         
         .btn-edit {
-            color: #2196f3;
+            color: #42a5f5;
         }
         
         .btn-delete {
-            color: #f44336;
+            color: #ef5350;
         }
         
         .empty-state {
             text-align: center;
             padding: 80px 40px;
             grid-column: 1/-1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
         
         .empty-state .icon {
             font-size: 80px;
             margin-bottom: 20px;
-            opacity: 0.3;
+            color: #c8e6c9;
         }
         
         .empty-state h3 {
-            color: #666;
+            color: #66bb6a;
             margin-bottom: 15px;
         }
         
@@ -372,7 +379,7 @@
         }
         
         .btn-primary-custom {
-            background-color: #667eea;
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
             color: white;
             padding: 12px 30px;
             border: none;
@@ -382,12 +389,13 @@
             transition: all 0.3s;
             text-decoration: none;
             display: inline-block;
+            font-weight: 500;
         }
         
         .btn-primary-custom:hover {
-            background-color: #5568d3;
+            background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(129, 199, 132, 0.4);
         }
         
         .loading {
@@ -425,7 +433,7 @@
 
 <div class="page-header">
     <div class="container">
-        <h1>📚 我的上架</h1>
+        <h1><i class="fas fa-books"></i> 我的上架</h1>
         <p>管理您所有上架的二手書籍</p>
     </div>
 </div>
@@ -522,21 +530,21 @@
 <div class="controls-bar">
     <div class="stats-info">
         <div class="stat-item">
-            <span class="icon">📚</span>
+            <span class="icon"><i class="fas fa-books"></i></span>
             <div class="info">
                 <span class="label">總上架數</span>
                 <span class="value"><%= totalBooks %></span>
             </div>
         </div>
         <div class="stat-item">
-            <span class="icon">✅</span>
+            <span class="icon"><i class="fas fa-check-circle"></i></span>
             <div class="info">
                 <span class="label">已審核</span>
                 <span class="value"><%= approvedBooks %></span>
             </div>
         </div>
         <div class="stat-item">
-            <span class="icon">⏳</span>
+            <span class="icon"><i class="fas fa-clock"></i></span>
             <div class="info">
                 <span class="label">待審核</span>
                 <span class="value"><%= pendingBooks %></span>
@@ -546,13 +554,21 @@
     
     <div class="filter-buttons">
         <button class="filter-btn <%= filterStatus.equals("all") ? "active" : "" %>" 
-                onclick="changeFilter('all')">全部</button>
+                onclick="changeFilter('all')">
+            <i class="fas fa-list"></i> 全部
+        </button>
         <button class="filter-btn <%= filterStatus.equals("approved") ? "active" : "" %>" 
-                onclick="changeFilter('approved')">已審核</button>
+                onclick="changeFilter('approved')">
+            <i class="fas fa-check-circle"></i> 已審核
+        </button>
         <button class="filter-btn <%= filterStatus.equals("pending") ? "active" : "" %>" 
-                onclick="changeFilter('pending')">待審核</button>
+                onclick="changeFilter('pending')">
+            <i class="fas fa-clock"></i> 待審核
+        </button>
         <button class="filter-btn <%= filterStatus.equals("delisted") ? "active" : "" %>" 
-                onclick="changeFilter('delisted')">已下架</button>
+                onclick="changeFilter('delisted')">
+            <i class="fas fa-ban"></i> 已下架
+        </button>
     </div>
     
     <div class="sort-controls">
@@ -630,12 +646,12 @@
                 <button class="action-btn btn-edit" 
                         onclick="editListing('<%= listingId %>')"
                         title="編輯">
-                    ✏️
+                    <i class="fas fa-edit"></i>
                 </button>
                 <button class="action-btn btn-delete" 
                         onclick="deleteListing('<%= listingId %>', '<%= title %>')"
                         title="下架">
-                    🗑️
+                    <i class="fas fa-trash"></i>
                 </button>
             </div>
             
@@ -675,17 +691,17 @@
         if (displayCount == 0) {
 %>
     <div class="empty-state">
-        <div class="icon">📦</div>
+        <div class="icon"><i class="fas fa-box-open"></i></div>
         <h3>目前沒有符合條件的書籍</h3>
         <p>您尚未上架任何書籍，或目前篩選條件下沒有資料</p>
         <a href="uploadBook.jsp" class="btn-primary-custom">
-            ➕ 立即上架書籍
+            <i class="fas fa-plus"></i> 立即上架書籍
         </a>
     </div>
 <%
         }
     } catch (Exception e) {
-        out.println("<div style='grid-column: 1/-1; text-align: center; padding: 40px; color: #d9534f;'>");
+        out.println("<div style='grid-column: 1/-1; text-align: center; padding: 40px; color: #ef5350;'>");
         out.println("<h3>載入資料時發生錯誤</h3>");
         out.println("<p>錯誤訊息: " + e.getMessage() + "</p>");
         out.println("</div>");
@@ -812,10 +828,4 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
     </div>
-    <div class="container-fluid text-center border-top border-secondary py-3">
-        <p class="mb-0">&copy; 2025年 國北護二手書交易網. @All Rights Reserved.</p>
-    </div>
-</div>
-
-</body>
-</html>
+    
