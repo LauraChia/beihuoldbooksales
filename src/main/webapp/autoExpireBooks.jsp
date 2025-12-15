@@ -50,13 +50,16 @@
 
         // 2. 執行下架操作
         if (!expiredBooks.isEmpty()) {
-            // 下架書籍
-            String updateSql = "UPDATE bookListings SET isDelisted = TRUE, delistedAt = ? WHERE listingId = ?";
+            // 下架書籍（加入 delistReason 和 delistedBy）
+            String updateSql = "UPDATE bookListings SET isDelisted = TRUE, delistedAt = ?, " +
+                              "delistReason = ?, delistedBy = ? WHERE listingId = ?";
             pstmt = con.prepareStatement(updateSql);
 
             for (Map<String, String> book : expiredBooks) {
                 pstmt.setString(1, currentTime);
-                pstmt.setString(2, book.get("listingId"));
+                pstmt.setString(2, "自動到期下架");
+                pstmt.setString(3, "系統自動執行");
+                pstmt.setString(4, book.get("listingId"));
                 int updated = pstmt.executeUpdate();
 
                 if (updated > 0) {

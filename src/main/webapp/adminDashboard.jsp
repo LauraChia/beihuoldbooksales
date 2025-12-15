@@ -195,8 +195,14 @@ String loginTime = (String) session.getAttribute("loginTime");
                 <p>管理使用者帳號資訊</p>
             </a>
             
+            <a href="delistingRecords.jsp" class="dashboard-card">
+                <div class="icon">📋</div>
+                <h3>下架紀錄查詢</h3>
+                <p>查詢書籍下架的歷史紀錄</p>
+            </a>
+            
             <a href="systemAnnouncement.jsp" class="dashboard-card">
-                <div class="icon">🏠</div>
+                <div class="icon">📢</div>
                 <h3>系統通知</h3>
                 <p>管理員公告平台的狀態</p>
             </a>
