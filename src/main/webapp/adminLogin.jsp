@@ -2,7 +2,8 @@
 <%@ page import="java.security.MessageDigest"%>
 <%@ page import="java.util.HashMap"%>
 <%@ page import="java.util.Map"%>
-
+<%@ page import="java.text.SimpleDateFormat" %>
+<%@ page import="java.util.Date" %>
 <%
 // 定義管理員帳號密碼（使用 HashMap 儲存）
 Map<String, String> adminUsers = new HashMap<>();
@@ -28,9 +29,16 @@ if ("login".equals(action)) {
         if (adminUsers.containsKey(username) && adminUsers.get(username).equals(password)) {
             // 登入成功，建立 session
             session.setAttribute("adminUser", username);
-            session.setAttribute("loginTime", new java.util.Date().toString());
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            String loginTime = sdf.format(new Date());
+
+            // 存入 session
+            session.setAttribute("adminUser", username);
+            session.setAttribute("loginTime", loginTime);
+
             response.sendRedirect("adminDashboard.jsp");
             return;
+            
         } else {
             message = "帳號或密碼錯誤！";
             messageType = "error";
