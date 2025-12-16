@@ -161,6 +161,23 @@ if (action != null && listingId != null) {
             }
         }
         
+        .back-btn {
+            display: inline-block;
+            background: white;
+            color: #81c408;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        
         .filter-tabs {
             display: flex;
             gap: 10px;
@@ -355,18 +372,6 @@ if (action != null && listingId != null) {
             margin-bottom: 20px;
         }
         
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #81c408;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        
         .book-info {
             display: flex;
             align-items: center;
@@ -398,6 +403,7 @@ if (action != null && listingId != null) {
             <h1>📚 書籍審核管理</h1>
             <div class="user-info">
                 <span>👤 <%= adminUser %></span>
+             
                 <a href="adminDashboard.jsp" class="logout-btn">返回後台</a>
                 <a href="adminLogin.jsp?action=logout" class="logout-btn">登出</a>
             </div>
@@ -405,7 +411,7 @@ if (action != null && listingId != null) {
     </div>
     
     <div class="container">
-        <a href="adminDashboard.jsp" class="back-link">← 返回管理後台</a>
+        <a href="adminDashboard.jsp" class="back-btn">← 返回管理後台</a>
         
         <% if (!message.isEmpty()) { %>
             <div class="alert alert-<%= messageType %>">

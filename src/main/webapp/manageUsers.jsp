@@ -256,6 +256,23 @@ try {
             }
         }
         
+        .back-btn {
+            display: inline-block;
+            background: white;
+            color: #81c408;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        
         .filter-tabs {
             display: flex;
             gap: 10px;
@@ -452,18 +469,6 @@ try {
             margin-bottom: 20px;
         }
         
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #81c408;
-            text-decoration: none;
-            font-size: 14px;
-        }
-        
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        
         .modal {
             display: none;
             position: fixed;
@@ -585,7 +590,7 @@ try {
     </div>
     
     <div class="container">
-        <a href="adminDashboard.jsp" class="back-link">← 返回管理後台</a>
+        <a href="adminDashboard.jsp" class="back-btn">← 返回管理後台</a>
         
         <% if (!message.isEmpty()) { %>
             <div class="alert alert-<%= messageType %>">
@@ -828,7 +833,7 @@ try {
                     <div class="form-group">
                         <label>帳號 *</label>
                         <input type="text" name="username" id="editUsername" required>
-                    </div>
+                   
                     
                     <div class="form-group">
                         <label>聯絡方式</label>

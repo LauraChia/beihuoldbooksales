@@ -198,16 +198,21 @@ if ("delete".equals(action) && announcementId != null) {
             }
         }
         
-        .back-link {
+        .back-btn {
             display: inline-block;
-            margin-bottom: 20px;
+            background: white;
             color: #81c408;
+            padding: 10px 20px;
+            border-radius: 8px;
             text-decoration: none;
-            font-size: 14px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         
-        .back-link:hover {
-            text-decoration: underline;
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
         }
         
         .publish-card {
@@ -428,7 +433,7 @@ if ("delete".equals(action) && announcementId != null) {
     </div>
     
     <div class="container">
-        <a href="adminDashboard.jsp" class="back-link">← 返回管理後台</a>
+        <a href="adminDashboard.jsp" class="back-btn">← 返回管理後台</a>
         
         <% if (!message.isEmpty()) { %>
             <div class="alert alert-<%= messageType %>">
@@ -523,15 +528,16 @@ if ("delete".equals(action) && announcementId != null) {
             </h2>
             
             <%
-                // 查詢最近的公告記錄（去重複）
-                String historySql = "SELECT TOP 10 n.notificationId, n.message, n.createdAt, " +
-                                  "COUNT(*) as sentCount " +
-                                  "FROM notifications n " +
-                                  "GROUP BY n.notificationId, n.message, n.createdAt " +
-                                  "ORDER BY n.createdAt DESC";
-                
-                Statement historyStmt = con.createStatement();
-                ResultSet historyRs = historyStmt.executeQuery(historySql);
+            
+            // 查詢最近的公告記錄（去重複，只顯示每則公告一次）
+            String historySql = "SELECT n.message, MIN(n.createdAt) as createdAt, " +
+                              "COUNT(*) as sentCount, MIN(n.notificationId) as notificationId " +
+                              "FROM notifications n " +
+                              "GROUP BY n.message " +
+                              "ORDER BY MIN(n.createdAt) DESC";
+            
+            Statement historyStmt = con.createStatement();
+            ResultSet historyRs = historyStmt.executeQuery(historySql);
                 
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
                 boolean hasHistory = false;

@@ -159,4 +159,5 @@ private void sendDelistingEmail(String toEmail, String userName, String bookTitl
     message.setContent(emailBody, "text/html; charset=UTF-8");
     Transport.send(message);
 }
+
 %>

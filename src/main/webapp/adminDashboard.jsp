@@ -213,11 +213,6 @@ String loginTime = (String) session.getAttribute("loginTime");
                 <p>查看網站使用統計資料</p>
             </a>
             
-            <a href="settings.jsp" class="dashboard-card">
-                <div class="icon">⚙️</div>
-                <h3>系統設定</h3>
-                <p>修改網站設定和參數</p>
-            </a>
             
             <a href="index.jsp" class="dashboard-card">
                 <div class="icon">🏠</div>

@@ -1,187 +1,283 @@
 <%@page contentType="text/html" pageEncoding="utf-8"%>
 <%@page import="java.sql.*"%>
-<%@page import="java.util.*"%>
 <%@page import="java.text.DecimalFormat"%>
 <jsp:useBean id='objDBConfig' scope='session' class='hitstd.group.tool.database.DBConfig' />
 
-<html lang="zh">
+<%
+// 檢查管理員登入狀態
+String adminUser = (String) session.getAttribute("adminUser");
+if (adminUser == null) {
+    response.sendRedirect("adminLogin.jsp");
+    return;
+}
+%>
+
+<!DOCTYPE html>
+<html lang="zh-TW">
 <head>
-    <meta charset="utf-8">
-    <title>統計數據 - 北護二手書交易網</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網站數據統計 - 北護二手書交易網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            background-color: #f5f5f5;
-            font-family: "Microsoft JhengHei", sans-serif;
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: #f5f5f5;
         }
-        .stats-container {
+        
+        .header {
+            background: linear-gradient(135deg, #81c408 0%, #81c408 100%);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-content {
             max-width: 1400px;
-            margin: 100px auto 50px;
-            padding: 20px;
-        }
-        .page-header {
-            text-align: center;
-            margin-bottom: 50px;
-            color: #333;
-        }
-        .page-header h1 {
-            font-size: 36px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .page-header p {
-            color: #666;
-            font-size: 16px;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-            text-align: center;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-        }
-        .stat-icon {
-            font-size: 48px;
-            margin-bottom: 15px;
-        }
-        .stat-value {
-            font-size: 42px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .stat-label {
-            font-size: 16px;
-            color: #7f8c8d;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .chart-section {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        .chart-title {
-            font-size: 22px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 3px solid #3498db;
-        }
-        .table-container {
-            overflow-x: auto;
-        }
-        .stats-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .stats-table th {
-            background-color: #3498db;
-            color: white;
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-        }
-        .stats-table td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #ecf0f1;
-        }
-        .stats-table tr:hover {
-            background-color: #f8f9fa;
-        }
-        .rank-badge {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            line-height: 30px;
-            border-radius: 50%;
-            background-color: #3498db;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-        }
-        .rank-badge.gold {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-        }
-        .rank-badge.silver {
-            background: linear-gradient(135deg, #C0C0C0, #808080);
-        }
-        .rank-badge.bronze {
-            background: linear-gradient(135deg, #CD7F32, #8B4513);
-        }
-        .error-message {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        .loading {
-            text-align: center;
-            padding: 50px;
-            color: #666;
-        }
-        .price-range {
+            margin: 0 auto;
+            padding: 0 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #ecf0f1;
         }
-        .price-range:last-child {
-            border-bottom: none;
+        
+        .header h1 {
+            font-size: 24px;
         }
-        .price-label {
-            font-weight: 600;
-            color: #555;
-        }
-        .price-bar {
-            flex: 1;
-            margin: 0 20px;
-            height: 25px;
-            background-color: #ecf0f1;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-        }
-        .price-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3498db, #2ecc71);
-            transition: width 0.8s ease;
+        
+        .user-info {
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            padding-right: 10px;
+            gap: 20px;
+        }
+        
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
             color: white;
-            font-size: 12px;
+            border: 2px solid white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .logout-btn:hover {
+            background: white;
+            color: #81c408;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            background: white;
+            color: #81c408;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .chart-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chart-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #81c408;
+            font-size: 20px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        .top-books {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .top-books li {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .top-books li:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .book-rank {
+            background: linear-gradient(135deg, #81c408 0%, #6ba006 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 16px;
+        }
+        
+        .book-info {
+            flex: 1;
+        }
+        
+        .book-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+        
+        .book-meta {
+            color: #666;
+            font-size: 13px;
+        }
+        
+        .category-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .category-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #81c408;
+            transition: all 0.3s;
+        }
+        
+        .category-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .category-item .cat-name {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .category-item .cat-count {
+            color: #81c408;
+            font-size: 1.2em;
             font-weight: bold;
         }
+        
+        .error-message {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            color: #d9534f;
+            text-align: center;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        
+        /* 顏色配置 */
+        .books-color { color: #2196f3; }
+        .listings-color { color: #9c27b0; }
+        .available-color { color: #4caf50; }
+        .sold-color { color: #ff9800; }
+        .users-color { color: #00bcd4; }
+        .favorites-color { color: #e91e63; }
+        .revenue-color { color: #8bc34a; }
+        .price-color { color: #ff5722; }
+        .rate-color { color: #81c408; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-<%@ include file="menu.jsp"%>
-
-<div class="stats-container">
-    <div class="page-header">
-        <h1>📊 系統統計數據</h1>
-        <p>北護二手書交易網的即時數據分析</p>
+    <div class="header">
+        <div class="header-content">
+            <h1>📊 網站數據統計</h1>
+            <div class="user-info">
+                <span>👤 <%= adminUser %></span>
+                <a href="adminDashboard.jsp" class="logout-btn">返回後台</a>
+                <a href="adminLogin.jsp?action=logout" class="logout-btn">登出</a>
+            </div>
+        </div>
     </div>
 
 <%
@@ -189,377 +285,346 @@
     Statement smt = null;
     ResultSet rs = null;
     
+    // 統計數據變數
+    int totalBooks = 0;
+    int totalListings = 0;
+    int soldBooks = 0;
+    int availableBooks = 0;
+    int totalUsers = 0;
+    int totalFavorites = 0;
+    double totalRevenue = 0;
+    double avgPrice = 0;
+    double successRate = 0;
+    
+    // 價格分布
+    int price0_100 = 0, price100_300 = 0, price300_500 = 0, price500plus = 0;
+    
     try {
         Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
         con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
         smt = con.createStatement();
         
-        // 統計總書籍數
-        rs = smt.executeQuery("SELECT COUNT(*) as total FROM books");
-        int totalBooks = 0;
-        if(rs.next()) totalBooks = rs.getInt("total");
+        // 查詢總書籍數（books 表）
+        rs = smt.executeQuery("SELECT COUNT(*) as count FROM books");
+        if(rs.next()) totalBooks = rs.getInt("count");
         rs.close();
         
-        // 統計總刊登數
-        rs = smt.executeQuery("SELECT COUNT(*) as total FROM bookListings");
-        int totalListings = 0;
-        if(rs.next()) totalListings = rs.getInt("total");
+        // 查詢總上架數（bookListings 表）
+        rs = smt.executeQuery("SELECT COUNT(*) as count FROM bookListings WHERE isDelisted = FALSE");
+        if(rs.next()) totalListings = rs.getInt("count");
         rs.close();
         
-        // 統計總會員數
-        rs = smt.executeQuery("SELECT COUNT(*) as total FROM members");
-        int totalMembers = 0;
-        if(rs.next()) totalMembers = rs.getInt("total");
+        // 查詢在售書籍數
+        rs = smt.executeQuery("SELECT COUNT(*) as count FROM bookListings WHERE isDelisted = FALSE AND quantity > 0");
+        if(rs.next()) availableBooks = rs.getInt("count");
         rs.close();
         
-        // 統計待審核書籍
-        rs = smt.executeQuery("SELECT COUNT(*) as total FROM bookListings WHERE Approved = 'Pending'");
-        int pendingBooks = 0;
-        if(rs.next()) pendingBooks = rs.getInt("total");
+        // 查詢已售出書籍數
+        rs = smt.executeQuery("SELECT COUNT(*) as count FROM bookListings WHERE quantity = 0");
+        if(rs.next()) soldBooks = rs.getInt("count");
         rs.close();
         
-        // 統計總交易次數（假設有交易表）
-        int totalTransactions = 0;
-        try {
-            rs = smt.executeQuery("SELECT COUNT(*) as total FROM transactions");
-            if(rs.next()) totalTransactions = rs.getInt("total");
-            rs.close();
-        } catch(Exception e) {
-            // 如果沒有交易表則忽略
+        // 查詢用戶總數
+        rs = smt.executeQuery("SELECT COUNT(*) as count FROM users");
+        if(rs.next()) totalUsers = rs.getInt("count");
+        rs.close();
+        
+        // 查詢收藏總數
+        rs = smt.executeQuery("SELECT COUNT(*) as count FROM favorites");
+        if(rs.next()) totalFavorites = rs.getInt("count");
+        rs.close();
+        
+        // 查詢總交易金額
+        rs = smt.executeQuery("SELECT SUM(price) as total FROM bookListings WHERE quantity = 0");
+        if(rs.next()) totalRevenue = rs.getDouble("total");
+        rs.close();
+        
+        // 查詢平均書價
+        rs = smt.executeQuery("SELECT AVG(price) as avg FROM bookListings WHERE isDelisted = FALSE");
+        if(rs.next()) avgPrice = rs.getDouble("avg");
+        rs.close();
+        
+        // 計算成交率
+        if(totalListings > 0) {
+            successRate = (double)soldBooks / totalListings * 100;
         }
         
-        // 統計平均價格
-        rs = smt.executeQuery("SELECT AVG(CDBL(price)) as avgPrice FROM bookListings WHERE price IS NOT NULL AND price <> ''");
-        double avgPrice = 0;
-        if(rs.next()) avgPrice = rs.getDouble("avgPrice");
+        // 查詢價格分布
+        rs = smt.executeQuery("SELECT COUNT(*) as count FROM bookListings WHERE price < 100 AND isDelisted = FALSE");
+        if(rs.next()) price0_100 = rs.getInt("count");
         rs.close();
         
-        DecimalFormat df = new DecimalFormat("#,##0");
-        DecimalFormat dfPrice = new DecimalFormat("#,##0.00");
-%>
-
-    <!-- 核心統計卡片 -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">📚</div>
-            <div class="stat-value"><%= df.format(totalBooks) %></div>
-            <div class="stat-label">總書籍數</div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon">📝</div>
-            <div class="stat-value"><%= df.format(totalListings) %></div>
-            <div class="stat-label">總刊登數</div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon">👥</div>
-            <div class="stat-value"><%= df.format(totalMembers) %></div>
-            <div class="stat-label">註冊會員數</div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon">⏳</div>
-            <div class="stat-value"><%= df.format(pendingBooks) %></div>
-            <div class="stat-label">待審核書籍</div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon">💰</div>
-            <div class="stat-value">NT$<%= dfPrice.format(avgPrice) %></div>
-            <div class="stat-label">平均售價</div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon">🔄</div>
-            <div class="stat-value"><%= df.format(totalTransactions) %></div>
-            <div class="stat-label">總交易次數</div>
-        </div>
-    </div>
-
-    <!-- 最熱門書籍 TOP 10 -->
-    <div class="chart-section">
-        <h3 class="chart-title">🔥 最熱門書籍 TOP 10</h3>
-        <div class="table-container">
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th style="width: 60px;">排名</th>
-                        <th>書名</th>
-                        <th>作者</th>
-                        <th style="width: 120px;">刊登次數</th>
-                    </tr>
-                </thead>
-                <tbody>
-<%
-        rs = smt.executeQuery(
-            "SELECT TOP 10 b.title, b.author, COUNT(*) as listingCount " +
-            "FROM books b " +
-            "INNER JOIN bookListings bl ON b.bookId = bl.bookId " +
-            "GROUP BY b.title, b.author " +
-            "ORDER BY COUNT(*) DESC"
-        );
-        
-        int rank = 1;
-        while(rs.next()) {
-            String rankClass = "";
-            if(rank == 1) rankClass = "gold";
-            else if(rank == 2) rankClass = "silver";
-            else if(rank == 3) rankClass = "bronze";
-%>
-                    <tr>
-                        <td><span class="rank-badge <%= rankClass %>"><%= rank %></span></td>
-                        <td><%= rs.getString("title") %></td>
-                        <td><%= rs.getString("author") != null ? rs.getString("author") : "未提供" %></td>
-                        <td><strong><%= rs.getInt("listingCount") %></strong> 次</td>
-                    </tr>
-<%
-            rank++;
-        }
-        rs.close();
-%>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- 價格分佈統計 -->
-    <div class="chart-section">
-        <h3 class="chart-title">💵 書籍價格分佈</h3>
-<%
-        // 價格區間統計
-        Map<String, Integer> priceRanges = new LinkedHashMap<>();
-        priceRanges.put("0-100元", 0);
-        priceRanges.put("101-200元", 0);
-        priceRanges.put("201-300元", 0);
-        priceRanges.put("301-500元", 0);
-        priceRanges.put("500元以上", 0);
-        
-        rs = smt.executeQuery("SELECT price FROM bookListings WHERE price IS NOT NULL AND price <> ''");
-        int totalPriceCount = 0;
-        
-        while(rs.next()) {
-            try {
-                double price = Double.parseDouble(rs.getString("price"));
-                totalPriceCount++;
-                
-                if(price <= 100) priceRanges.put("0-100元", priceRanges.get("0-100元") + 1);
-                else if(price <= 200) priceRanges.put("101-200元", priceRanges.get("101-200元") + 1);
-                else if(price <= 300) priceRanges.put("201-300元", priceRanges.get("201-300元") + 1);
-                else if(price <= 500) priceRanges.put("301-500元", priceRanges.get("301-500元") + 1);
-                else priceRanges.put("500元以上", priceRanges.get("500元以上") + 1);
-            } catch(Exception e) {
-                // 忽略無效價格
-            }
-        }
+        rs = smt.executeQuery("SELECT COUNT(*) as count FROM bookListings WHERE price >= 100 AND price < 300 AND isDelisted = FALSE");
+        if(rs.next()) price100_300 = rs.getInt("count");
         rs.close();
         
-        for(Map.Entry<String, Integer> entry : priceRanges.entrySet()) {
-            int count = entry.getValue();
-            double percentage = totalPriceCount > 0 ? (count * 100.0 / totalPriceCount) : 0;
-%>
-        <div class="price-range">
-            <div class="price-label"><%= entry.getKey() %></div>
-            <div class="price-bar">
-                <div class="price-bar-fill" style="width: <%= percentage %>%">
-                    <%= count %> 本
-                </div>
-            </div>
-            <div style="width: 80px; text-align: right; color: #7f8c8d;">
-                <%= String.format("%.1f%%", percentage) %>
-            </div>
-        </div>
-<%
-        }
-%>
-    </div>
-
-    <!-- 最活躍賣家 TOP 10 -->
-    <div class="chart-section">
-        <h3 class="chart-title">👤 最活躍賣家 TOP 10</h3>
-        <div class="table-container">
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th style="width: 60px;">排名</th>
-                        <th>會員 ID</th>
-                        <th>姓名</th>
-                        <th style="width: 120px;">刊登數量</th>
-                    </tr>
-                </thead>
-                <tbody>
-<%
-        rs = smt.executeQuery(
-            "SELECT TOP 10 m.userId, m.name, COUNT(*) as listingCount " +
-            "FROM members m " +
-            "INNER JOIN bookListings bl ON m.userId = bl.userId " +
-            "GROUP BY m.userId, m.name " +
-            "ORDER BY COUNT(*) DESC"
-        );
-        
-        rank = 1;
-        while(rs.next()) {
-            String rankClass = "";
-            if(rank == 1) rankClass = "gold";
-            else if(rank == 2) rankClass = "silver";
-            else if(rank == 3) rankClass = "bronze";
-%>
-                    <tr>
-                        <td><span class="rank-badge <%= rankClass %>"><%= rank %></span></td>
-                        <td><%= rs.getString("userId") %></td>
-                        <td><%= rs.getString("name") %></td>
-                        <td><strong><%= rs.getInt("listingCount") %></strong> 本</td>
-                    </tr>
-<%
-            rank++;
-        }
+        rs = smt.executeQuery("SELECT COUNT(*) as count FROM bookListings WHERE price >= 300 AND price < 500 AND isDelisted = FALSE");
+        if(rs.next()) price300_500 = rs.getInt("count");
         rs.close();
-%>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- 書籍狀態統計 -->
-    <div class="chart-section">
-        <h3 class="chart-title">📋 書籍審核狀態統計</h3>
-        <div class="table-container">
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th>狀態</th>
-                        <th>數量</th>
-                        <th>百分比</th>
-                    </tr>
-                </thead>
-                <tbody>
-<%
-        Map<String, String> statusNames = new LinkedHashMap<>();
-        statusNames.put("Approved", "已通過");
-        statusNames.put("Pending", "待審核");
-        statusNames.put("Rejected", "未通過");
         
-        for(Map.Entry<String, String> status : statusNames.entrySet()) {
-            rs = smt.executeQuery(
-                "SELECT COUNT(*) as count FROM bookListings WHERE Approved = '" + status.getKey() + "'"
-            );
-            int count = 0;
-            if(rs.next()) count = rs.getInt("count");
-            double percentage = totalListings > 0 ? (count * 100.0 / totalListings) : 0;
-            rs.close();
-%>
-                    <tr>
-                        <td><%= status.getValue() %></td>
-                        <td><strong><%= count %></strong> 本</td>
-                        <td><%= String.format("%.1f%%", percentage) %></td>
-                    </tr>
-<%
-        }
-%>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-<%
-    } catch (Exception e) {
+        rs = smt.executeQuery("SELECT COUNT(*) as count FROM bookListings WHERE price >= 500 AND isDelisted = FALSE");
+        if(rs.next()) price500plus = rs.getInt("count");
+        rs.close();
+        
+    } catch(Exception e) {
         out.println("<div class='error-message'>");
-        out.println("<h3>⚠️ 載入統計數據時發生錯誤</h3>");
+        out.println("<h3>❌ 載入數據時發生錯誤</h3>");
         out.println("<p>錯誤訊息: " + e.getMessage() + "</p>");
-        out.println("<p>請聯繫系統管理員或稍後再試。</p>");
         out.println("</div>");
         e.printStackTrace();
-    } finally {
-        try {
-            if (rs != null) rs.close();
-            if (smt != null) smt.close();
-            if (con != null) con.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
+    
+    DecimalFormat df = new DecimalFormat("#,###");
+    DecimalFormat df2 = new DecimalFormat("#,###.0");
 %>
-</div>
 
-<!-- Footer -->
-<div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
-    <div class="container py-5">
-        <div class="row g-5">
-            <div class="col-md-6 col-lg-3">
-                <h5 class="text-white mb-4">專題資訊</h5>
-                <p class="mb-2">題目:國北護二手書交易網</p>
-                <p class="mb-2">系所:健康事業管理系</p>
-                <p class="mb-2">專題組員:黃郁心、賈子瑩、許宇翔、闕紫彤</p>
+    <div class="container">
+        <a href="adminDashboard.jsp" class="back-btn">← 返回管理後台</a>
+        
+        <!-- 核心統計卡片 -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">📚</div>
+                <div class="stat-number books-color"><%= df.format(totalBooks) %></div>
+                <div class="stat-label">書籍資料庫</div>
             </div>
-            <div class="col-md-6 col-lg-3">
-                <h5 class="text-white mb-4">快速連結</h5>
-                <a class="btn btn-link" href="index.jsp">首頁</a>
-                <a class="btn btn-link" href="statistics.jsp">統計數據</a>
-                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8" target="_blank">系統使用回饋表單</a>
+            
+            <div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <div class="stat-number listings-color"><%= df.format(totalListings) %></div>
+                <div class="stat-label">累計上架次數</div>
             </div>
-            <div class="col-md-6 col-lg-3">
-                <h5 class="text-white mb-4">管理員專區</h5>
-                <a class="btn btn-link" href="adminLogin.jsp">管理員</a>
+            
+            <div class="stat-card">
+                <div class="stat-icon">🛒</div>
+                <div class="stat-number available-color"><%= df.format(availableBooks) %></div>
+                <div class="stat-label">目前在售書籍</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-number sold-color"><%= df.format(soldBooks) %></div>
+                <div class="stat-label">成功售出</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">🎓</div>
+                <div class="stat-number users-color"><%= df.format(totalUsers) %></div>
+                <div class="stat-label">註冊學生數</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">❤️</div>
+                <div class="stat-number favorites-color"><%= df.format(totalFavorites) %></div>
+                <div class="stat-label">總收藏數</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">💰</div>
+                <div class="stat-number revenue-color">$<%= df.format(totalRevenue) %></div>
+                <div class="stat-label">累計交易金額</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">💵</div>
+                <div class="stat-number price-color">$<%= df2.format(avgPrice) %></div>
+                <div class="stat-label">平均書籍價格</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-number rate-color"><%= df2.format(successRate) %>%</div>
+                <div class="stat-label">書籍成交率</div>
+            </div>
+        </div>
+        
+        <!-- 書籍狀態分布圖 -->
+        <div class="chart-section">
+            <h2>📊 書籍狀態分布</h2>
+            <div class="chart-container">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- 價格分布圖 -->
+        <div class="chart-section">
+            <h2>💰 書籍價格分布</h2>
+            <div class="chart-container">
+                <canvas id="priceChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- 最受歡迎書籍 TOP 10 -->
+        <div class="chart-section">
+            <h2>🔥 最受歡迎書籍 TOP 10（依收藏數）</h2>
+            <ul class="top-books">
+                <%
+                    try {
+                        String topBooksSql = "SELECT TOP 10 " +
+                                            "b.title, " +
+                                            "b.author, " +
+                                            "bl.price, " +
+                                            "COUNT(f.bookId) as favoriteCount " +
+                                            "FROM books b " +
+                                            "INNER JOIN bookListings bl ON b.bookId = bl.bookId " +
+                                            "LEFT JOIN favorites f ON b.bookId = f.bookId " +
+                                            "WHERE bl.isDelisted = FALSE " +
+                                            "GROUP BY b.bookId, b.title, b.author, bl.price " +
+                                            "ORDER BY favoriteCount DESC";
+                        
+                        rs = smt.executeQuery(topBooksSql);
+                        int rank = 1;
+                        boolean hasData = false;
+                        
+                        while(rs.next()) {
+                            hasData = true;
+                            String title = rs.getString("title");
+                            String author = rs.getString("author");
+                            double price = rs.getDouble("price");
+                            int favCount = rs.getInt("favoriteCount");
+                %>
+                    <li>
+                        <div class="book-rank"><%= rank++ %></div>
+                        <div class="book-info">
+                            <div class="book-title"><%= title %></div>
+                            <div class="book-meta">
+                                作者: <%= author != null ? author : "未提供" %> | 
+                                收藏數: <%= favCount %> 次 | 
+                                售價: $<%= df.format(price) %>
+                            </div>
+                        </div>
+                    </li>
+                <%
+                        }
+                        
+                        if(!hasData) {
+                %>
+                    <li>
+                        <div class="empty-state">
+                            <div style="font-size: 48px;">📚</div>
+                            <p>目前沒有資料</p>
+                        </div>
+                    </li>
+                <%
+                        }
+                        
+                        rs.close();
+                    } catch(Exception e) {
+                        out.println("<li style='text-align:center; padding:20px; color:#d9534f;'>載入資料時發生錯誤: " + e.getMessage() + "</li>");
+                    }
+                %>
+            </ul>
+        </div>
+        
+        <!-- 書籍狀況分布 -->
+        <div class="chart-section">
+            <h2>📖 書籍狀況分布</h2>
+            <div class="category-list">
+                <%
+                    try {
+                        String conditionSql = "SELECT condition, COUNT(*) as count " +
+                                             "FROM bookListings " +
+                                             "WHERE isDelisted = FALSE " +
+                                             "GROUP BY condition " +
+                                             "ORDER BY count DESC";
+                        
+                        rs = smt.executeQuery(conditionSql);
+                        boolean hasConditions = false;
+                        
+                        while(rs.next()) {
+                            hasConditions = true;
+                            String condition = rs.getString("condition");
+                            int count = rs.getInt("count");
+                %>
+                    <div class="category-item">
+                        <div class="cat-name"><%= condition != null && !condition.isEmpty() ? condition : "未分類" %></div>
+                        <div class="cat-count"><%= count %> 本</div>
+                    </div>
+                <%
+                        }
+                        
+                        if(!hasConditions) {
+                            out.println("<div class='empty-state'>目前沒有資料</div>");
+                        }
+                        
+                        rs.close();
+                    } catch(Exception e) {
+                        out.println("<p style='color:#d9534f;'>載入狀況統計時發生錯誤</p>");
+                    }
+                %>
             </div>
         </div>
     </div>
-    <div class="container-fluid text-center border-top border-secondary py-3">
-        <p class="mb-0">&copy; 2025年 國北護二手書交易網. @All Rights Reserved.</p>
-    </div>
-</div>
 
 <script>
-// 動畫效果 - 數字遞增
-document.addEventListener('DOMContentLoaded', function() {
-    const statValues = document.querySelectorAll('.stat-value');
-    
-    statValues.forEach(el => {
-        const text = el.textContent.trim();
-        const match = text.match(/[\d,]+/);
-        
-        if (match) {
-            const targetValue = parseInt(match[0].replace(/,/g, ''));
-            if (!isNaN(targetValue)) {
-                animateValue(el, 0, targetValue, 1500, text);
+    // 書籍狀態分布圖
+    const statusCtx = document.getElementById('statusChart').getContext('2d');
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['在售中', '已售出'],
+            datasets: [{
+                data: [<%= availableBooks %>, <%= soldBooks %>],
+                backgroundColor: ['#4caf50', '#ff9800'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        font: { size: 14 },
+                        padding: 20
+                    }
+                }
             }
         }
     });
-});
-
-function animateValue(el, start, end, duration, originalText) {
-    const range = end - start;
-    const increment = range / (duration / 16);
-    let current = start;
-    const prefix = originalText.includes('NT$') ? 'NT$' : '';
-    const isDecimal = originalText.includes('.');
     
-    const timer = setInterval(() => {
-        current += increment;
-        if (current >= end) {
-            current = end;
-            clearInterval(timer);
+    // 價格分布圖
+    const priceCtx = document.getElementById('priceChart').getContext('2d');
+    new Chart(priceCtx, {
+        type: 'bar',
+        data: {
+            labels: ['0-99元', '100-299元', '300-499元', '500元以上'],
+            datasets: [{
+                label: '書籍數量',
+                data: [<%= price0_100 %>, <%= price100_300 %>, <%= price300_500 %>, <%= price500plus %>],
+                backgroundColor: '#81c408',
+                borderColor: '#6ba006',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
         }
-        
-        if (isDecimal) {
-            el.textContent = prefix + current.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-        } else {
-            el.textContent = prefix + Math.floor(current).toLocaleString();
-        }
-    }, 16);
-}
-
-// 價格條動畫
-window.addEventListener('load', function() {
-    const priceBars = document.querySelectorAll('.price-bar-fill');
-    priceBars.forEach(bar => {
-        const width = bar.style.width;
-        bar.style.width = '0%';
-        setTimeout(() => {
-            bar.style.width = width;
-        }, 100);
     });
-});
 </script>
+
+<%
+    // 關閉資料庫連接
+    try {
+        if(rs != null) rs.close();
+        if(smt != null) smt.close();
+        if(con != null) con.close();
+    } catch(SQLException e) {
+        e.printStackTrace();
+    }
+%>
 
 </body>
 </html>
