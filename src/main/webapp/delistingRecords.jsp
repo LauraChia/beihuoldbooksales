@@ -608,10 +608,10 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
                         <label>下架原因</label>
                         <select name="reasonFilter">
                             <option value="ALL" <%= "ALL".equals(reasonFilter) || reasonFilter == null ? "selected" : "" %>>全部</option>
-                            <option value="AUTO_EXPIRED" <%= "AUTO_EXPIRED".equals(reasonFilter) ? "selected" : "" %>>自動到期</option>
-                            <option value="MANUAL_ADMIN" <%= "MANUAL_ADMIN".equals(reasonFilter) ? "selected" : "" %>>管理員下架</option>
-                            <option value="VIOLATION" <%= "VIOLATION".equals(reasonFilter) ? "selected" : "" %>>違規下架</option>
-                            <option value="USER_REQUEST" <%= "USER_REQUEST".equals(reasonFilter) ? "selected" : "" %>>使用者自行下架</option>
+                            <option value="自動到期下架" <%= "自動到期下架".equals(reasonFilter) ? "selected" : "" %>>自動到期</option>
+                            <option value="管理員下架" <%= "管理員下架".equals(reasonFilter) ? "selected" : "" %>>管理員下架</option>
+                            <option value="違規下架" <%= "違規下架".equals(reasonFilter) ? "selected" : "" %>>違規下架</option>
+                            <option value="使用者自行下架" <%= "使用者自行下架".equals(reasonFilter) ? "selected" : "" %>>使用者自行下架</option>
                         </select>
                     </div>
                     <div class="filter-item">

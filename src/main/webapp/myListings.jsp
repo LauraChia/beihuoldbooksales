@@ -170,7 +170,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             position: relative;
         }
-        
+              
         .book-card:hover {
             transform: translateY(-6px);
             box-shadow: 0 4px 15px rgba(0,0,0,0.12);
@@ -642,18 +642,23 @@
         <a class="book-link" href="myListingDetail.jsp?listingId=<%= listingId %>">
             <div class="status-badge <%= statusClass %>"><%= statusText %></div>
             
-            <div class="action-buttons" onclick="event.preventDefault();">
-                <button class="action-btn btn-edit" 
-                        onclick="editListing('<%= listingId %>')"
-                        title="編輯">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="action-btn btn-delete" 
-                        onclick="deleteListing('<%= listingId %>', '<%= title %>')"
-                        title="下架">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
+		<div class="action-buttons" onclick="event.preventDefault();">
+		    <% if (isDelisted != null && isDelisted) { %>
+		        <!-- 已下架：只顯示編輯按鈕 -->
+		        <button class="action-btn btn-edit" 
+		                onclick="editListing('<%= listingId %>')"
+		                title="編輯並重新上架">
+		            <i class="fas fa-edit"></i>
+		        </button>
+		    <% } else { %>
+		        <!-- 未下架：只顯示下架按鈕 -->
+		        <button class="action-btn btn-delete" 
+		                onclick="deleteListing('<%= listingId %>', '<%= title %>')"
+		                title="下架">
+		            <i class="fas fa-trash"></i>
+		        </button>
+		    <% } %>
+		</div>
             
             <div class="book-images" id="<%= cardId %>">
                 <% if (photoList.isEmpty()) { %>

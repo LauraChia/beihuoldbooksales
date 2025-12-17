@@ -560,7 +560,7 @@
 <% if (isDelisted != null && isDelisted) { %>
 <div class="alert alert-warning">
     <strong>⚠️ 此書籍已下架</strong><br>
-    此書籍已從平台下架，買家無法看到此商品。如需重新上架，請聯繫管理員。
+    此書籍已從平台下架，買家無法看到此商品。
 </div>
 <% } else if ("FALSE".equalsIgnoreCase(approvalStatus)) { %>
 <div class="alert alert-warning">
@@ -570,7 +570,7 @@
 <% } else if (!"TRUE".equalsIgnoreCase(approvalStatus)) { %>
 <div class="alert alert-info">
     <strong>ℹ️ 等待審核中</strong><br>
-    您的書籍正在等待管理員審核，審核通過後買家才能看到此商品。
+    您的書籍正在等待管理員審核。
 </div>
 <% } %>
 
@@ -724,19 +724,22 @@
         </div>
 
         <!-- 操作按鈕 -->
-        <div class="action-buttons">
-            <button class="btn-action btn-edit" onclick="editListing()">
-                <i class="fas fa-edit"></i> 編輯書籍
-            </button>
-            <% if (isDelisted == null || !isDelisted) { %>
-            <button class="btn-action btn-delete" onclick="deleteListing()">
-                <i class="fas fa-trash"></i> 下架書籍
-            </button>
-            <% } %>
-            <button class="btn-action btn-secondary" onclick="viewMessages()">
-                <i class="fas fa-comments"></i> 查看訊息 <% if (messageCount > 0) { %>(<%= messageCount %>)<% } %>
-            </button>
-        </div>
+		<div class="action-buttons">
+		    <% if (isDelisted != null && isDelisted) { %>
+		        <!-- 已下架：顯示編輯並重新上架按鈕 -->
+		        <button class="btn-action btn-secondary" onclick="editAndRelist()">
+		            <i class="fas fa-edit"></i> 編輯並重新上架
+		        </button>
+		    <% } else { %>
+		        <!-- 未下架：只顯示下架按鈕 -->
+		        <button class="btn-action btn-delete" onclick="deleteListing()">
+		            <i class="fas fa-trash"></i> 下架書籍
+		        </button>
+		    <% } %>
+		    <button class="btn-action btn-secondary" onclick="viewMessages()">
+		        <i class="fas fa-comments"></i> 查看訊息 <% if (messageCount > 0) { %>(<%= messageCount %>)<% } %>
+		    </button>
+		</div>
     </div>
 </div>
 
@@ -787,8 +790,11 @@
         }
     });
     
-    function editListing() {
-        window.location.href = 'editListing.jsp?listingId=' + listingId;
+    function editAndRelist() {
+        if (confirm('確定要編輯並重新上架「' + bookTitle + '」嗎？\n\n您將被導向編輯頁面，編輯完成後書籍將自動重新上架並等待審核。')) {
+            // 帶上 relist 參數，表示這是重新上架的編輯
+            window.location.href = 'editListing.jsp?listingId=' + listingId + '&relist=true';
+        }
     }
     
     function deleteListing() {
