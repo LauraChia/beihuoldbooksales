@@ -16,7 +16,7 @@
 <html lang="zh">
 <head>
     <meta charset="utf-8">
-    <title>系統通知 - 北護二手書交易網</title>
+    <title>管理員公告 - 北護二手書交易網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
     <style>

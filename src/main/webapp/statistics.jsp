@@ -516,42 +516,173 @@ if (adminUser == null) {
             </ul>
         </div>
         
-        <!-- 書籍狀況分布 -->
+<!-- 書籍狀況分布 -->
+<style>
+    .pie-chart-section {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    .pie-chart-section h2 {
+        font-size: 28px;
+        color: #333;
+        margin-bottom: 30px;
+        text-align: center;
+    }
+
+    .pie-chart-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 60px;
+        flex-wrap: wrap;
+    }
+
+    .pie-chart-svg {
+        position: relative;
+        width: 300px;
+        height: 300px;
+    }
+
+    .pie-chart-svg svg {
+        transform: rotate(-90deg);
+        filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+    }
+
+    .pie-chart-center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        background: white;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .pie-total-label {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 5px;
+    }
+
+    .pie-total-count {
+        font-size: 36px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .pie-legend {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .pie-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .pie-legend-item:hover {
+        background: #f8f9fa;
+        transform: translateX(5px);
+    }
+
+    .pie-legend-color {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    .pie-legend-text {
+        flex: 1;
+    }
+
+    .pie-legend-name {
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 2px;
+    }
+
+    .pie-legend-count {
+        font-size: 14px;
+        color: #666;
+    }
+
+    .pie-legend-percentage {
+        font-size: 18px;
+        font-weight: bold;
+        color: #333;
+        margin-left: auto;
+    }
+</style>
+
+<!-- 書籍狀況分布 -->
 <div class="chart-section">
     <h2>📖 書籍狀況分布</h2>
     <div class="category-list">
         <%
             ResultSet conditionRs = null;
             try {
+                // 定義書籍狀況的順序和顯示名稱
+                String[] conditionOrder = {"全新", "二手-近全新", "二手-良好", "二手-有使用痕跡"};
+                java.util.Map<String, Integer> conditionCounts = new java.util.LinkedHashMap<>();
+                
+                // 初始化所有狀況為 0
+                for(String cond : conditionOrder) {
+                    conditionCounts.put(cond, 0);
+                }
+                
                 // Access 資料庫查詢語法
                 String conditionSql = "SELECT [condition], COUNT(*) AS count " +
                                      "FROM bookListings " +
                                      "WHERE isDelisted = FALSE " +
-                                     "GROUP BY [condition] " +
-                                     "ORDER BY COUNT(*) DESC";
+                                     "GROUP BY [condition]";
 
                 conditionRs = smt.executeQuery(conditionSql);
-                boolean hasConditions = false;
 
+                // 讀取資料並填入對應的數量
                 while(conditionRs.next()) {
-                    hasConditions = true;
                     String condition = conditionRs.getString("condition");
                     int count = conditionRs.getInt("count");
                     
-                    // 處理空值或空字串
-                    String displayCondition = "未分類";
                     if(condition != null && !condition.trim().isEmpty()) {
-                        displayCondition = condition.trim();
+                        String trimmedCondition = condition.trim();
+                        if(conditionCounts.containsKey(trimmedCondition)) {
+                            conditionCounts.put(trimmedCondition, count);
+                        }
                     }
+                }
+
+                // 按照預定順序顯示所有狀況
+                boolean hasAnyBooks = false;
+                for(String condition : conditionOrder) {
+                    int count = conditionCounts.get(condition);
+                    if(count > 0) hasAnyBooks = true;
         %>
             <div class="category-item">
-                <div class="cat-name"><%= displayCondition %></div>
+                <div class="cat-name"><%= condition %></div>
                 <div class="cat-count"><%= count %> 本</div>
             </div>
         <%
                 }
 
-                if(!hasConditions) {
+                if(!hasAnyBooks) {
         %>
             <div class='empty-state'>目前沒有資料</div>
         <%
@@ -573,7 +704,6 @@ if (adminUser == null) {
         %>
     </div>
 </div>
-    </div>
 
 <script>
     // 書籍狀態分布圖

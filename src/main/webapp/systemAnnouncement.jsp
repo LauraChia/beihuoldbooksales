@@ -95,7 +95,7 @@ if ("delete".equals(action) && announcementId != null) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>系統公告管理 - 北護二手書交易網</title>
+    <title>管理員公告 - 北護二手書交易網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
     <style>
@@ -423,7 +423,7 @@ if ("delete".equals(action) && announcementId != null) {
 <body>
     <div class="header">
         <div class="header-content">
-            <h1>📢 系統通知管理</h1>
+            <h1>📢 管理員公告</h1>
             <div class="user-info">
                 <span>👤 <%= adminUser %></span>
                 <a href="adminDashboard.jsp" class="logout-btn">返回後台</a>
@@ -485,12 +485,12 @@ if ("delete".equals(action) && announcementId != null) {
         <div class="publish-card">
             <h2>
                 <i class="fas fa-bullhorn"></i>
-                發布系統通知
+                管理員發布公告
             </h2>
             
             <form method="post" action="?action=publish">
                 <div class="form-group">
-                    <label class="form-label">通知內容 *</label>
+                    <label class="form-label">管理員公告內容 *</label>
                     <textarea 
                         name="announcementMsg" 
                         class="form-control" 
@@ -512,7 +512,7 @@ if ("delete".equals(action) && announcementId != null) {
                     <h4><i class="fas fa-lightbulb"></i> 發送提示</h4>
                     <ul>
                         <li>公告將立即發送給所有註冊用戶</li>
-                        <li>用戶可在「系統通知」頁面查看公告</li>
+                        <li>用戶可在「管理員公告」頁面查看公告</li>
                         <li>建議公告內容簡潔明確，不超過 200 字</li>
                         <li>重要公告可使用 ⚠️ 📢 ✅ 等表情符號增加辨識度</li>
                     </ul>
@@ -581,7 +581,7 @@ if ("delete".equals(action) && announcementId != null) {
             <div class="empty-state">
                 <i class="fas fa-inbox"></i>
                 <h3>尚無發送記錄</h3>
-                <p>發布的系統公告將顯示在這裡</p>
+                <p>發布的管理員公告將顯示在這裡</p>
             </div>
             <%
                 }

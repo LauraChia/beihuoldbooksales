@@ -203,7 +203,7 @@ String loginTime = (String) session.getAttribute("loginTime");
             
             <a href="systemAnnouncement.jsp" class="dashboard-card">
                 <div class="icon">📢</div>
-                <h3>系統通知</h3>
+                <h3>管理員公告</h3>
                 <p>管理員公告平台的狀態</p>
             </a>
             
