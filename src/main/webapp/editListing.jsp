@@ -14,7 +14,7 @@
     }
     
     String listingId = request.getParameter("listingId");
-    String isRelist = request.getParameter("relist"); // 判斷是否為重新上架
+    String isRelist = "true"; // 此頁面固定為重新上架
     
     if (listingId == null || listingId.trim().isEmpty()) {
         response.sendRedirect("myListings.jsp");
@@ -28,7 +28,7 @@
 <html lang="zh">
 <head>
     <meta charset="utf-8">
-    <title><%= "true".equals(isRelist) ? "編輯並重新上架" : "編輯書籍" %> - 二手書交易網</title>
+    <title>編輯並重新上架 - 二手書交易網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
     <style>
@@ -334,7 +334,7 @@
 
 <div class="page-header">
     <div class="container">
-        <h1><i class="fas fa-edit"></i> <%= "true".equals(isRelist) ? "編輯並重新上架" : "編輯書籍資訊" %></h1>
+        <h1><i class="fas fa-edit"></i> 編輯並重新上架</h1>
     </div>
 </div>
 
@@ -443,31 +443,22 @@
 %>
 
 <div style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
-    <button class="back-button" onclick="window.location.href='listingDetail.jsp?listingId=<%= listingId %>'">
+    <button class="back-button" onclick="window.location.href='myListingDetail.jsp?listingId=<%= listingId %>'">
         <i class="fas fa-arrow-left"></i> 返回書籍詳情
     </button>
 </div>
 
 <div class="form-container">
-    <% if ("true".equals(isRelist)) { %>
     <div class="warning-alert">
-        <strong><i class="fas fa-info-circle"></i> 重新上架說明</strong><br>
-        編輯完成並送出後，此書籍將自動重新上架並等待管理員審核。
-    </div>
-    <% } else { %>
-    <div class="info-alert">
-        <strong><i class="fas fa-info-circle"></i> 編輯提示</strong><br>
-        修改資料後請記得按下「儲存變更」按鈕。
-    </div>
-    <% } %>
-
-    <h3><i class="fas fa-book-open"></i> <%= "true".equals(isRelist) ? "編輯並重新上架書籍" : "編輯書籍資訊" %></h3>
+    <strong><i class="fas fa-info-circle"></i> 重新上架說明</strong><br>
+    編輯完成並送出後，此書籍將自動重新上架並等待管理員審核。
+</div>
 
     <form action="updateListing.jsp" method="post" enctype="multipart/form-data" id="editForm">
         <input type="hidden" name="listingId" value="<%= listingId %>">
         <input type="hidden" name="bookId" value="<%= bookId %>">
         <input type="hidden" name="sellerId" value="<%= userId %>">
-        <input type="hidden" name="isRelist" value="<%= isRelist != null ? isRelist : "false" %>">
+        <input type="hidden" name="isRelist" value="true">
         <input type="hidden" name="existingPhotos" id="existingPhotos" value="<%= photoStr != null ? photoStr : "" %>">
 
         <!-- 書名 -->
@@ -610,8 +601,8 @@
 
         <div class="btn-container">
             <button type="submit" class="btn-primary">
-                <i class="fas fa-save"></i> <%= "true".equals(isRelist) ? "儲存並重新上架" : "儲存變更" %>
-            </button>
+			    <i class="fas fa-save"></i> 儲存並重新上架
+			</button>
             <button type="button" class="btn-secondary" onclick="window.location.href='myListingDetail.jsp?listingId=<%= listingId %>'">
                 <i class="fas fa-times"></i> 取消
             </button>

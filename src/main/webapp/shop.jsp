@@ -20,38 +20,238 @@
     <meta charset="utf-8">
     <title>上架書籍 - 二手書交易網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
     <style>
         body { background-color: #f8f9fa; font-family: "Microsoft JhengHei", sans-serif; }
-        .form-container { background:#fff; padding:30px; border-radius:8px; max-width:900px; margin:150px auto; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
-        .form-group { margin-bottom: 20px; display: flex; align-items: flex-start; }
-        label { display:inline-block; width:120px; margin-bottom:10px; vertical-align:top; font-weight: 500; padding-top: 6px; }
+        
+        .page-header {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
+        }
+        
+        .page-header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 600;
+        }
+        
+        .form-container { 
+            background:#fff; 
+            padding:40px; 
+            border-radius:12px; 
+            max-width:900px; 
+            margin:0 auto 40px; 
+            box-shadow:0 2px 12px rgba(0,0,0,0.1);
+        }
+        
+        .form-container h3 {
+            color: #66bb6a;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #c8e6c9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .info-alert {
+            background: #e8f5e9;
+            border-left: 4px solid #66bb6a;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            color: #2e7d32;
+        }
+        
+        .form-group { 
+            margin-bottom: 20px; 
+            display: flex; 
+            align-items: flex-start; 
+        }
+        
+        label { 
+            display:inline-block; 
+            width:140px; 
+            margin-bottom:10px; 
+            vertical-align:top; 
+            font-weight: 500; 
+            padding-top: 6px;
+            color: #333;
+        }
+        
         label .required { color:red; margin-left: 2px; }
-        input:not([type="file"]):not([type="submit"]):not([type="reset"]), select, textarea { flex: 1; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        
+        input:not([type="file"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]), select, textarea { 
+            flex: 1; 
+            padding: 10px 14px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #66bb6a;
+            box-shadow: 0 0 0 3px rgba(102, 187, 106, 0.1);
+        }
 
         /* 圖片上傳樣式 */
         .upload-section { display: flex; flex-direction: column; gap: 15px; }
-        .upload-area { border: 2px dashed #d9534f; border-radius: 8px; padding: 30px; text-align: center; background-color: #fef5f5; cursor: pointer; transition: all 0.3s; }
-        .upload-area:hover { background-color: #ffe6e6; border-color: #c9302c; }
-        .upload-area.dragover { background-color: #ffe0e0; border-color: #c9302c; transform: scale(1.02); }
+        
+        .upload-area { 
+            border: 2px dashed #d9534f; 
+            border-radius: 8px; 
+            padding: 30px; 
+            text-align: center; 
+            background-color: #fef5f5; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+        }
+        
+        .upload-area:hover { 
+            background-color: #ffe6e6; 
+            border-color: #c9302c; 
+        }
+        
+        .upload-area.dragover { 
+            background-color: #ffe0e0; 
+            border-color: #c9302c; 
+            transform: scale(1.02); 
+        }
+        
         .upload-icon { font-size: 48px; color: #d9534f; margin-bottom: 10px; }
-        .upload-text { color: #666; margin-bottom: 5px; }
+        .upload-text { color: #666; margin-bottom: 5px; font-weight: 500; }
         .upload-hint { color: #999; font-size: 13px; }
-        .image-preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 15px; }
-        .preview-item { position: relative; width: 100%; padding-bottom: 100%; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background-color: #f8f9fa; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.3s; }
-        .preview-item:hover { transform: translateY(-4px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .preview-item img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-        .remove-btn { position: absolute; top: 8px; right: 8px; background: rgba(220, 53, 69, 0.9); color: #fff; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; transition: all 0.3s; z-index: 10; }
-        .remove-btn:hover { background: rgba(200, 35, 51, 1); transform: scale(1.1); }
-        .upload-limit { text-align: center; color: #666; font-size: 13px; margin-top: 10px; }
+        
+        .image-preview-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
+            gap: 15px; 
+            margin-top: 15px; 
+        }
+        
+        .preview-item { 
+            position: relative; 
+            width: 100%; 
+            padding-bottom: 100%; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            overflow: hidden; 
+            background-color: #f8f9fa; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            transition: all 0.3s; 
+        }
+        
+        .preview-item:hover { 
+            transform: translateY(-4px); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+        }
+        
+        .preview-item img { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            display: block; 
+        }
+        
+        .remove-btn { 
+            position: absolute; 
+            top: 8px; 
+            right: 8px; 
+            background: rgba(244, 67, 54, 0.9); 
+            color: #fff; 
+            border: none; 
+            width: 28px; 
+            height: 28px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            font-size: 18px; 
+            line-height: 1; 
+            transition: all 0.3s; 
+            z-index: 10; 
+        }
+        
+        .remove-btn:hover { 
+            background: rgba(200, 35, 51, 1); 
+            transform: scale(1.1); 
+        }
+        
+        .upload-limit { 
+            text-align: center; 
+            color: #666; 
+            font-size: 13px; 
+            margin-top: 10px; 
+            font-weight: 500;
+        }
+        
         #photoInput { display: none; }
-        .btn-container { text-align: center; margin-top: 30px; display: flex; gap: 15px; justify-content: center; }
+        
+        .btn-container { 
+            text-align: center; 
+            margin-top: 30px; 
+            display: flex; 
+            gap: 15px; 
+            justify-content: center; 
+        }
+        
+        .btn-primary {
+            background: white;
+            border: 2px solid #66bb6a;
+            color: #66bb6a;
+            padding: 14px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            border: 2px solid #999;
+            color: #666;
+            padding: 14px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-secondary:hover {
+            background: #f5f5f5;
+            border-color: #666;
+        }
     </style>
 </head>
 <body>
 <%@ include file="menu.jsp" %>
 
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-upload"></i> 上架書籍</h1>
+    </div>
+</div>
+
 <div class="form-container">
-    <h3 style="margin-bottom: 30px;">📚 上架書籍</h3>
+    <div class="info-alert">
+        <strong><i class="fas fa-info-circle"></i> 上架須知</strong><br>
+        請詳細填寫書籍資訊，上架後將由管理員審核。審核通過後即可開始販售。
+    </div>
 
     <form action="shop_DBInsertInto.jsp" method="post" enctype="multipart/form-data" id="uploadForm">
 
@@ -178,8 +378,12 @@
         <input type="hidden" name="sellerId" value="<%= userId %>">
 
         <div class="btn-container">
-            <button type="submit" class="btn btn-primary btn-lg" style="min-width: 150px;">送出上架</button>
-            <button type="reset" class="btn btn-secondary btn-lg" id="resetBtn" style="min-width: 150px;">清除重填</button>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-check"></i> 送出上架
+            </button>
+            <button type="reset" class="btn-secondary" id="resetBtn">
+                <i class="fas fa-redo"></i> 清除重填
+            </button>
         </div>
     </form>
 </div>
@@ -271,7 +475,7 @@
     });
 
     document.getElementById('uploadForm').addEventListener('submit', function(e) {
-        if (selectedFiles.length === 0 && !confirm('您尚未上傳任何圖片，確定要繼續嗎？')) e.preventDefault();
+        if (selectedFiles.length === 0 && !confirm('您尚未上傳任何圖片,確定要繼續嗎?')) e.preventDefault();
     });
 </script>
 </body>
