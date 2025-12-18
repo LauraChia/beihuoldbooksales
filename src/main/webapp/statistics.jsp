@@ -517,43 +517,62 @@ if (adminUser == null) {
         </div>
         
         <!-- 書籍狀況分布 -->
-        <div class="chart-section">
-            <h2>📖 書籍狀況分布</h2>
-            <div class="category-list">
-                <%
-                    try {
-                        String conditionSql = "SELECT condition, COUNT(*) as count " +
-                                             "FROM bookListings " +
-                                             "WHERE isDelisted = FALSE " +
-                                             "GROUP BY condition " +
-                                             "ORDER BY count DESC";
-                        
-                        rs = smt.executeQuery(conditionSql);
-                        boolean hasConditions = false;
-                        
-                        while(rs.next()) {
-                            hasConditions = true;
-                            String condition = rs.getString("condition");
-                            int count = rs.getInt("count");
-                %>
-                    <div class="category-item">
-                        <div class="cat-name"><%= condition != null && !condition.isEmpty() ? condition : "未分類" %></div>
-                        <div class="cat-count"><%= count %> 本</div>
-                    </div>
-                <%
-                        }
-                        
-                        if(!hasConditions) {
-                            out.println("<div class='empty-state'>目前沒有資料</div>");
-                        }
-                        
-                        rs.close();
-                    } catch(Exception e) {
-                        out.println("<p style='color:#d9534f;'>載入狀況統計時發生錯誤</p>");
+<div class="chart-section">
+    <h2>📖 書籍狀況分布</h2>
+    <div class="category-list">
+        <%
+            ResultSet conditionRs = null;
+            try {
+                // Access 資料庫查詢語法
+                String conditionSql = "SELECT [condition], COUNT(*) AS count " +
+                                     "FROM bookListings " +
+                                     "WHERE isDelisted = FALSE " +
+                                     "GROUP BY [condition] " +
+                                     "ORDER BY COUNT(*) DESC";
+
+                conditionRs = smt.executeQuery(conditionSql);
+                boolean hasConditions = false;
+
+                while(conditionRs.next()) {
+                    hasConditions = true;
+                    String condition = conditionRs.getString("condition");
+                    int count = conditionRs.getInt("count");
+                    
+                    // 處理空值或空字串
+                    String displayCondition = "未分類";
+                    if(condition != null && !condition.trim().isEmpty()) {
+                        displayCondition = condition.trim();
                     }
-                %>
+        %>
+            <div class="category-item">
+                <div class="cat-name"><%= displayCondition %></div>
+                <div class="cat-count"><%= count %> 本</div>
             </div>
-        </div>
+        <%
+                }
+
+                if(!hasConditions) {
+        %>
+            <div class='empty-state'>目前沒有資料</div>
+        <%
+                }
+
+            } catch(SQLException e) {
+                out.println("<p style='color:#d9534f;'>載入狀況統計時發生錯誤: " + e.getMessage() + "</p>");
+                e.printStackTrace();
+            } finally {
+                // 確保關閉 ResultSet
+                if(conditionRs != null) {
+                    try {
+                        conditionRs.close();
+                    } catch(SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        %>
+    </div>
+</div>
     </div>
 
 <script>
