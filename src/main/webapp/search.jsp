@@ -174,7 +174,7 @@
 
     // 搜尋類型的中文顯示
     String typeDisplay = "";
-    if("titleBook".equals(type)) typeDisplay = "書名";
+    if("title".equals(type)) typeDisplay = "書名";
     else if("author".equals(type)) typeDisplay = "作者";
     else if("department".equals(type)) typeDisplay = "系所";
     else if("teacher".equals(type)) typeDisplay = "授課老師";
@@ -182,166 +182,171 @@
 
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
     Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
-    Statement smt = con.createStatement();
 
-    String sql = "SELECT * FROM book";
-    if(query != null && !query.trim().isEmpty() && type != null && !type.trim().isEmpty()) {
-        // 如果是搜尋系所，加入簡稱對應
-        if("department".equals(type)) {
-            // 建立系所簡稱對應表
-            Map<String, String[]> deptMap = new HashMap<>();
-            
-            // 護理學院
-            deptMap.put("護理", new String[]{"護理"});
-            deptMap.put("護理系", new String[]{"護理"});
-            deptMap.put("護理學系", new String[]{"護理"});
-            deptMap.put("助產", new String[]{"助產"});
-            deptMap.put("助產系", new String[]{"助產"});
-            deptMap.put("醫護", new String[]{"醫護教育"});
-            deptMap.put("醫護系", new String[]{"醫護教育"});
-            
-            // 健康科技學院
-            deptMap.put("資管", new String[]{"資訊管理"});
-            deptMap.put("資管系", new String[]{"資訊管理"});
-            deptMap.put("資訊管理系", new String[]{"資訊管理"});
-            deptMap.put("健管", new String[]{"健康事業管理"});
-            deptMap.put("健管系", new String[]{"健康事業管理"});
-            deptMap.put("健康事業管理系", new String[]{"健康事業管理"});
-            deptMap.put("長照", new String[]{"長期照護"});
-            deptMap.put("長照系", new String[]{"長期照護"});
-            deptMap.put("長期照護系", new String[]{"長期照護"});
-            deptMap.put("休閒", new String[]{"休閒產業"});
-            deptMap.put("休閒系", new String[]{"休閒產業"});
-            deptMap.put("語聽", new String[]{"語言治療", "聽力"});
-            deptMap.put("語聽系", new String[]{"語言治療", "聽力"});
-            
-            // 人類發展與健康學院
-            deptMap.put("嬰幼", new String[]{"嬰幼兒保育"});
-            deptMap.put("嬰幼系", new String[]{"嬰幼兒保育"});
-            deptMap.put("嬰幼兒保育系", new String[]{"嬰幼兒保育"});
-            deptMap.put("幼保", new String[]{"嬰幼兒保育"});
-            deptMap.put("幼保系", new String[]{"嬰幼兒保育"});
-            deptMap.put("運保", new String[]{"運動保健"});
-            deptMap.put("運保系", new String[]{"運動保健"});
-            deptMap.put("運動保健系", new String[]{"運動保健"});
-            deptMap.put("生死", new String[]{"生死與健康心理諮商"});
-            deptMap.put("生死系", new String[]{"生死與健康心理諮商"});
-            
-            // 智慧健康照護跨領域學院
-            deptMap.put("人工智慧", new String[]{"人工智慧"});
-            deptMap.put("AI", new String[]{"人工智慧"});
-            deptMap.put("大數據", new String[]{"大數據"});
-            
-            // 通識教育中心
-            deptMap.put("通識", new String[]{"通識教育"});
-            
-            // 檢查是否為簡稱
-            if(deptMap.containsKey(query)) {
-                String[] keywords = deptMap.get(query);
-                sql += " WHERE (";
-                for(int i = 0; i < keywords.length; i++) {
-                    if(i > 0) sql += " OR ";
-                    sql += type + " LIKE '%" + keywords[i] + "%'";
-                }
-                sql += ")";
-            } else {
-                // 不是簡稱，使用原本的模糊搜尋
-                sql += " WHERE " + type + " LIKE '%" + query + "%'";
+    // 將搜尋關鍵字拆分成多個字詞（支援空格分隔）
+    List<String> keywords = new ArrayList<>();
+    if(query != null && !query.trim().isEmpty()) {
+        String[] parts = query.trim().split("\\s+");
+        for(String part : parts) {
+            if(!part.isEmpty()) {
+                keywords.add(part);
             }
-        } else {
-            sql += " WHERE " + type + " LIKE '%" + query + "%'";
         }
     }
-    sql += " ORDER BY createdAt DESC";
 
-    ResultSet rs = smt.executeQuery(sql);
+    // 系所簡稱對應表
+    Map<String, String[]> deptMap = new HashMap<>();
+    deptMap.put("護理", new String[]{"護理"});
+    deptMap.put("護理系", new String[]{"護理"});
+    deptMap.put("護理學系", new String[]{"護理"});
+    deptMap.put("助產", new String[]{"助產"});
+    deptMap.put("助產系", new String[]{"助產"});
+    deptMap.put("醫護", new String[]{"醫護教育"});
+    deptMap.put("醫護系", new String[]{"醫護教育"});
+    deptMap.put("資管", new String[]{"資訊管理"});
+    deptMap.put("資管系", new String[]{"資訊管理"});
+    deptMap.put("資訊管理系", new String[]{"資訊管理"});
+    deptMap.put("健管", new String[]{"健康事業管理"});
+    deptMap.put("健管系", new String[]{"健康事業管理"});
+    deptMap.put("健康事業管理系", new String[]{"健康事業管理"});
+    deptMap.put("長照", new String[]{"長期照護"});
+    deptMap.put("長照系", new String[]{"長期照護"});
+    deptMap.put("長期照護系", new String[]{"長期照護"});
+    deptMap.put("休閒", new String[]{"休閒產業"});
+    deptMap.put("休閒系", new String[]{"休閒產業"});
+    deptMap.put("語聽", new String[]{"語言治療", "聽力"});
+    deptMap.put("語聽系", new String[]{"語言治療", "聽力"});
+    deptMap.put("嬰幼", new String[]{"嬰幼兒保育"});
+    deptMap.put("嬰幼系", new String[]{"嬰幼兒保育"});
+    deptMap.put("嬰幼兒保育系", new String[]{"嬰幼兒保育"});
+    deptMap.put("幼保", new String[]{"嬰幼兒保育"});
+    deptMap.put("幼保系", new String[]{"嬰幼兒保育"});
+    deptMap.put("運保", new String[]{"運動保健"});
+    deptMap.put("運保系", new String[]{"運動保健"});
+    deptMap.put("運動保健系", new String[]{"運動保健"});
+    deptMap.put("生死", new String[]{"生死與健康心理諮商"});
+    deptMap.put("生死系", new String[]{"生死與健康心理諮商"});
+    deptMap.put("人工智慧", new String[]{"人工智慧"});
+    deptMap.put("AI", new String[]{"人工智慧"});
+    deptMap.put("大數據", new String[]{"大數據"});
+    deptMap.put("通識", new String[]{"通識教育"});
+
+    // 根據搜尋類型決定是否需要 JOIN courses 表
+    boolean needCourseJoin = "department".equals(type) || "teacher".equals(type) || "course".equals(type);
+    
+    StringBuilder sql = new StringBuilder();
+    List<String> paramList = new ArrayList<>();
+    
+    if (needCourseJoin) {
+        sql.append("SELECT DISTINCT b.bookId, b.title, b.author, bl.price, bl.photo, bl.listedAt ");
+        sql.append("FROM books b ");
+        sql.append("INNER JOIN bookListings bl ON b.bookId = bl.bookId ");
+        sql.append("INNER JOIN book_course_relations bcr ON b.bookId = bcr.bookId ");
+        sql.append("INNER JOIN courses c ON bcr.courseId = c.courseId ");
+        sql.append("WHERE bl.isDelisted = false");
+    } else {
+        sql.append("SELECT b.bookId, b.title, b.author, bl.price, bl.photo, bl.listedAt ");
+        sql.append("FROM books b ");
+        sql.append("INNER JOIN bookListings bl ON b.bookId = bl.bookId ");
+        sql.append("WHERE bl.isDelisted = false");
+    }
+    
+    // 建立 WHERE 條件
+    if(query != null && !query.trim().isEmpty() && type != null && !type.trim().isEmpty()) {
+        if("department".equals(type)) {
+            // 處理系所簡稱
+            List<String> searchTerms = new ArrayList<>();
+            if(deptMap.containsKey(query)) {
+                searchTerms.addAll(Arrays.asList(deptMap.get(query)));
+            } else {
+                searchTerms.addAll(keywords);
+            }
+            
+            if(!searchTerms.isEmpty()) {
+                sql.append(" AND (");
+                for(int i = 0; i < searchTerms.size(); i++) {
+                    if(i > 0) sql.append(" OR ");
+                    sql.append("LOWER(c.department) LIKE ?");
+                    paramList.add("%" + searchTerms.get(i).toLowerCase() + "%");
+                }
+                sql.append(")");
+            }
+        } else if("teacher".equals(type)) {
+            if(!keywords.isEmpty()) {
+                sql.append(" AND (");
+                for(int i = 0; i < keywords.size(); i++) {
+                    if(i > 0) sql.append(" OR ");
+                    sql.append("LOWER(c.teacher) LIKE ?");
+                    paramList.add("%" + keywords.get(i).toLowerCase() + "%");
+                }
+                sql.append(")");
+            }
+        } else if("course".equals(type)) {
+            if(!keywords.isEmpty()) {
+                sql.append(" AND (");
+                for(int i = 0; i < keywords.size(); i++) {
+                    if(i > 0) sql.append(" OR ");
+                    sql.append("LOWER(c.courseName) LIKE ?");
+                    paramList.add("%" + keywords.get(i).toLowerCase() + "%");
+                }
+                sql.append(")");
+            }
+        } else if("title".equals(type)) {
+        	if(!keywords.isEmpty()) {
+                sql.append(" AND (");
+                for(int i = 0; i < keywords.size(); i++) {
+                    if(i > 0) sql.append(" AND ");  // 改成 AND
+                    sql.append("LOWER(b.title) LIKE ?");
+                    paramList.add("%" + keywords.get(i).toLowerCase() + "%");
+                }
+                sql.append(")");
+            }
+        } else if("author".equals(type)) {
+        	if(!keywords.isEmpty()) {
+                sql.append(" AND (");
+                for(int i = 0; i < keywords.size(); i++) {
+                    if(i > 0) sql.append(" AND ");  // 改成 AND
+                    sql.append("LOWER(b.author) LIKE ?");
+                    paramList.add("%" + keywords.get(i).toLowerCase() + "%");
+                }
+                sql.append(")");
+            }
+        }
+    }
+    
+    sql.append(" ORDER BY bl.listedAt DESC");
+
+    out.println("<!-- Debug SQL: " + sql.toString() + " -->");
+    out.println("<!-- Param Count: " + paramList.size() + " -->");
+    
+    // 使用 PreparedStatement 防止 SQL 注入
+    PreparedStatement pstmt = con.prepareStatement(sql.toString());
+    
+    // 設定參數
+    for(int i = 0; i < paramList.size(); i++) {
+        pstmt.setString(i + 1, paramList.get(i));
+    }
+    
+    ResultSet rs = pstmt.executeQuery();
 
     // 計算結果數量
     int resultCount = 0;
-    if(query != null && !query.trim().isEmpty() && type != null && !type.trim().isEmpty()) {
-        String sqlCount = "";
-        
-        // 如果是搜尋系所，使用相同的簡稱邏輯
-        if("department".equals(type)) {
-            Map<String, String[]> deptMap = new HashMap<>();
-            // 護理學院
-            deptMap.put("護理", new String[]{"護理"});
-            deptMap.put("助產", new String[]{"助產"});
-            deptMap.put("醫護", new String[]{"醫護教育"});
-            
-            // 健康科技學院
-            deptMap.put("資管", new String[]{"資訊管理"});
-            deptMap.put("健管", new String[]{"健康事業管理"});
-            deptMap.put("長照", new String[]{"長期照護"});
-            deptMap.put("休閒", new String[]{"休閒產業"});
-            deptMap.put("語聽", new String[]{"語言治療", "聽力"});
-            
-            // 人類發展與健康學院
-            deptMap.put("嬰幼", new String[]{"嬰幼兒保育"});
-            deptMap.put("幼保", new String[]{"嬰幼兒保育"});
-            deptMap.put("幼保系", new String[]{"嬰幼兒保育"});
-            deptMap.put("運保", new String[]{"運動保健"});
-            deptMap.put("生死", new String[]{"生死與健康心理諮商"});
-            
-            // 智慧健康照護跨領域學院
-            deptMap.put("人工智慧", new String[]{"人工智慧"});
-            deptMap.put("AI", new String[]{"人工智慧"});
-            deptMap.put("大數據", new String[]{"大數據"});
-            
-            // 通識教育中心
-            deptMap.put("通識", new String[]{"通識教育"});
-            
-            if(deptMap.containsKey(query)) {
-                String[] keywords = deptMap.get(query);
-                sqlCount = "SELECT COUNT(*) AS cnt FROM book WHERE (";
-                for(int i = 0; i < keywords.length; i++) {
-                    if(i > 0) sqlCount += " OR ";
-                    sqlCount += type + " LIKE ?";
-                }
-                sqlCount += ")";
-                
-                PreparedStatement psCount = con.prepareStatement(sqlCount);
-                for(int i = 0; i < keywords.length; i++) {
-                    psCount.setString(i + 1, "%" + keywords[i] + "%");
-                }
-                ResultSet rsCount = psCount.executeQuery();
-                if(rsCount.next()) {
-                    resultCount = rsCount.getInt("cnt");
-                }
-                rsCount.close();
-                psCount.close();
-            } else {
-                sqlCount = "SELECT COUNT(*) AS cnt FROM book WHERE " + type + " LIKE ?";
-                PreparedStatement psCount = con.prepareStatement(sqlCount);
-                psCount.setString(1, "%" + query + "%");
-                ResultSet rsCount = psCount.executeQuery();
-                if(rsCount.next()) {
-                    resultCount = rsCount.getInt("cnt");
-                }
-                rsCount.close();
-                psCount.close();
-            }
-        } else {
-            sqlCount = "SELECT COUNT(*) AS cnt FROM book WHERE " + type + " LIKE ?";
-            PreparedStatement psCount = con.prepareStatement(sqlCount);
-            psCount.setString(1, "%" + query + "%");
-            ResultSet rsCount = psCount.executeQuery();
-            if(rsCount.next()) {
-                resultCount = rsCount.getInt("cnt");
-            }
-            rsCount.close();
-            psCount.close();
-        }
-    } else {
-        String sqlCount = "SELECT COUNT(*) AS cnt FROM book";
-        PreparedStatement psCount = con.prepareStatement(sqlCount);
-        ResultSet rsCount = psCount.executeQuery();
-        if(rsCount.next()) {
-            resultCount = rsCount.getInt("cnt");
-        }
-        rsCount.close();
-        psCount.close();
+    List<Map<String, Object>> resultList = new ArrayList<>();
+    
+    while(rs.next()) {
+        Map<String, Object> row = new HashMap<>();
+        row.put("bookId", rs.getString("bookId"));
+        row.put("title", rs.getString("title"));
+        row.put("author", rs.getString("author"));
+        row.put("price", rs.getString("price"));
+        row.put("listedAt", rs.getString("listedAt"));
+        row.put("photo", rs.getString("photo"));
+        resultList.add(row);
+        resultCount++;
     }
+    
+    rs.close();
+    pstmt.close();
 %>
 
 <!-- 搜尋資訊顯示 -->
@@ -349,6 +354,9 @@
 <div class="search-info">
     搜尋「<strong><%= typeDisplay %></strong>」包含「<strong><%= query %></strong>」
     - 找到 <strong><%= resultCount %></strong> 筆結果
+    <% if(keywords.size() > 1) { %>
+        <br><small style="color: #888;">搜尋關鍵字：<%= String.join("、", keywords.subList(0, Math.min(5, keywords.size()))) %><%= keywords.size() > 5 ? "..." : "" %></small>
+    <% } %>
 </div>
 <% } %>
 
@@ -367,21 +375,20 @@
     <div class="book-grid">
     <%
         int cardIndex = 0;
-        while(rs.next()) {
-            String bookId = rs.getString("bookId");
-            String title = rs.getString("titleBook");
-            String author = rs.getString("author");
-            String price = rs.getString("price");
-            String date = rs.getString("date");
-            String photoStr = rs.getString("photo");
+        for(Map<String, Object> row : resultList) {
+            String bookId = (String) row.get("bookId");
+            String title = (String) row.get("title");
+            String author = (String) row.get("author");
+            String price = (String) row.get("price");
+            String listedAt = (String) row.get("listedAt");
+            String photoStr = (String) row.get("photo");
             
-            // 分割圖片路徑 - 支援多張圖片
+            // 分割圖片路徑
             List<String> photoList = new ArrayList<>();
             if (photoStr != null && !photoStr.trim().isEmpty()) {
                 String[] photoArray = photoStr.split(",");
                 for (String photo : photoArray) {
                     String trimmedPhoto = photo.trim();
-                    // 確保路徑正確
                     if (!trimmedPhoto.startsWith("assets/")) {
                         trimmedPhoto = "assets/images/member/" + trimmedPhoto;
                     }
@@ -389,7 +396,6 @@
                 }
             }
             
-            // 如果沒有圖片,使用預設圖
             if (photoList.isEmpty()) {
                 photoList.add("assets/images/about.png");
             }
@@ -399,7 +405,7 @@
             cardIndex++;
     %>
         <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
-            <div class="book-card" data-card-id="<%= cardId %>">
+        	<div class="book-card" data-card-id="<%= cardId %>">
                 <div class="book-images" id="<%= cardId %>">
                     <% if (photoList.isEmpty()) { %>
                         <div class="no-image">無圖片</div>
@@ -425,7 +431,7 @@
                     <div class="book-title"><%= title %></div>
                     <div class="book-author">作者：<%= author %></div>
                     <div class="book-price">NT$<%= (int) Float.parseFloat(price) %></div>
-                    <div class="book-date">出版日期：<%= date != null ? date.split(" ")[0] : "" %></div>
+                    <div class="book-date">上架日期：<%= listedAt != null ? listedAt.split(" ")[0] : "" %></div>
                 </div>
             </div>
         </a>
@@ -451,7 +457,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const dots = container.querySelectorAll('.dot');
         const indicator = container.querySelector('.current-img');
         
-        if (images.length <= 1) return; // 只有一張圖片不需要輪播
+        if (images.length <= 1) return;
         
         let currentIndex = 0;
         let intervalId = null;
@@ -473,12 +479,10 @@ document.addEventListener('DOMContentLoaded', function() {
             showImage(currentIndex);
         }
         
-        // 滑鼠移入時開始輪播
         card.addEventListener('mouseenter', function() {
-            intervalId = setInterval(nextImage, 800); // 每0.8秒切換
+            intervalId = setInterval(nextImage, 800);
         });
         
-        // 滑鼠移出時停止輪播並回到第一張
         card.addEventListener('mouseleave', function() {
             if (intervalId) {
                 clearInterval(intervalId);

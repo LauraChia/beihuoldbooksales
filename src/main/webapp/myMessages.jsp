@@ -390,12 +390,13 @@
         
         // === 6. 查詢訊息列表 (使用 PreparedStatement) ===
         String sql = "SELECT m.messageId, m.buyerId, m.sellerId, m.bookId, m.message, m.contactInfo, m.isRead, m.sentAt, " +
-                    "b.titleBook, b.photo, b.price, " +
-                    "u.name as buyerName, u.username as buyerEmail " +
-                    "FROM (messages m " +
-                    "INNER JOIN book b ON m.bookId = b.bookId) " +
-                    "INNER JOIN users u ON m.buyerId = u.userId " +
-                    "WHERE m.sellerId = ?";
+	            "b.title, bl.photo, bl.price, bl.listingId, " +
+	            "u.name as buyerName, u.username as buyerEmail " +
+	            "FROM ((messages m " +
+	            "INNER JOIN bookListings bl ON m.bookId = bl.listingId) " +
+	            "INNER JOIN books b ON bl.bookId = b.bookId) " +
+	            "INNER JOIN users u ON m.buyerId = u.userId " +
+	            "WHERE m.sellerId = ?";
         
         if (filter.equals("unread")) {
             sql += " AND m.isRead = false";
@@ -444,7 +445,7 @@
             hasMessages = true;
             
             int messageId = rs.getInt("messageId");
-            String bookTitle = rs.getString("titleBook");
+            String bookTitle = rs.getString("title");
             String photo = rs.getString("photo");
             String price = rs.getString("price");
             String message = rs.getString("message");
@@ -454,6 +455,7 @@
             boolean isRead = rs.getBoolean("isRead");
             Timestamp sentAt = rs.getTimestamp("sentAt");
             int bookId = rs.getInt("bookId");
+            int listingId = rs.getInt("listingId"); 
             
             // 處理圖片路徑
             if (photo != null && !photo.trim().isEmpty()) {

@@ -276,12 +276,14 @@
     Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
     
     // 查詢使用者的收藏書籍
-    String sql = "SELECT f.favoriteId, f.createdAt as favoriteTime, " +
-                 "b.bookId, b.titleBook, b.author, b.price, b.date, b.photo " +
-                 "FROM favorites f " +
-                 "INNER JOIN book b ON f.bookId = b.bookId " +
-                 "WHERE f.userId = '" + userId + "' " +
-                 "ORDER BY f.createdAt DESC";
+	String sql = "SELECT f.favoriteId, f.createdAt as favoriteTime, " +
+	             "b.bookId, b.title, b.author, bl.price, bl.listedAt, bl.photo, bl.listingId " +
+	             "FROM favorites f " +
+	             "INNER JOIN books b ON f.bookId = b.bookId " +
+	             "INNER JOIN bookListings bl ON b.bookId = bl.bookId " +
+	             "WHERE f.userId = '" + userId + "' " +
+	             "AND bl.isDelisted = false " +  // 只顯示未下架的書籍
+	             "ORDER BY f.createdAt DESC";
     
     Statement smt = con.createStatement();
     ResultSet rs = smt.executeQuery(sql);
@@ -291,20 +293,18 @@
         Map<String, String> book = new HashMap<>();
         book.put("favoriteId", rs.getString("favoriteId"));
         book.put("bookId", rs.getString("bookId"));
-        book.put("titleBook", rs.getString("titleBook"));
+        book.put("titleBook", rs.getString("title"));
         book.put("author", rs.getString("author"));
         book.put("price", rs.getString("price"));
-        book.put("date", rs.getString("date"));
+        book.put("date", rs.getString("listedAt"));
         book.put("favoriteTime", rs.getString("favoriteTime"));
+        book.put("listingId", rs.getString("listingId"));
         
         // 處理圖片
         String photoStr = rs.getString("photo");
         String photo = "assets/images/about.png"; // 預設圖片
         if (photoStr != null && !photoStr.trim().isEmpty()) {
             String firstPhoto = photoStr.split(",")[0].trim();
-            if (!firstPhoto.startsWith("assets/")) {
-                firstPhoto = "assets/images/member/" + firstPhoto;
-            }
             photo = firstPhoto;
         }
         book.put("photo", photo);
@@ -349,7 +349,7 @@
                         <i class="fas fa-heart"></i>
                     </button>
                     
-                    <a class="book-link" href="bookDetail.jsp?bookId=<%= book.get("bookId") %>">
+                    <a class="book-link" href="bookDetail.jsp?listingId=<%= book.get("bookId") %>">
                         <img src="<%= book.get("photo") %>" 
                              alt="<%= book.get("titleBook") %>" 
                              class="book-image"
