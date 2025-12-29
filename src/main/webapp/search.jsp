@@ -7,7 +7,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>二手書交易網 - 搜尋結果</title>
+    <title>搜尋結果 - 二手書交易網</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Google Fonts -->
@@ -20,40 +20,103 @@
 
     <style>
         body {
-            background-color: #f5f5f5;
+            background-color: #f8f9fa;
             font-family: "Microsoft JhengHei", sans-serif;
         }
+
+        /* 頁面標題區塊 - 綠色漸層 */
+        .page-header {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 0;
+            box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
+        }
+        
+        .page-header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .page-header .search-title {
+            font-size: 18px;
+            margin-top: 10px;
+            opacity: 0.95;
+        }
+
+        /* 搜尋資訊框 - 綠色系 */
+        .search-info-container {
+            background: white;
+            margin: 30px auto;
+            max-width: 1200px;
+            padding: 0;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .search-info {
+            background: #e8f5e9;
+            border-left: 4px solid #66bb6a;
+            padding: 20px 30px;
+            color: #2e7d32;
+            font-size: 15px;
+        }
+        
+        .search-info strong {
+            color: #1b5e20;
+            font-weight: 600;
+        }
+
+        .search-info small {
+            display: block;
+            margin-top: 8px;
+            color: #558b2f;
+        }
+
+        /* 書籍網格容器 */
+        .book-grid-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 40px 60px;
+        }
+
         .book-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 25px;
-            padding: 40px;
-            max-width: 1200px;
-            margin: 100px auto 60px;
         }
+
+        /* 書籍卡片 - 加入綠色系 hover 效果 */
         .book-card {
             background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
             overflow: hidden;
-            transition: 0.2s ease-in-out;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
+        
         .book-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(102, 187, 106, 0.25);
+            border-color: #81c784;
         }
+        
         .book-link {
             text-decoration: none;
             color: inherit;
         }
+        
         .book-images {
             position: relative;
             width: 100%;
             height: 260px;
             overflow: hidden;
-            background-color: #f0f0f0;
+            background-color: #f5f5f5;
         }
+        
         .book-img {
             width: 100%;
             height: 260px;
@@ -64,102 +127,160 @@
             transition: opacity 0.5s ease;
             opacity: 0;
         }
+        
         .book-img.active {
             opacity: 1;
         }
+        
         .book-info {
-            padding: 12px 14px;
+            padding: 15px 16px;
         }
+        
         .book-title {
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
             color: #333;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             height: 40px;
             overflow: hidden;
             line-height: 20px;
         }
+        
         .book-author {
             color: #666;
             font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .book-price {
+            color: #66bb6a;
+            font-weight: bold;
+            font-size: 18px;
             margin-bottom: 6px;
         }
-        .book-price {
-            color: #d9534f;
-            font-weight: bold;
-            font-size: 15px;
-        }
+        
         .book-date {
             font-size: 13px;
-            color: #888;
+            color: #999;
         }
+
+        /* 圖片指示器 - 綠色系 */
         .image-indicator {
             position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background-color: rgba(0,0,0,0.6);
+            bottom: 10px;
+            right: 10px;
+            background-color: rgba(102, 187, 106, 0.9);
             color: white;
-            padding: 3px 8px;
+            padding: 4px 10px;
             border-radius: 12px;
             font-size: 12px;
+            font-weight: 500;
             z-index: 10;
         }
+        
         .image-dots {
             position: absolute;
-            bottom: 8px;
+            bottom: 10px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 5px;
+            gap: 6px;
             z-index: 10;
         }
+        
         .dot {
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background-color: rgba(255,255,255,0.5);
-            transition: background-color 0.3s;
+            transition: all 0.3s;
         }
+        
         .dot.active {
             background-color: white;
+            transform: scale(1.2);
         }
+        
         .no-image {
             display: flex;
             align-items: center;
             justify-content: center;
             height: 100%;
-            color: #999;
+            color: #bbb;
             font-size: 14px;
         }
+
+        /* 無結果顯示 - 綠色系 */
         .no-results {
             text-align: center;
             padding: 80px 20px;
-            margin: 150px auto 100px;
+            margin: 60px auto;
             max-width: 600px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
+        
         .no-results i {
             font-size: 80px;
-            color: #ccc;
+            color: #c8e6c9;
             margin-bottom: 20px;
         }
+        
         .no-results h4 {
-            color: #666;
+            color: #555;
             margin-bottom: 15px;
+            font-weight: 600;
         }
+        
         .no-results p {
             color: #999;
-            font-size: 14px;
+            font-size: 15px;
+            margin-bottom: 25px;
         }
-        .search-info {
-            background-color: white;
-            padding: 15px 25px;
+
+        .no-results .btn {
+            background: white;
+            border: 2px solid #66bb6a;
+            color: #66bb6a;
+            padding: 12px 32px;
             border-radius: 8px;
-            margin: 120px auto 20px;
-            max-width: 1200px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
-        .search-info strong {
-            color: #d9534f;
+
+        .no-results .btn:hover {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 24px;
+            }
+            
+            .page-header .search-title {
+                font-size: 16px;
+            }
+
+            .book-grid-wrapper {
+                padding: 20px 20px 40px;
+            }
+
+            .book-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 15px;
+            }
+
+            .search-info {
+                padding: 15px 20px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -238,14 +359,14 @@
     List<String> paramList = new ArrayList<>();
     
     if (needCourseJoin) {
-        sql.append("SELECT DISTINCT b.bookId, b.title, b.author, bl.price, bl.photo, bl.listedAt ");
+        sql.append("SELECT DISTINCT b.bookId, b.title, b.author, bl.listingId, bl.price, bl.photo, bl.listedAt ");
         sql.append("FROM books b ");
         sql.append("INNER JOIN bookListings bl ON b.bookId = bl.bookId ");
         sql.append("INNER JOIN book_course_relations bcr ON b.bookId = bcr.bookId ");
         sql.append("INNER JOIN courses c ON bcr.courseId = c.courseId ");
         sql.append("WHERE bl.isDelisted = false");
     } else {
-        sql.append("SELECT b.bookId, b.title, b.author, bl.price, bl.photo, bl.listedAt ");
+        sql.append("SELECT b.bookId, b.title, b.author, bl.listingId, bl.price, bl.photo, bl.listedAt ");
         sql.append("FROM books b ");
         sql.append("INNER JOIN bookListings bl ON b.bookId = bl.bookId ");
         sql.append("WHERE bl.isDelisted = false");
@@ -292,24 +413,16 @@
                 sql.append(")");
             }
         } else if("title".equals(type)) {
-        	if(!keywords.isEmpty()) {
-                sql.append(" AND (");
-                for(int i = 0; i < keywords.size(); i++) {
-                    if(i > 0) sql.append(" AND ");  // 改成 AND
-                    sql.append("LOWER(b.title) LIKE ?");
-                    paramList.add("%" + keywords.get(i).toLowerCase() + "%");
-                }
-                sql.append(")");
+            // 書名搜尋：使用完整查詢字串，不分割
+            if(query != null && !query.trim().isEmpty()) {
+                sql.append(" AND LOWER(b.title) LIKE ?");
+                paramList.add("%" + query.trim().toLowerCase() + "%");
             }
         } else if("author".equals(type)) {
-        	if(!keywords.isEmpty()) {
-                sql.append(" AND (");
-                for(int i = 0; i < keywords.size(); i++) {
-                    if(i > 0) sql.append(" AND ");  // 改成 AND
-                    sql.append("LOWER(b.author) LIKE ?");
-                    paramList.add("%" + keywords.get(i).toLowerCase() + "%");
-                }
-                sql.append(")");
+            // 作者搜尋：使用完整查詢字串,不分割
+            if(query != null && !query.trim().isEmpty()) {
+                sql.append(" AND LOWER(b.author) LIKE ?");
+                paramList.add("%" + query.trim().toLowerCase() + "%");
             }
         }
     }
@@ -336,6 +449,7 @@
     while(rs.next()) {
         Map<String, Object> row = new HashMap<>();
         row.put("bookId", rs.getString("bookId"));
+        row.put("listingId", rs.getString("listingId"));
         row.put("title", rs.getString("title"));
         row.put("author", rs.getString("author"));
         row.put("price", rs.getString("price"));
@@ -349,95 +463,115 @@
     pstmt.close();
 %>
 
+<!-- 頁面標題 -->
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-search"></i> 搜尋結果</h1>
+        <% if(query != null && !query.trim().isEmpty()) { %>
+        <div class="search-title">
+            搜尋「<%= typeDisplay %>」：「<%= query %>」
+        </div>
+        <% } %>
+    </div>
+</div>
+
 <!-- 搜尋資訊顯示 -->
 <% if(query != null && !query.trim().isEmpty()) { %>
-<div class="search-info">
-    搜尋「<strong><%= typeDisplay %></strong>」包含「<strong><%= query %></strong>」
-    - 找到 <strong><%= resultCount %></strong> 筆結果
-    <% if(keywords.size() > 1) { %>
-        <br><small style="color: #888;">搜尋關鍵字：<%= String.join("、", keywords.subList(0, Math.min(5, keywords.size()))) %><%= keywords.size() > 5 ? "..." : "" %></small>
-    <% } %>
+<div class="search-info-container">
+    <div class="search-info">
+        <i class="fas fa-info-circle"></i>
+        搜尋「<strong><%= typeDisplay %></strong>」包含「<strong><%= query %></strong>」
+        - 找到 <strong><%= resultCount %></strong> 筆結果
+        <% if(keywords.size() > 1) { %>
+            <small>搜尋關鍵字：<%= String.join("、", keywords.subList(0, Math.min(5, keywords.size()))) %><%= keywords.size() > 5 ? "..." : "" %></small>
+        <% } %>
+    </div>
 </div>
 <% } %>
 
 <% if(resultCount == 0) { %>
     <!-- 無結果顯示 -->
-    <div class="no-results">
-        <i class="fas fa-search"></i>
-        <h4>找不到相符的書籍</h4>
-        <p>請嘗試使用其他關鍵字或搜尋條件</p>
-        <a href="index.jsp" class="btn btn-primary mt-3">
-            <i class="fas fa-home me-2"></i>返回首頁
-        </a>
+    <div class="book-grid-wrapper">
+        <div class="no-results">
+            <i class="fas fa-search"></i>
+            <h4>找不到相符的書籍</h4>
+            <p>請嘗試使用其他關鍵字或搜尋條件</p>
+            <a href="index.jsp" class="btn">
+                <i class="fas fa-home"></i> 返回首頁
+            </a>
+        </div>
     </div>
 <% } else { %>
     <!-- 有結果時顯示書籍列表 -->
-    <div class="book-grid">
-    <%
-        int cardIndex = 0;
-        for(Map<String, Object> row : resultList) {
-            String bookId = (String) row.get("bookId");
-            String title = (String) row.get("title");
-            String author = (String) row.get("author");
-            String price = (String) row.get("price");
-            String listedAt = (String) row.get("listedAt");
-            String photoStr = (String) row.get("photo");
-            
-            // 分割圖片路徑
-            List<String> photoList = new ArrayList<>();
-            if (photoStr != null && !photoStr.trim().isEmpty()) {
-                String[] photoArray = photoStr.split(",");
-                for (String photo : photoArray) {
-                    String trimmedPhoto = photo.trim();
-                    if (!trimmedPhoto.startsWith("assets/")) {
-                        trimmedPhoto = "assets/images/member/" + trimmedPhoto;
+    <div class="book-grid-wrapper">
+        <div class="book-grid">
+        <%
+            int cardIndex = 0;
+            for(Map<String, Object> row : resultList) {
+                String bookId = (String) row.get("bookId");
+                String listingId = (String) row.get("listingId");
+                String title = (String) row.get("title");
+                String author = (String) row.get("author");
+                String price = (String) row.get("price");
+                String listedAt = (String) row.get("listedAt");
+                String photoStr = (String) row.get("photo");
+                
+                // 分割圖片路徑
+                List<String> photoList = new ArrayList<>();
+                if (photoStr != null && !photoStr.trim().isEmpty()) {
+                    String[] photoArray = photoStr.split(",");
+                    for (String photo : photoArray) {
+                        String trimmedPhoto = photo.trim();
+                        if (!trimmedPhoto.startsWith("assets/")) {
+                            trimmedPhoto = "assets/images/member/" + trimmedPhoto;
+                        }
+                        photoList.add(trimmedPhoto);
                     }
-                    photoList.add(trimmedPhoto);
                 }
-            }
-            
-            if (photoList.isEmpty()) {
-                photoList.add("assets/images/about.png");
-            }
-            
-            int photoCount = photoList.size();
-            String cardId = "card-" + cardIndex;
-            cardIndex++;
-    %>
-        <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
-        	<div class="book-card" data-card-id="<%= cardId %>">
-                <div class="book-images" id="<%= cardId %>">
-                    <% if (photoList.isEmpty()) { %>
-                        <div class="no-image">無圖片</div>
-                    <% } else { %>
-                        <% for (int i = 0; i < photoList.size(); i++) { %>
-                            <img src="<%= photoList.get(i) %>" 
-                                 alt="書籍圖片<%= (i+1) %>" 
-                                 class="book-img <%= (i == 0) ? "active" : "" %>"
-                                 onerror="this.src='assets/images/about.png'">
+                
+                if (photoList.isEmpty()) {
+                    photoList.add("assets/images/about.png");
+                }
+                
+                int photoCount = photoList.size();
+                String cardId = "card-" + cardIndex;
+                cardIndex++;
+        %>
+            <a class="book-link" href="bookDetail.jsp?listingId=<%= listingId %>">
+                <div class="book-card" data-card-id="<%= cardId %>">
+                    <div class="book-images" id="<%= cardId %>">
+                        <% if (photoList.isEmpty()) { %>
+                            <div class="no-image">無圖片</div>
+                        <% } else { %>
+                            <% for (int i = 0; i < photoList.size(); i++) { %>
+                                <img src="<%= photoList.get(i) %>" 
+                                     alt="書籍圖片<%= (i+1) %>" 
+                                     class="book-img <%= (i == 0) ? "active" : "" %>"
+                                     onerror="this.src='assets/images/about.png'">
+                            <% } %>
+                            
+                            <% if (photoCount > 1) { %>
+                                <span class="image-indicator"><span class="current-img">1</span>/<%= photoCount %></span>
+                                <div class="image-dots">
+                                    <% for (int i = 0; i < photoCount; i++) { %>
+                                        <span class="dot <%= (i == 0) ? "active" : "" %>"></span>
+                                    <% } %>
+                                </div>
+                            <% } %>
                         <% } %>
-                        
-                        <% if (photoCount > 1) { %>
-                            <span class="image-indicator"><span class="current-img">1</span>/<%= photoCount %></span>
-                            <div class="image-dots">
-                                <% for (int i = 0; i < photoCount; i++) { %>
-                                    <span class="dot <%= (i == 0) ? "active" : "" %>"></span>
-                                <% } %>
-                            </div>
-                        <% } %>
-                    <% } %>
+                    </div>
+                    <div class="book-info">
+                        <div class="book-title"><%= title %></div>
+                        <div class="book-author">作者：<%= author %></div>
+                        <div class="book-price">NT$ <%= (int) Float.parseFloat(price) %></div>
+                        <div class="book-date"><i class="far fa-calendar-alt"></i> <%= listedAt != null ? listedAt.split(" ")[0] : "" %></div>
+                    </div>
                 </div>
-                <div class="book-info">
-                    <div class="book-title"><%= title %></div>
-                    <div class="book-author">作者：<%= author %></div>
-                    <div class="book-price">NT$<%= (int) Float.parseFloat(price) %></div>
-                    <div class="book-date">上架日期：<%= listedAt != null ? listedAt.split(" ")[0] : "" %></div>
-                </div>
-            </div>
-        </a>
-    <%
-        }
-    %>
+            </a>
+        <%
+            }
+        %>
+        </div>
     </div>
 <% } %>
 
@@ -495,28 +629,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Footer Start -->
-<div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
-    <div class="container py-5">
-        <div class="row g-5">
-            <div class="col-md-6 col-lg-3">
-                <h5 class="text-white mb-4">專題資訊</h5>
-                <p class="mb-2">題目：北護二手書拍賣系統</p>
-                <p class="mb-2">系所：健康事業管理系</p>
-                <p class="mb-2">專題組員：黃郁心、賈子瑩、許宇翔、闕紫彤</p>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <h5 class="text-white mb-4">快速連結</h5>
-                <a class="btn btn-link" href="index.jsp">首頁</a>
-                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8" target="_blank" rel="noopener noreferrer">系統使用回饋表單</a>
-            </div>
-        </div>
-    </div>
-    <div class="container-fluid text-center border-top border-secondary py-3">
-        <p class="mb-0">&copy; 2025年 國北護二手書拍賣網. @All Rights Reserved.</p>
-    </div>
-</div>
-<!-- Footer End -->
+<!-- Footer -->
+<%@ include file="footer.jsp"%>
 
 </body>
 </html>

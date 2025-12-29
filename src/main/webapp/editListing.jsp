@@ -606,3 +606,186 @@
             <button type="button" class="btn-secondary" onclick="window.location.href='myListingDetail.jsp?listingId=<%= listingId %>'">
                 <i class="fas fa-times"></i> 取消
             </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const departmentOptions = {
+        "護理學院": ["護理系所", "護理助產及婦女健康系所", "醫護教育暨數位學習系所", "高齡健康照護系所"],
+        "健康科技學院": ["資訊管理系所", "健康事業管理系所", "長期照護系所", "休閒產業與健康促進系所", "語言治療與聽力學系所"],
+        "人類發展與健康學院": ["嬰幼兒保育系所", "運動保健系所", "生死與健康心理諮商系所"],
+        "智慧健康照護跨領域學院": ["人工智慧與健康大數據系所"],
+        "通識教育中心": ["英文", "國文", "其他"]
+    };
+    
+    const currentDepartment = "<%= department != null ? department : "" %>";
+    
+    function updateDepartment() {
+        const college = document.getElementById("college").value;
+        const deptSelect = document.getElementById("department");
+        deptSelect.innerHTML = "<option value=''>請選擇系所</option>";
+        
+        if (college && departmentOptions[college]) {
+            departmentOptions[college].forEach(dept => {
+                const option = document.createElement("option");
+                option.value = dept;
+                option.textContent = dept;
+                if (dept === currentDepartment) {
+                    option.selected = true;
+                }
+                deptSelect.appendChild(option);
+            });
+        }
+    }
+    
+    // 頁面載入時初始化系所選單
+    window.addEventListener('load', function() {
+        updateDepartment();
+    });
+
+    // 圖片管理
+    const photoInput = document.getElementById('photoInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const uploadArea = document.getElementById('uploadArea');
+    const existingCountSpan = document.getElementById('existingCount');
+    const newCountSpan = document.getElementById('newCount');
+    const totalCountSpan = document.getElementById('totalCount');
+    const existingPhotosInput = document.getElementById('existingPhotos');
+    const MAX_IMAGES = 6;
+    
+    let selectedFiles = [];
+    let existingPhotos = existingPhotosInput.value.split(',').filter(p => p.trim() !== '');
+    
+    function updateCounts() {
+        const existingCount = existingPhotos.length;
+        const newCount = selectedFiles.length;
+        const totalCount = existingCount + newCount;
+        
+        existingCountSpan.textContent = existingCount;
+        newCountSpan.textContent = newCount;
+        totalCountSpan.textContent = totalCount;
+        
+        // 更新隱藏欄位
+        existingPhotosInput.value = existingPhotos.join(',');
+    }
+    
+    function removeCurrentImage(btn, filename) {
+        if (confirm('確定要移除這張圖片嗎？')) {
+            const item = btn.closest('.current-image-item');
+            item.remove();
+            
+            // 從 existingPhotos 陣列中移除
+            existingPhotos = existingPhotos.filter(p => p !== filename);
+            updateCounts();
+            
+            // 檢查是否還有現有圖片
+            const container = document.getElementById('currentImagesContainer');
+            if (container && container.children.length === 0) {
+                container.remove();
+            }
+        }
+    }
+    
+    // 將函數設為全域以便 onclick 使用
+    window.removeCurrentImage = removeCurrentImage;
+
+    function updatePreview() {
+        previewContainer.innerHTML = '';
+        selectedFiles.forEach((file, index) => {
+            const div = document.createElement('div');
+            div.className = 'preview-item';
+            div.innerHTML = `<img src="" alt="載入中..." style="display:none;"><button type="button" class="remove-btn" onclick="removeNewImage(${index})">×</button>`;
+            previewContainer.appendChild(div);
+            
+            const reader = new FileReader();
+            const img = div.querySelector('img');
+            reader.onload = e => { 
+                img.src = e.target.result; 
+                img.style.display = 'block'; 
+            };
+            reader.onerror = () => { 
+                img.alt = '載入失敗'; 
+            };
+            reader.readAsDataURL(file);
+        });
+        updateCounts();
+    }
+
+    function removeNewImage(index) {
+        selectedFiles.splice(index, 1);
+        updateFileInput();
+        updatePreview();
+    }
+    
+    window.removeNewImage = removeNewImage;
+
+    function updateFileInput() {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(file => dt.items.add(file));
+        photoInput.files = dt.files;
+    }
+
+    photoInput.addEventListener('change', function() {
+        const newFiles = Array.from(this.files);
+        newFiles.forEach(file => {
+            if (!file.type.startsWith('image/')) { 
+                alert('請選擇圖片檔案！'); 
+                return; 
+            }
+            const totalImages = existingPhotos.length + selectedFiles.length;
+            if (totalImages >= MAX_IMAGES) { 
+                alert(`最多只能上傳 ${MAX_IMAGES} 張圖片（包含現有圖片）！`); 
+                return; 
+            }
+            selectedFiles.push(file);
+        });
+        updateFileInput();
+        updatePreview();
+    });
+
+    uploadArea.addEventListener('dragover', e => { 
+        e.preventDefault(); 
+        uploadArea.classList.add('dragover'); 
+    });
+    
+    uploadArea.addEventListener('dragleave', () => { 
+        uploadArea.classList.remove('dragover'); 
+    });
+    
+    uploadArea.addEventListener('drop', e => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        Array.from(e.dataTransfer.files).forEach(file => {
+            const totalImages = existingPhotos.length + selectedFiles.length;
+            if (file.type.startsWith('image/') && totalImages < MAX_IMAGES) {
+                selectedFiles.push(file);
+            }
+        });
+        updateFileInput();
+        updatePreview();
+    });
+
+    document.getElementById('editForm').addEventListener('submit', function(e) {
+        const totalImages = existingPhotos.length + selectedFiles.length;
+        if (totalImages === 0) {
+            e.preventDefault();
+            alert('請至少保留或上傳一張圖片！');
+            return false;
+        }
+        if (totalImages > MAX_IMAGES) {
+            e.preventDefault();
+            alert(`圖片總數不能超過 ${MAX_IMAGES} 張！`);
+            return false;
+        }
+    });
+    
+    // 初始化計數
+    updateCounts();
+</script>
+
+<%@ include file="footer.jsp"%>
+
+</body>
+</html>

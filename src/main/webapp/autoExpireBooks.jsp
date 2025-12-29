@@ -71,7 +71,7 @@
                         notifyStmt.setString(1, book.get("sellerId"));
                         notifyStmt.setString(2, 
                             "📦 書籍下架通知：您的書籍《" + book.get("title") + "》已到達下架時間（" + 
-                            book.get("expiryDate") + "），系統已自動將其下架。若需重新上架，請至「我的書籍」進行操作。");
+                            book.get("expiryDate") + "），系統已自動將其下架。若需重新上架，請至「我的上架」進行操作。");
                         notifyStmt.setString(3, currentTime);
                         notifyStmt.setBoolean(4, false);
                         notifyStmt.executeUpdate();

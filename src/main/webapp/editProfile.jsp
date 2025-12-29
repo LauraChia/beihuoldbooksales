@@ -48,7 +48,6 @@
     String contactType = "";
     String customContact = "";
     
-    
     // 根據系所判斷所屬學院
     String selectedCollege = "";
     if (!department.isEmpty()) {
@@ -71,124 +70,300 @@
 %>
 
 <html lang="zh">
-
 <head>
     <meta charset="utf-8">
-    <title>編輯個人資料 - 北護二手書拍賣網</title>
+    <title>編輯個人資料 - 二手書交易網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
     <style>
-        /* 修正被 fixed navbar 遮住的問題 */
-        body {
-            padding-top: 50px;
+        body { 
+            background-color: #f8f9fa; 
+            font-family: "Microsoft JhengHei", sans-serif; 
         }
         
-        /* 系所選單並排顯示 */
-        .department-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        .page-header {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
+        }
+        
+        .page-header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 600;
+        }
+        
+        .form-container { 
+            background: #fff; 
+            padding: 40px; 
+            border-radius: 12px; 
+            max-width: 900px; 
+            margin: 0 auto 40px; 
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        
+        .form-container h3 {
+            color: #66bb6a;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #c8e6c9;
+            display: flex;
+            align-items: center;
             gap: 10px;
         }
         
+        .info-alert {
+            background: #e8f5e9;
+            border-left: 4px solid #66bb6a;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            color: #2e7d32;
+        }
+        
+        .form-group { 
+            margin-bottom: 20px; 
+            display: flex; 
+            align-items: flex-start; 
+        }
+        
+        label { 
+            display: inline-block; 
+            width: 140px; 
+            margin-bottom: 10px; 
+            vertical-align: top; 
+            font-weight: 500; 
+            padding-top: 6px;
+            color: #333;
+        }
+        
+        label .required { 
+            color: red; 
+            margin-left: 2px; 
+        }
+        
+        input:not([type="submit"]):not([type="reset"]):not([type="checkbox"]), select, textarea { 
+            flex: 1; 
+            padding: 10px 14px; 
+            border: 1px solid #ddd; 
+            border-radius: 6px; 
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #66bb6a;
+            box-shadow: 0 0 0 3px rgba(102, 187, 106, 0.1);
+        }
+        
+        input[readonly] {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+        }
+        
+        .department-row {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        .department-row select {
+            flex: 1;
+        }
+        
+        .btn-container { 
+            text-align: center; 
+            margin-top: 30px; 
+            display: flex; 
+            gap: 15px; 
+            justify-content: center; 
+        }
+        
+        .btn-primary {
+            background: white;
+            border: 2px solid #66bb6a;
+            color: #66bb6a;
+            padding: 14px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            border: 2px solid #999;
+            color: #666;
+            padding: 14px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-secondary:hover {
+            background: #f5f5f5;
+            border-color: #666;
+            text-decoration: none;
+            color: #666;
+        }
+        
+        .back-button {
+            background-color: white;
+            border: 2px solid #81c784;
+            color: #66bb6a;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .back-button:hover {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            color: white;
+            transform: translateX(-5px);
+            box-shadow: 0 4px 12px rgba(129, 199, 132, 0.4);
+        }
+        
         @media (max-width: 768px) {
-            body {
-                padding-top: 120px;
+            .form-group {
+                flex-direction: column;
             }
+            
+            label {
+                width: 100%;
+                padding-top: 0;
+                margin-bottom: 8px;
+            }
+            
             .department-row {
-                grid-template-columns: 1fr;
+                flex-direction: column;
+            }
+            
+            .btn-container {
+                flex-direction: column;
+            }
+            
+            .btn-primary, .btn-secondary {
+                width: 100%;
             }
         }
     </style>
 </head>
 
 <body>
-    <%@ include file="menu.jsp" %>
+<%@ include file="menu.jsp" %>
 
-    <div class="container mt-5 pt-5">
-        <div class="card p-4 shadow-sm">
-            <h4 class="mb-4">編輯個人資料</h4>
-
-            <form method="post" action="updateProfile.jsp">
-                <div class="mb-3">
-                    <label class="form-label">帳號</label>
-                    <input type="text" class="form-control" value="<%= username %>" readonly>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">暱稱 <span class="text-danger">*</span></label>
-                    <input type="text" name="name" class="form-control" value="<%= name %>">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">聯絡方式 <span class="text-danger">*</span></label>
-                    <select name="contactType" id="contactType" class="form-select" onchange="toggleCustomContact()">
-                        <option value="">請選擇</option>
-                        <option value="LINE" <%= contactType.equals("LINE") ? "selected" : "" %>>LINE</option>
-                        <option value="IG" <%= contactType.equals("IG") ? "selected" : "" %>>IG</option>
-                        <option value="FB" <%= contactType.equals("FB") ? "selected" : "" %>>FB</option>
-                        <option value="其他" <%= contactType.equals("其他") ? "selected" : "" %>>其他</option>
-                    </select>
-                </div>
-
-                <div class="mb-3" id="customContactDiv" style="display: <%= contactType.equals("其他") ? "block" : "none" %>;">
-                    <label class="form-label">請輸入聯絡方式 <span class="text-danger">*</span></label>
-                    <input type="text" name="customContact" id="customContact" class="form-control" 
-                           placeholder="例如:電話、Email等" value="<%= customContact %>">
-                </div>
-
-                <!-- 隱藏欄位,用來傳送最終的 contact 值 -->
-                <input type="hidden" name="contact" id="finalContact">
-                
-
-                <div class="mb-3">
-                    <label for="college" class="form-label">就讀系所 <span class="text-danger">*</span></label>
-                    <div class="department-row">
-                        <select class="form-select" id="college" onchange="updateDepartment()" required>
-                            <option value="">請選擇學院</option>
-                            <option value="護理學院" <%= selectedCollege.equals("護理學院") ? "selected" : "" %>>護理學院</option>
-                            <option value="健康科技學院" <%= selectedCollege.equals("健康科技學院") ? "selected" : "" %>>健康科技學院</option>
-                            <option value="人類發展與健康學院" <%= selectedCollege.equals("人類發展與健康學院") ? "selected" : "" %>>人類發展與健康學院</option>
-                            <option value="智慧健康照護跨領域學院" <%= selectedCollege.equals("智慧健康照護跨領域學院") ? "selected" : "" %>>智慧健康照護跨領域學院</option>
-                        </select>
-                        <select class="form-select" id="department" name="department" required>
-                            <option value="">請先選擇學院</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">密碼 <span class="text-danger">*</span></label>
-                    <input type="password" name="password" class="form-control" value="<%= password %>">
-                </div>
-
-                <button type="submit" class="btn btn-success" onclick="return prepareSubmit()">儲存變更</button>
-                <a href="profile.jsp" class="btn btn-secondary ms-2">返回</a>
-            </form>
-        </div>
-    </div>
-
-<!-- Footer Start -->
-<div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
-    <div class="container py-5">
-        <div class="row g-5">
-            <div class="col-md-6 col-lg-3">
-                <h5 class="text-white mb-4">專題資訊</h5>
-                <p class="mb-2">題目:北護二手書拍賣系統</p>
-                <p class="mb-2">系所:健康事業管理系</p>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <h5 class="text-white mb-4">快速連結</h5>
-                <a class="btn btn-link" href="index.jsp">首頁</a>
-                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
-            </div>
-        </div>
-    </div>
-    <div class="container-fluid text-center border-top border-secondary py-3">
-        <p class="mb-0">&copy; 2025 二手書拍賣網. All Rights Reserved.</p>
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-user-edit"></i> 編輯個人資料</h1>
     </div>
 </div>
-<!-- Footer End -->
 
-<script src="js/bootstrap.bundle.min.js"></script>
+<div style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
+    <button class="back-button" onclick="window.location.href='profile.jsp'">
+        <i class="fas fa-arrow-left"></i> 返回個人資料
+    </button>
+</div>
+
+<div class="form-container">
+    <div class="info-alert">
+        <strong><i class="fas fa-info-circle"></i> 編輯說明</strong><br>
+        請填寫完整資訊，標有 <span style="color: red;">*</span> 為必填欄位。
+    </div>
+
+    <form method="post" action="updateProfile.jsp" id="profileForm">
+        <!-- 帳號 (唯讀) -->
+        <div class="form-group">
+            <label>帳號：</label>
+            <input type="text" value="<%= username %>" readonly>
+        </div>
+
+        <!-- 暱稱 -->
+        <div class="form-group">
+            <label>暱稱：<span class="required">*</span></label>
+            <input type="text" name="name" value="<%= name %>" required>
+        </div>
+
+        <!-- 聯絡方式 -->
+        <div class="form-group">
+            <label>聯絡方式：<span class="required">*</span></label>
+            <select name="contactType" id="contactType" onchange="toggleCustomContact()" required>
+                <option value="">請選擇</option>
+                <option value="LINE" <%= contactType.equals("LINE") ? "selected" : "" %>>LINE</option>
+                <option value="IG" <%= contactType.equals("IG") ? "selected" : "" %>>IG</option>
+                <option value="FB" <%= contactType.equals("FB") ? "selected" : "" %>>FB</option>
+                <option value="其他" <%= contactType.equals("其他") ? "selected" : "" %>>其他</option>
+            </select>
+        </div>
+
+        <!-- 自訂聯絡方式 -->
+        <div class="form-group" id="customContactDiv" style="display: <%= contactType.equals("其他") ? "flex" : "none" %>;">
+            <label>請輸入聯絡方式：<span class="required">*</span></label>
+            <input type="text" name="customContact" id="customContact" 
+                   placeholder="例如：電話、Email等" value="<%= customContact %>">
+        </div>
+
+        <!-- 隱藏欄位，用來傳送最終的 contact 值 -->
+        <input type="hidden" name="contact" id="finalContact">
+
+        <!-- 就讀系所 -->
+        <div class="form-group">
+            <label>就讀系所：<span class="required">*</span></label>
+            <div class="department-row">
+                <select id="college" onchange="updateDepartment()" required>
+                    <option value="">請選擇學院</option>
+                    <option value="護理學院" <%= selectedCollege.equals("護理學院") ? "selected" : "" %>>護理學院</option>
+                    <option value="健康科技學院" <%= selectedCollege.equals("健康科技學院") ? "selected" : "" %>>健康科技學院</option>
+                    <option value="人類發展與健康學院" <%= selectedCollege.equals("人類發展與健康學院") ? "selected" : "" %>>人類發展與健康學院</option>
+                    <option value="智慧健康照護跨領域學院" <%= selectedCollege.equals("智慧健康照護跨領域學院") ? "selected" : "" %>>智慧健康照護跨領域學院</option>
+                    <option value="通識教育中心" <%= selectedCollege.equals("通識教育中心") ? "selected" : "" %>>通識教育中心</option>
+                </select>
+                <select id="department" name="department" required>
+                    <option value="">請先選擇學院</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 密碼 -->
+        <div class="form-group">
+            <label>密碼：<span class="required">*</span></label>
+            <input type="password" name="password" value="<%= password %>" required>
+        </div>
+
+        <div class="btn-container">
+            <button type="submit" class="btn-primary" onclick="return prepareSubmit()">
+                <i class="fas fa-save"></i> 儲存變更
+            </button>
+            <a href="profile.jsp" class="btn-secondary">
+                <i class="fas fa-times"></i> 取消
+            </a>
+        </div>
+    </form>
+</div>
+
 <script>
     // 系所選項資料
     const departmentOptions = {
@@ -225,6 +400,9 @@
                 const option = document.createElement("option");
                 option.value = dept;
                 option.textContent = dept;
+                if (dept === originalDepartment) {
+                    option.selected = true;
+                }
                 deptSelect.appendChild(option);
             });
         }
@@ -236,7 +414,7 @@
         var customDiv = document.getElementById('customContactDiv');
         
         if (contactType === '其他') {
-            customDiv.style.display = 'block';
+            customDiv.style.display = 'flex';
         } else {
             customDiv.style.display = 'none';
             document.getElementById('customContact').value = '';
@@ -262,5 +440,8 @@
         return true;
     }
 </script>
+
+<%@ include file="footer.jsp"%>
+
 </body>
 </html>

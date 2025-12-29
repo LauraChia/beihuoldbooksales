@@ -65,119 +65,146 @@
     <meta charset="utf-8">
     <title>個人資料 - 北護二手書交易網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
     
     <style>
-        body {
-        	padding-top: 50px;
-            background-color: #f5f5f5;
-            font-family: "Microsoft JhengHei", sans-serif;
+        body { 
+            background-color: #f8f9fa; 
+            font-family: "Microsoft JhengHei", sans-serif; 
         }
-        .card-section {
-            max-width: 1200px;
-            margin: 40px auto;
+        
+        .page-header {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
         }
-        .book-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 25px;
+        
+        .page-header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-weight: 600;
         }
-        .book-card {
-            background-color: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: 0.2s ease-in-out;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        
+        .form-container { 
+            background: #fff; 
+            padding: 40px; 
+            border-radius: 12px; 
+            max-width: 900px; 
+            margin: 0 auto 40px; 
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
         }
-        .book-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        
+        .form-container h3 {
+            color: #66bb6a;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #c8e6c9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .book-link {
-            text-decoration: none;
-            color: inherit;
+        
+        .info-alert {
+            background: #e8f5e9;
+            border-left: 4px solid #66bb6a;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+            color: #2e7d32;
         }
-        .book-images {
-            position: relative;
-            width: 100%;
-            height: 260px;
-            overflow: hidden;
-            background-color: #f0f0f0;
+        
+        .info-group { 
+            margin-bottom: 20px; 
+            display: flex; 
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
         }
-        .book-img {
-            width: 100%;
-            height: 260px;
-            object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
-            transition: opacity 0.5s ease;
-            opacity: 0;
+        
+        .info-group:last-child {
+            border-bottom: none;
         }
-        .book-img.active {
-            opacity: 1;
+        
+        .info-label { 
+            display: inline-block; 
+            width: 140px; 
+            font-weight: 500; 
+            color: #555;
+            flex-shrink: 0;
         }
-        .book-info {
-            padding: 12px 14px;
-        }
-        .book-title {
-            font-size: 16px;
-            font-weight: bold;
+        
+        .info-value {
+            flex: 1;
             color: #333;
-            margin-bottom: 6px;
-            height: 40px;
-            overflow: hidden;
-            line-height: 20px;
-        }
-        .book-author {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 6px;
-        }
-        .book-price {
-            color: #d9534f;
-            font-weight: bold;
             font-size: 15px;
         }
-        .book-date {
-            font-size: 13px;
-            color: #888;
+        
+        .info-value.empty {
+            color: #999;
+            font-style: italic;
         }
-        .image-indicator {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background-color: rgba(0,0,0,0.6);
+        
+        .btn-container { 
+            text-align: center; 
+            margin-top: 30px; 
+            display: flex; 
+            gap: 15px; 
+            justify-content: center; 
+        }
+        
+        .btn-primary {
+            background: white;
+            border: 2px solid #66bb6a;
+            color: #66bb6a;
+            padding: 14px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
             color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-            z-index: 10;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
+            text-decoration: none;
         }
-        .image-dots {
-            position: absolute;
-            bottom: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 5px;
-            z-index: 10;
-        }
-        .dot {
-            width: 6px;
-            height: 6px;
+        
+        .profile-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
             border-radius: 50%;
-            background-color: rgba(255,255,255,0.5);
-            transition: background-color 0.3s;
-        }
-        .dot.active {
-            background-color: white;
-        }
-        .no-image {
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100%;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 36px;
+        }
+        
+        .user-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e8f5e9;
+        }
+        
+        .user-header h3 {
+            border: none;
+            margin: 10px 0 5px;
+            padding: 0;
+        }
+        
+        .user-header .username {
             color: #999;
             font-size: 14px;
         }
@@ -186,194 +213,63 @@
 <body>
     <%@ include file="menu.jsp" %>
     
-    <div class="container mt-5 pt-5">
-        <div class="card p-4 shadow-sm">
-            <h4 class="mb-4">個人資料</h4>
-            <p><strong>帳號：</strong><%= username %></p>
-            <p><strong>暱稱：</strong><%= name %></p>
-            <p><strong>聯絡方式：</strong><%= contact %></p>
-            <p><strong>就讀系所：</strong><%= department %></p>
-            <p><strong>上次登入：</strong><%= lastLogin %></p>
-            <p><strong>上次登出：</strong><%= lastLogout %></p>
-            
-            <a href="editProfile.jsp" class="btn btn-primary">編輯資料</a>
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-user"></i> 個人資料</h1>
         </div>
     </div>
     
-    <div class="card-section">
-        <h4 class="mb-4">我的上架紀錄</h4>
+    <div class="form-container">
+        <div class="info-alert">
+            <strong><i class="fas fa-info-circle"></i> 資料說明</strong><br>
+            以下是您的個人資料，如需修改請點擊下方的「編輯資料」按鈕。
+        </div>
 
-        <%
-            Connection con2 = null;
-            PreparedStatement ps2 = null;
-            ResultSet rs2 = null;
+        <div class="info-group">
+            <div class="info-label"><i class="fas fa-id-card"></i> 帳號：</div>
+            <div class="info-value"><%= username %></div>
+        </div>
 
-            try {
-                con2 = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-                String sql2 = "SELECT bookId, titleBook, author, price, date, photo FROM book WHERE userId = ? ORDER BY date DESC";
-                ps2 = con2.prepareStatement(sql2);
-                ps2.setString(1, userAccessId);
-                rs2 = ps2.executeQuery();
+        <div class="info-group">
+            <div class="info-label"><i class="fas fa-user-circle"></i> 暱稱：</div>
+            <div class="info-value <%= name.isEmpty() ? "empty" : "" %>">
+                <%= name.isEmpty() ? "尚未設定" : name %>
+            </div>
+        </div>
 
-                boolean hasBooks = false;
-                int cardIndex = 0;
-        %>
-        <div class="book-grid">
-        <%
-                while(rs2.next()) {
-                    hasBooks = true;
-                    String bookId = rs2.getString("bookId");
-                    String title = rs2.getString("titleBook") != null ? rs2.getString("titleBook") : "";
-                    String author = rs2.getString("author") != null ? rs2.getString("author") : "";
-                    String price = rs2.getString("price") != null ? rs2.getString("price") : "0";
-                    String date = rs2.getString("date") != null ? rs2.getString("date") : "";
-                    String photoStr = rs2.getString("photo");
-                    
-                    List<String> photoList = new ArrayList<>();
-                    if (photoStr != null && !photoStr.trim().isEmpty()) {
-                        String[] photoArray = photoStr.split(",");
-                        for (String photo : photoArray) {
-                            String trimmedPhoto = photo.trim();
-                            if (!trimmedPhoto.startsWith("assets/")) {
-                                trimmedPhoto = "assets/images/member/" + trimmedPhoto;
-                            }
-                            photoList.add(trimmedPhoto);
-                        }
-                    }
-                    
-                    if (photoList.isEmpty()) {
-                        photoList.add("assets/images/about.png");
-                    }
-                    
-                    int photoCount = photoList.size();
-                    String cardId = "profile-card-" + cardIndex;
-                    cardIndex++;
-        %>
-            <a class="book-link" href="bookDetail.jsp?bookId=<%= bookId %>">
-                <div class="book-card" data-card-id="<%= cardId %>">
-                    <div class="book-images" id="<%= cardId %>">
-                        <% if (photoList.isEmpty()) { %>
-                            <div class="no-image">無圖片</div>
-                        <% } else { %>
-                            <% for (int i = 0; i < photoList.size(); i++) { %>
-                                <img src="<%= photoList.get(i) %>" 
-                                     alt="書籍圖片<%= (i+1) %>" 
-                                     class="book-img <%= (i == 0) ? "active" : "" %>"
-                                     onerror="this.src='assets/images/about.png'">
-                            <% } %>
-                            
-                            <% if (photoCount > 1) { %>
-                                <span class="image-indicator"><span class="current-img">1</span>/<%= photoCount %></span>
-                                <div class="image-dots">
-                                    <% for (int i = 0; i < photoCount; i++) { %>
-                                        <span class="dot <%= (i == 0) ? "active" : "" %>"></span>
-                                    <% } %>
-                                </div>
-                            <% } %>
-                        <% } %>
-                    </div>
-                    <div class="book-info">
-                        <div class="book-title"><%= title %></div>
-                        <div class="book-author">作者：<%= author %></div>
-                        <div class="book-price">NT$<%= (int)Float.parseFloat(price) %></div>
-                        <div class="book-date">上架日期：<%= date.split(" ")[0] %></div>
-                    </div>
-                </div>
+        <div class="info-group">
+            <div class="info-label"><i class="fas fa-envelope"></i> 聯絡方式：</div>
+            <div class="info-value <%= contact.isEmpty() ? "empty" : "" %>">
+                <%= contact.isEmpty() ? "尚未設定" : contact %>
+            </div>
+        </div>
+
+        <div class="info-group">
+            <div class="info-label"><i class="fas fa-graduation-cap"></i> 就讀系所：</div>
+            <div class="info-value <%= department.isEmpty() ? "empty" : "" %>">
+                <%= department.isEmpty() ? "尚未設定" : department %>
+            </div>
+        </div>
+
+        <div class="info-group">
+            <div class="info-label"><i class="fas fa-sign-in-alt"></i> 上次登入：</div>
+            <div class="info-value"><%= lastLogin %></div>
+        </div>
+
+        <div class="info-group">
+            <div class="info-label"><i class="fas fa-sign-out-alt"></i> 上次登出：</div>
+            <div class="info-value"><%= lastLogout %></div>
+        </div>
+
+        <div class="btn-container">
+            <a href="editProfile.jsp" class="btn-primary">
+                <i class="fas fa-edit"></i> 編輯資料
             </a>
-        <%
-                }
-
-                if(!hasBooks) {
-        %>
-            <p>您還沒有上架任何書籍。</p>
-        <%
-                }
-        %>
-        </div>
-        <%
-            } catch(Exception e) {
-                e.printStackTrace();
-            } finally {
-                if(rs2 != null) try { rs2.close(); } catch(Exception e) {}
-                if(ps2 != null) try { ps2.close(); } catch(Exception e) {}
-                if(con2 != null) try { con2.close(); } catch(Exception e) {}
-            }
-        %>
-    </div>
-
-<!-- 圖片輪播 JavaScript -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const cards = document.querySelectorAll('.book-card');
-    
-    cards.forEach(card => {
-        const cardId = card.getAttribute('data-card-id');
-        const container = document.getElementById(cardId);
-        const images = container.querySelectorAll('.book-img');
-        const dots = container.querySelectorAll('.dot');
-        const indicator = container.querySelector('.current-img');
-        
-        if (images.length <= 1) return;
-        
-        let currentIndex = 0;
-        let intervalId = null;
-        
-        function showImage(index) {
-            images.forEach(img => img.classList.remove('active'));
-            dots.forEach(dot => dot.classList.remove('active'));
-            
-            images[index].classList.add('active');
-            dots[index].classList.add('active');
-            
-            if (indicator) {
-                indicator.textContent = index + 1;
-            }
-        }
-        
-        function nextImage() {
-            currentIndex = (currentIndex + 1) % images.length;
-            showImage(currentIndex);
-        }
-        
-        card.addEventListener('mouseenter', function() {
-            intervalId = setInterval(nextImage, 800);
-        });
-        
-        card.addEventListener('mouseleave', function() {
-            if (intervalId) {
-                clearInterval(intervalId);
-                intervalId = null;
-            }
-            currentIndex = 0;
-            showImage(0);
-        });
-    });
-});
-</script>
-
-<!-- Footer Start -->
-<div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
-    <div class="container py-5">
-        <div class="row g-5">
-            <div class="col-md-6 col-lg-3">
-                <h5 class="text-white mb-4">專題資訊</h5>
-                <p class="mb-2">題目：北護二手書拍賣系統</p>
-                <p class="mb-2">系所：健康事業管理系</p>
-                <p class="mb-2">專題組員：黃郁心、賈子瑩、許宇翔、闕紫彤</p>
-            </div>
-            <div class="col-md-6 col-lg-3">
-                <h5 class="text-white mb-4">快速連結</h5>
-                <a class="btn btn-link" href="index.jsp">首頁</a>
-                <a class="btn btn-link" href="https://forms.gle/JP4LyWAVgKSvzzUM8">系統使用回饋表單</a>
-            </div>
         </div>
     </div>
-    <div class="container-fluid text-center border-top border-secondary py-3">
-        <p class="mb-0">&copy; 2025 二手書拍賣網. All Rights Reserved.</p>
-    </div>
-</div>
-<!-- Footer End -->
 
-<script src="js/bootstrap.bundle.min.js"></script>
+    <%@ include file="footer.jsp"%>
+
+    <script src="js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

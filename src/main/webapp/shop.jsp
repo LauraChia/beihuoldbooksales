@@ -315,7 +315,46 @@
 
         <!-- 使用書籍系所 -->
         <div class="form-group">
-@ -158,120 +358,124 @@
+            <label>使用書籍系所：<span class="required">*</span></label>
+            <div style="flex: 1; display: flex; gap: 10px;">
+                <select id="college" name="college" onchange="updateDepartment()" style="flex: 1;" required>
+                    <option value="">請選擇學院</option>
+                    <option value="護理學院">護理學院</option>
+                    <option value="健康科技學院">健康科技學院</option>
+                    <option value="人類發展與健康學院">人類發展與健康學院</option>
+                    <option value="智慧健康照護跨領域學院">智慧健康照護跨領域學院</option>
+                    <option value="通識教育中心">通識教育中心</option>
+                </select>
+                <select id="department" name="department" style="flex: 1;" required>
+                    <option value="">請先選擇學院</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 授課老師 -->
+        <div class="form-group">
+            <label>授課老師：<span class="required">*</span></label>
+            <input type="text" name="teacher" required>
+        </div>
+
+        <!-- 使用課程 -->
+        <div class="form-group">
+            <label>使用課程：<span class="required">*</span></label>
+            <input type="text" name="courseName" required>
+        </div>
+
+        <!-- 上架日期 (隱藏欄位，自動設定為今天) -->
+        <input type="hidden" name="listedAt" value="<%= todayDate %>">
+
+        <!-- 下架日期時間 -->
+        <div class="form-group">
+            <label>下架日期時間：<span class="required">*</span></label>
+            <input type="datetime-local" name="expiryDate" required>
+        </div>
+		
+        <!-- 書籍狀況 -->
+        <div class="form-group">
+            <label>書籍狀況：<span class="required">*</span></label>
             <input type="text" name="condition" placeholder="例如：全新、二手-近全新、二手-良好、二手-有使用痕跡" required>
         </div>
 
@@ -439,4 +478,7 @@
         if (selectedFiles.length === 0 && !confirm('您尚未上傳任何圖片,確定要繼續嗎?')) e.preventDefault();
     });
 </script>
+
+<%@ include file="footer.jsp"%>
+
 </body>

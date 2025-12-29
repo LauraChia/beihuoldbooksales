@@ -445,7 +445,7 @@
                 <div class="modal-body d-flex align-items-center">
                     <form action="search.jsp" method="get" class="input-group w-75 mx-auto">
                         <select name="type" class="form-select p-3" style="max-width: 180px;">
-                            <option value="titleBook">書名</option>
+                            <option value="title">書名</option>
                             <option value="author">作者</option>
                             <option value="department">系所</option>
                             <option value="teacher">授課老師</option>
