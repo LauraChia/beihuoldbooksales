@@ -372,12 +372,6 @@ if (action != null && listingId != null) {
             margin-bottom: 20px;
         }
         
-        .book-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
         .book-details h4 {
             margin: 0 0 5px 0;
             font-size: 16px;
@@ -395,6 +389,16 @@ if (action != null && listingId != null) {
             font-weight: bold;
             font-size: 16px;
         }
+
+        .info-note {
+            background: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #1565c0;
+        }
     </style>
 </head>
 <body>
@@ -403,7 +407,6 @@ if (action != null && listingId != null) {
             <h1>📚 書籍審核管理</h1>
             <div class="user-info">
                 <span>👤 <%= adminUser %></span>
-             
                 <a href="adminDashboard.jsp" class="logout-btn">返回後台</a>
                 <a href="adminLogin.jsp?action=logout" class="logout-btn">登出</a>
             </div>
@@ -412,6 +415,10 @@ if (action != null && listingId != null) {
     
     <div class="container">
         <a href="adminDashboard.jsp" class="back-btn">← 返回管理後台</a>
+        
+        <div class="info-note">
+            💡 此頁面僅顯示上架中的書籍，已下架的書籍不會出現在列表中
+        </div>
         
         <% if (!message.isEmpty()) { %>
             <div class="alert alert-<%= messageType %>">
@@ -423,8 +430,10 @@ if (action != null && listingId != null) {
             Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
             Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
             
-            // 統計各狀態數量
-            String statsSql = "SELECT Approved, COUNT(*) as count FROM bookListings GROUP BY Approved";
+            // 統計各狀態數量（排除已下架的書籍）
+            String statsSql = "SELECT Approved, COUNT(*) as count FROM bookListings " +
+                            "WHERE status <> '已下架' " +
+                            "GROUP BY Approved";
             Statement statsStmt = con.createStatement();
             ResultSet statsRs = statsStmt.executeQuery(statsSql);
             
@@ -463,7 +472,7 @@ if (action != null && listingId != null) {
             </div>
             <div class="stat-card">
                 <div class="stat-number total"><%= totalCount %></div>
-                <div class="stat-label">總計</div>
+                <div class="stat-label">總計（上架中）</div>
             </div>
         </div>
         
@@ -493,25 +502,27 @@ if (action != null && listingId != null) {
                         <th style="width: 100px;">價格</th>
                         <th style="width: 120px;">賣家</th>
                         <th style="width: 100px;">上架日期</th>
-                        <th style="width: 100px;">狀態</th>
+                        <th style="width: 100px;">審核狀態</th>
                         <th style="width: 200px;">操作</th>
                     </tr>
                 </thead>
                 <tbody>
                     <%
                         String filter = request.getParameter("filter");
+                        // 關鍵修改：加入 status <> '已下架' 條件，排除已下架的書籍
                         String sql = "SELECT bl.listingId, bl.bookId, bl.price, bl.photo, bl.Approved, " +
-                                   "bl.listedAt, b.title, b.author, u.name AS sellerName " +
+                                   "bl.listedAt, bl.status, b.title, b.author, u.name AS sellerName " +
                                    "FROM bookListings bl " +
                                    "INNER JOIN books b ON bl.bookId = b.bookId " +
-                                   "INNER JOIN users u ON bl.sellerId = u.userId ";
+                                   "INNER JOIN users u ON bl.sellerId = u.userId " +
+                                   "WHERE bl.status <> '已下架' ";
                         
                         if ("pending".equals(filter)) {
-                            sql += "WHERE (bl.Approved = '待審核' OR bl.Approved IS NULL) ";
+                            sql += "AND (bl.Approved = '待審核' OR bl.Approved IS NULL) ";
                         } else if ("approved".equals(filter)) {
-                            sql += "WHERE (bl.Approved = 'TRUE' OR bl.Approved = '已審核') ";
+                            sql += "AND (bl.Approved = 'TRUE' OR bl.Approved = '已審核') ";
                         } else if ("rejected".equals(filter)) {
-                            sql += "WHERE (bl.Approved = 'FALSE' OR bl.Approved = '未通過') ";
+                            sql += "AND (bl.Approved = 'FALSE' OR bl.Approved = '未通過') ";
                         }
                         
                         sql += "ORDER BY bl.listedAt DESC";
@@ -605,7 +616,7 @@ if (action != null && listingId != null) {
                             <div class="empty-state">
                                 <div style="font-size: 64px;">📚</div>
                                 <h3>暫無書籍資料</h3>
-                                <p>目前沒有符合條件的書籍</p>
+                                <p>目前沒有符合條件的上架中書籍</p>
                             </div>
                         </td>
                     </tr>
