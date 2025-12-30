@@ -432,8 +432,8 @@ if (action != null && listingId != null) {
             
             // 統計各狀態數量（排除已下架的書籍）
             String statsSql = "SELECT Approved, COUNT(*) as count FROM bookListings " +
-                            "WHERE status <> '已下架' " +
-                            "GROUP BY Approved";
+                "WHERE (isDelisted = FALSE OR isDelisted IS NULL) " +
+                "GROUP BY Approved";
             Statement statsStmt = con.createStatement();
             ResultSet statsRs = statsStmt.executeQuery(statsSql);
             
@@ -511,11 +511,11 @@ if (action != null && listingId != null) {
                         String filter = request.getParameter("filter");
                         // 關鍵修改：加入 status <> '已下架' 條件，排除已下架的書籍
                         String sql = "SELECT bl.listingId, bl.bookId, bl.price, bl.photo, bl.Approved, " +
-                                   "bl.listedAt, bl.status, b.title, b.author, u.name AS sellerName " +
-                                   "FROM bookListings bl " +
-                                   "INNER JOIN books b ON bl.bookId = b.bookId " +
-                                   "INNER JOIN users u ON bl.sellerId = u.userId " +
-                                   "WHERE bl.status <> '已下架' ";
+						           "bl.listedAt, bl.isDelisted, b.title, b.author, u.name AS sellerName " +
+						           "FROM bookListings bl " +
+						           "INNER JOIN books b ON bl.bookId = b.bookId " +
+						           "INNER JOIN users u ON bl.sellerId = u.userId " +
+						           "WHERE (bl.isDelisted = FALSE OR bl.isDelisted IS NULL) ";
                         
                         if ("pending".equals(filter)) {
                             sql += "AND (bl.Approved = '待審核' OR bl.Approved IS NULL) ";
@@ -549,10 +549,10 @@ if (action != null && listingId != null) {
                             String statusClass = "status-pending";
                             
                             if ("TRUE".equalsIgnoreCase(approvalStatus) || "已審核".equals(approvalStatus)) {
-                                statusText = "已通過";
+                                statusText = "已通過";  // 改為「已通過」
                                 statusClass = "status-approved";
                             } else if ("FALSE".equalsIgnoreCase(approvalStatus) || "未通過".equals(approvalStatus)) {
-                                statusText = "已拒絕";
+                                statusText = "未通過";  // 改為「未通過」
                                 statusClass = "status-rejected";
                             }
                     %>
@@ -572,10 +572,12 @@ if (action != null && listingId != null) {
                             </div>
                         </td>
                         <td>
-                            <span class="price">NT$<%= (int) Float.parseFloat(rs.getString("price")) %></span>
+                            <span class="price">
+							    NT$<%= rs.getString("price") != null ? (int) Float.parseFloat(rs.getString("price")) : 0 %>
+							</span>
                         </td>
                         <td><%= rs.getString("sellerName") %></td>
-                        <td><%= rs.getString("listedAt").split(" ")[0] %></td>
+                        <td><%= rs.getString("listedAt") != null ? rs.getString("listedAt").split(" ")[0] : "N/A" %></td>
                         <td>
                             <span class="status-badge <%= statusClass %>">
                                 <%= statusText %>

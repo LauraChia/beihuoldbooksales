@@ -478,14 +478,16 @@
         
         // 添加篩選條件
         if (!filterStatus.equals("all")) {
-            if (filterStatus.equals("approved")) {
-                sql += "AND bl.Approved = 'TRUE' AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) ";
-            } else if (filterStatus.equals("pending")) {
-                sql += "AND (bl.Approved IS NULL OR bl.Approved = 'FALSE') AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) ";
-            } else if (filterStatus.equals("delisted")) {
-                sql += "AND bl.isDelisted = TRUE ";
-            }
-        }
+	    if (filterStatus.equals("approved")) {
+	        sql += "AND bl.Approved = 'TRUE' AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) ";
+	    } else if (filterStatus.equals("pending")) {
+	        sql += "AND (bl.Approved IS NULL OR bl.Approved = '') AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) ";  // 修改這裡
+	    } else if (filterStatus.equals("rejected")) {  // 新增這個條件
+	        sql += "AND bl.Approved = 'FALSE' AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) ";
+	    } else if (filterStatus.equals("delisted")) {
+	        sql += "AND bl.isDelisted = TRUE ";
+	    }
+	}
         
         // 添加排序
         if (sortBy.equals("newest")) {
@@ -505,23 +507,26 @@
         
         // 計算統計資訊
         String statsSql = "SELECT " +
-                         "COUNT(*) as total, " +
-                         "SUM(CASE WHEN bl.Approved = 'TRUE' AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) THEN 1 ELSE 0 END) as approved, " +
-                         "SUM(CASE WHEN (bl.Approved IS NULL OR bl.Approved = 'FALSE') AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) THEN 1 ELSE 0 END) as pending, " +
-                         "SUM(CASE WHEN bl.isDelisted = TRUE THEN 1 ELSE 0 END) as delisted " +
-                         "FROM bookListings bl " +
-                         "WHERE bl.sellerId = '" + currentUserId + "'";
+                 "COUNT(*) as total, " +
+                 "SUM(CASE WHEN bl.Approved = 'TRUE' AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) THEN 1 ELSE 0 END) as approved, " +
+                 "SUM(CASE WHEN (bl.Approved IS NULL OR bl.Approved = '') AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) THEN 1 ELSE 0 END) as pending, " +  // 修改這裡
+                 "SUM(CASE WHEN bl.Approved = 'FALSE' AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) THEN 1 ELSE 0 END) as rejected, " +  // 新增這行
+                 "SUM(CASE WHEN bl.isDelisted = TRUE THEN 1 ELSE 0 END) as delisted " +
+                 "FROM bookListings bl " +
+                 "WHERE bl.sellerId = '" + currentUserId + "'";
         
         ResultSet statsRs = smt.executeQuery(statsSql);
         int totalBooks = 0;
         int approvedBooks = 0;
         int pendingBooks = 0;
+        int rejectedBooks = 0;  // 新增這行
         int delistedBooks = 0;
-        
+
         if (statsRs.next()) {
             totalBooks = statsRs.getInt("total");
             approvedBooks = statsRs.getInt("approved");
             pendingBooks = statsRs.getInt("pending");
+            rejectedBooks = statsRs.getInt("rejected");  // 新增這行
             delistedBooks = statsRs.getInt("delisted");
         }
         statsRs.close();
@@ -539,7 +544,7 @@
         <div class="stat-item">
             <span class="icon"><i class="fas fa-check-circle"></i></span>
             <div class="info">
-                <span class="label">已審核</span>
+                <span class="label">已通過</span>
                 <span class="value"><%= approvedBooks %></span>
             </div>
         </div>
@@ -548,6 +553,13 @@
             <div class="info">
                 <span class="label">待審核</span>
                 <span class="value"><%= pendingBooks %></span>
+            </div>
+        </div>
+        <div class="stat-item">
+            <span class="icon"><i class="fas fa-times-circle"></i></span>
+            <div class="info">
+                <span class="label">未通過</span>
+                <span class="value"><%= rejectedBooks %></span>
             </div>
         </div>
     </div>
@@ -559,11 +571,15 @@
         </button>
         <button class="filter-btn <%= filterStatus.equals("approved") ? "active" : "" %>" 
                 onclick="changeFilter('approved')">
-            <i class="fas fa-check-circle"></i> 已審核
+            <i class="fas fa-check-circle"></i> 已通過
         </button>
         <button class="filter-btn <%= filterStatus.equals("pending") ? "active" : "" %>" 
                 onclick="changeFilter('pending')">
             <i class="fas fa-clock"></i> 待審核
+        </button>
+        <button class="filter-btn <%= filterStatus.equals("rejected") ? "active" : "" %>" 
+                onclick="changeFilter('rejected')">
+            <i class="fas fa-times-circle"></i> 未通過
         </button>
         <button class="filter-btn <%= filterStatus.equals("delisted") ? "active" : "" %>" 
                 onclick="changeFilter('delisted')">
@@ -601,18 +617,18 @@
             String approved = rs.getString("Approved");
             Boolean isDelisted = rs.getBoolean("isDelisted");
             
-            // 判斷狀態
+         	// 判斷狀態
             String statusText = "待審核";
             String statusClass = "status-pending";
-            
+
             if (isDelisted != null && isDelisted) {
                 statusText = "已下架";
                 statusClass = "status-delisted";
             } else if ("TRUE".equalsIgnoreCase(approved)) {
-                statusText = "已審核";
+                statusText = "已通過";  // 改為「已通過」
                 statusClass = "status-approved";
             } else if ("FALSE".equalsIgnoreCase(approved)) {
-                statusText = "未通過";
+                statusText = "未通過";  // 改為「未通過」
                 statusClass = "status-rejected";
             }
             
