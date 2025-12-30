@@ -300,12 +300,17 @@
         book.put("favoriteTime", rs.getString("favoriteTime"));
         book.put("listingId", rs.getString("listingId"));
         
-        // 處理圖片
+     	// 處理圖片
         String photoStr = rs.getString("photo");
         String photo = "assets/images/about.png"; // 預設圖片
         if (photoStr != null && !photoStr.trim().isEmpty()) {
             String firstPhoto = photoStr.split(",")[0].trim();
-            photo = firstPhoto;
+            // 如果路徑不是以 assets/ 開頭，則加上前綴
+            if (!firstPhoto.startsWith("assets/")) {
+                photo = "assets/images/member/" + firstPhoto;
+            } else {
+                photo = firstPhoto;
+            }
         }
         book.put("photo", photo);
         
@@ -349,7 +354,7 @@
                         <i class="fas fa-heart"></i>
                     </button>
                     
-                    <a class="book-link" href="bookDetail.jsp?listingId=<%= book.get("bookId") %>">
+                    <a class="book-link" href="bookDetail.jsp?listingId=<%= book.get("listingId") %>">
                         <img src="<%= book.get("photo") %>" 
                              alt="<%= book.get("titleBook") %>" 
                              class="book-image"
