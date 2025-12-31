@@ -532,25 +532,9 @@
             statusClass = "status-rejected";
         }
         
-        // 解析備註資訊
+     	// 取得有無筆記資訊
         String remarks = rs.getString("remarks");
-        String contactInfo = "";
-        String hasNotes = "";
-        String additionalRemarks = "";
-        
-        if (remarks != null && !remarks.trim().isEmpty()) {
-            String[] remarksParts = remarks.split("\\|");
-            for (String part : remarksParts) {
-                part = part.trim();
-                if (part.startsWith("聯絡方式:")) {
-                    contactInfo = part.substring("聯絡方式:".length()).trim();
-                } else if (part.startsWith("筆記:")) {
-                    hasNotes = part.substring("筆記:".length()).trim();
-                } else {
-                    additionalRemarks = part;
-                }
-            }
-        }
+        String hasNotes = (remarks != null && !remarks.trim().isEmpty()) ? remarks : "未提供";
         
         // 設定預設值（不執行查詢）
         int favoriteCount = 0;
@@ -681,19 +665,7 @@
         
         <!-- 上架資訊 -->
         <div class="info-section">
-            <h3><i class="fas fa-info-circle"></i> 上架資訊</h3>
-            <% if (!contactInfo.isEmpty()) { %>
-            <div class="info-item">
-                <strong>偏好聯絡方式：</strong>
-                <span class="value"><%= contactInfo %></span>
-            </div>
-            <% } %>
-            <% if (!additionalRemarks.isEmpty()) { %>
-            <div class="info-item">
-                <strong>備註說明：</strong>
-                <span class="value"><%= additionalRemarks %></span>
-            </div>
-            <% } %>
+    		<h3><i class="fas fa-info-circle"></i> 上架資訊</h3>  		
             <div class="info-item">
                 <strong>上架日期：</strong>
                 <span class="value"><%= rs.getString("listedAt").split(" ")[0] %></span>

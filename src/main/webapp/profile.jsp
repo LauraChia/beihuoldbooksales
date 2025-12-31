@@ -14,7 +14,6 @@
     String userAccessId = (String) session.getAttribute("userId");
     String username = "";
     String name = "";
-    String contact = "";
     String department = "";
     String lastLogin = "";
     String lastLogout = "";
@@ -25,7 +24,7 @@
 
     try {
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-        String sql = "SELECT username, name, contact, department, lastLogin, lastLogout FROM users WHERE userId = ?";
+        String sql = "SELECT username, name, department, lastLogin, lastLogout FROM users WHERE userId = ?";
         ps = con.prepareStatement(sql);
         ps.setString(1, userAccessId);
         rs = ps.executeQuery();
@@ -33,7 +32,6 @@
         if (rs.next()) {
             username = rs.getString("username");
             name = rs.getString("name");
-            contact = rs.getString("contact");
             department = rs.getString("department");
             
             // ✅ 修正：正確取得 lastLogin 和 lastLogout
@@ -48,7 +46,6 @@
             // ✅ 避免 null 顯示
             if (username == null) username = "";
             if (name == null) name = "";
-            if (contact == null) contact = "";
             if (department == null) department = "";
         }
     } catch (Exception e) {
@@ -234,13 +231,6 @@
             <div class="info-label"><i class="fas fa-user-circle"></i> 暱稱：</div>
             <div class="info-value <%= name.isEmpty() ? "empty" : "" %>">
                 <%= name.isEmpty() ? "尚未設定" : name %>
-            </div>
-        </div>
-
-        <div class="info-group">
-            <div class="info-label"><i class="fas fa-envelope"></i> 聯絡方式：</div>
-            <div class="info-value <%= contact.isEmpty() ? "empty" : "" %>">
-                <%= contact.isEmpty() ? "尚未設定" : contact %>
             </div>
         </div>
 

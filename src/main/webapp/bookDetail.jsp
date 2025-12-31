@@ -143,11 +143,11 @@
             font-size: 16px;
         }
         
-        /* 購買按鈕相關樣式 */
         .action-buttons {
             margin-top: 30px;
             display: flex;
             gap: 15px;
+            flex-wrap: wrap;
         }
         .btn-contact {
             background-color: #d9534f;
@@ -158,7 +158,6 @@
             font-size: 16px;
             cursor: pointer;
             transition: all 0.3s;
-            position: relative;
         }
         .btn-contact:hover {
             background-color: #c9302c;
@@ -215,7 +214,6 @@
             margin-top: 5px;
         }
         
-        /* Tooltip 樣式 */
         .tooltip-wrapper {
             position: relative;
             display: inline-block;
@@ -253,7 +251,6 @@
             opacity: 1;
         }
         
-        /* Modal 樣式 */
         .modal {
             display: none;
             position: fixed;
@@ -354,7 +351,6 @@
             background-color: #5a6268;
         }
         
-        /* 警告訊息 */
         .alert {
             padding: 15px;
             margin-bottom: 20px;
@@ -371,6 +367,24 @@
             border-color: #bee5eb;
             color: #0c5460;
         }
+        
+        @media (max-width: 768px) {
+            .book-detail {
+                flex-direction: column;
+                padding: 40px 20px;
+            }
+            .image-gallery {
+                width: 100%;
+                max-width: 350px;
+                margin: 0 auto;
+            }
+            .image-container {
+                width: 100%;
+            }
+            .detail-info {
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 
@@ -381,14 +395,12 @@
 <%
     String listingId = request.getParameter("listingId");
     
-    // 檢查使用者是否登入
     String currentUserId = (String) session.getAttribute("userId");
     boolean isLoggedIn = (loggedInUserId != null && !loggedInUserId.trim().isEmpty());
     
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
     Connection con = DriverManager.getConnection("jdbc:ucanaccess://"+objDBConfig.FilePath()+";");
     
-    // 修改後的 SQL - 使用 JOIN 連接正規化的資料表
     String sql = "SELECT " +
                  "bl.listingId, bl.bookId, bl.sellerId, bl.price, bl.quantity, " +
                  "bl.condition, bl.photo, bl.remarks, bl.Approved, bl.listedAt, bl.expiryDate, " +
@@ -411,7 +423,7 @@
         String sellerEmail = rs.getString("sellerEmail");
         boolean isOwnBook = isLoggedIn && loggedInUserId.equals(sellerId);
         
-        // 分割圖片路徑 - 支援多張圖片
+        // 分割圖片路徑
         String photoStr = rs.getString("photo");
         List<String> photoList = new ArrayList<>();
         
@@ -459,7 +471,6 @@
             favRs.close();
         }
         
-        // 取得總收藏數
         String countFavSql = "SELECT COUNT(*) as total FROM favorites WHERE bookId = " + bookId;
         ResultSet countRs = smt.executeQuery(countFavSql);
         if (countRs.next()) {
@@ -467,24 +478,27 @@
         }
         countRs.close();
         
-        // 解析備註資訊
+     	// 取得有無筆記資訊
         String remarks = rs.getString("remarks");
-        String contactInfo = "";
-        String hasNotes = "";
-        String additionalRemarks = "";
+        String hasNotes = (remarks != null && !remarks.trim().isEmpty()) ? remarks : "未提供";
         
-        if (remarks != null && !remarks.trim().isEmpty()) {
-            String[] remarksParts = remarks.split("\\|");
-            for (String part : remarksParts) {
-                part = part.trim();
-                if (part.startsWith("聯絡方式:")) {
-                    contactInfo = part.substring("聯絡方式:".length()).trim();
-                } else if (part.startsWith("筆記:")) {
-                    hasNotes = part.substring("筆記:".length()).trim();
-                } else {
-                    additionalRemarks = part;
-                }
+        // 檢查是否已有對話串（使用 INTEGER 類型）
+        String existingConversationId = "";
+        if (isLoggedIn && !isOwnBook) {
+            int currentUserIdInt = Integer.parseInt(loggedInUserId);
+            int sellerIdInt = Integer.parseInt(sellerId);
+            
+            // 查找現有對話 - 確保 buyerId/sellerId 對應正確
+            String checkConvSQL = "SELECT conversationId FROM messages " +
+                                 "WHERE bookId = " + listingId + " " +
+                                 "AND ((senderId = " + currentUserIdInt + " AND receiverId = " + sellerIdInt + ") " +
+                                 "OR (senderId = " + sellerIdInt + " AND receiverId = " + currentUserIdInt + ")) " +
+                                 "ORDER BY messageId LIMIT 1";
+            ResultSet convRs = smt.executeQuery(checkConvSQL);
+            if (convRs.next()) {
+                existingConversationId = convRs.getString("conversationId");
             }
+            convRs.close();
         }
 %>
 
@@ -534,51 +548,42 @@
         <div class="info-item"><strong>書籍版本：</strong><%= rs.getString("edition") != null && !rs.getString("edition").trim().isEmpty() ? rs.getString("edition") : "未提供" %></div>
         <div class="info-item"><strong>ISBN：</strong><%= rs.getString("ISBN") != null && !rs.getString("ISBN").trim().isEmpty() ? rs.getString("ISBN") : "未提供" %></div>
         <div class="info-item"><strong>書籍狀況：</strong><%= rs.getString("condition") %></div>
-        <div class="info-item"><strong>有無筆記：</strong><%= hasNotes.isEmpty() ? "未提供" : hasNotes %></div>
+        <div class="info-item"><strong>有無筆記：</strong><%= hasNotes %></div>
         <div class="info-item"><strong>使用系所：</strong><%= rs.getString("department") != null ? rs.getString("department") : "未提供" %></div>
         <div class="info-item"><strong>使用課程：</strong><%= rs.getString("courseName") != null ? rs.getString("courseName") : "未提供" %></div>
         <div class="info-item"><strong>授課老師：</strong><%= rs.getString("teacher") != null ? rs.getString("teacher") : "未提供" %></div>
-        <% if (!contactInfo.isEmpty()) { %>
-        <div class="info-item"><strong>偏好聯絡方式：</strong><%= contactInfo %></div>
-        <% } %>
-        <% if (!additionalRemarks.isEmpty()) { %>
-        <div class="info-item"><strong>備註說明：</strong><%= additionalRemarks %></div>
-        <% } %>
         <div class="info-item"><strong>賣家：</strong><%= rs.getString("sellerName") %></div>
         <div class="info-item"><strong>上架日期：</strong><%= rs.getString("listedAt").split(" ")[0] %></div>
         <%
-	    // 格式化下架日期時間顯示
-	    String expiryDateStr = rs.getString("expiryDate");
-	    String displayExpiryDate = expiryDateStr;
-	    
-	    if (expiryDateStr != null && !expiryDateStr.trim().isEmpty()) {
-	        try {
-	            // 如果資料庫格式是 yyyy-MM-dd HH:mm:ss，轉換為更易讀的格式
-	            SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	            SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-	            java.util.Date date = dbFormat.parse(expiryDateStr);
-	            displayExpiryDate = displayFormat.format(date);
-	        } catch (Exception e) {
-	            // 如果解析失敗，直接使用原始值
-	            displayExpiryDate = expiryDateStr;
-	        }
-	    }
-		%>
+        String expiryDateStr = rs.getString("expiryDate");
+        String displayExpiryDate = expiryDateStr;
+        
+        if (expiryDateStr != null && !expiryDateStr.trim().isEmpty()) {
+            try {
+                SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+                java.util.Date date = dbFormat.parse(expiryDateStr);
+                displayExpiryDate = displayFormat.format(date);
+            } catch (Exception e) {
+                displayExpiryDate = expiryDateStr;
+            }
+        }
+        %>
         <div class="info-item"><strong>下架日期時間：</strong><%= displayExpiryDate %></div>
         <div class="info-item"><strong>上架本數：</strong><%= rs.getString("quantity") %></div>
         <div class="info-item"><strong>審核狀態：</strong><span class="<%= statusClass %>"><%= statusText %></span></div>
 
-        <!-- 購買按鈕區域 -->
         <div class="action-buttons">
             <% if (!isOwnBook) { %>
                 <div class="tooltip-wrapper">
                     <button class="btn-contact" onclick="handleContactSeller()" id="contactBtn">
-                        📧 我要購買
+                        💬 <%= existingConversationId.isEmpty() ? "我要購買" : "繼續對話" %>
                     </button>
                     <span class="custom-tooltip">
-                        點擊後將開啟訊息視窗，<br>
-                        您可以向賣家表達購買意願<br>
-                        <small>(需要先登入)</small>
+                        <%= existingConversationId.isEmpty() ? 
+                            "點擊後將開啟訊息視窗，<br>您可以向賣家表達購買意願" : 
+                            "點擊進入您與賣家的對話" %>
+                        <br><small>(需要先登入)</small>
                     </span>
                 </div>
             <% } else { %>
@@ -606,20 +611,19 @@
     </div>
 </div>
 
-<!-- 聯絡賣家的 Modal -->
+<!-- 聯絡賣家的 Modal - 只用於第一次發起對話 -->
 <div id="contactModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>📧 聯絡賣家</h3>
+            <h3>💬 聯絡賣家</h3>
             <button class="close" onclick="closeModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <div class="alert alert-warning">
-                <strong>提醒：</strong>您的訊息將會透過系統通知賣家，請禮貌表達購買意願。
+            <div class="alert alert-info">
+                <strong>提醒：</strong>發送後，您可以在「我的訊息」中查看與賣家的對話記錄。
             </div>
             <form id="contactForm">
-                <input type="hidden" name="bookId" value="<%= bookId %>">
-                <input type="hidden" name="listingId" value="<%= listingId %>">
+                <input type="hidden" name="bookId" value="<%= listingId %>">
                 <input type="hidden" name="sellerId" value="<%= sellerId %>">
                 <input type="hidden" name="sellerEmail" value="<%= sellerEmail %>">
                 
@@ -630,37 +634,19 @@
                 
                 <div class="form-group">
                     <label>給賣家的訊息：<span style="color: red;">*</span></label>
-                    <textarea name="message" id="messageText" rows="5" placeholder="例如：您好，我對這本書很感興趣，想了解更多細節...
+                    <textarea name="message" id="messageText" rows="5" placeholder="例如：您好，我對這本書很感興趣...
 
 建議內容：
 • 表達購買意願
 • 詢問書籍狀況
-• 詢問面交時間地點
-• 其他問題" required></textarea>
+• 詢問面交時間地點" required></textarea>
                     <small style="color: #666;">至少需要10個字元</small>
-                </div>
-                
-                <div class="form-group">
-                    <label>您的聯絡方式 (選填)：</label>
-                    <input type="text" 
-                           name="contactInfo" 
-                           id="contactInfo" 
-                           class="form-control" 
-                           placeholder="例如：手機 0912-345-678 或 Line ID: yourlineid"
-                           maxlength="100">
-                    <small style="color: #28a745;">
-                        建議提供手機或 Line ID，方便賣家與您聯繫！
-                    </small>
-                </div>
-                
-                <div class="alert alert-info" style="margin-top: 15px;">
-                    <strong>隱私提醒：</strong>您的聯絡方式只會顯示給此書籍的賣家，請放心填寫。
                 </div>
             </form>
         </div>
         <div class="modal-footer">
             <button class="btn-modal btn-cancel" onclick="closeModal()">取消</button>
-            <button class="btn-modal btn-send" onclick="sendMessage()">發送訊息</button>
+            <button class="btn-modal btn-send" onclick="sendFirstMessage()">發送訊息</button>
         </div>
     </div>
 </div>
@@ -668,6 +654,10 @@
 <script>
     const isLoggedIn = <%= isLoggedIn %>;
     const isOwnBook = <%= isOwnBook %>;
+    const existingConversationId = '<%= existingConversationId %>';
+    const currentUserId = '<%= isLoggedIn ? loggedInUserId : "" %>';
+    const sellerId = '<%= sellerId %>';
+    const bookId = '<%= listingId %>';
     
     let currentImageIndex = 0;
     const images = document.querySelectorAll('.book-image');
@@ -725,7 +715,12 @@
             return;
         }
         
-        openModal();
+        // 如果已有對話，直接跳轉到對話頁面
+        if (existingConversationId) {
+            window.location.href = 'conversation.jsp?conversationId=' + existingConversationId;
+        } else {
+            openModal();
+        }
     }
     
     function openModal() {
@@ -737,7 +732,6 @@
         document.getElementById('contactModal').style.display = 'none';
         document.body.style.overflow = 'auto';
         document.getElementById('messageText').value = '';
-        document.getElementById('contactInfo').value = '';
     }
     
     window.onclick = function(event) {
@@ -747,9 +741,9 @@
         }
     }
 
-    function sendMessage() {
+    // 發送第一則訊息並建立對話串
+    function sendFirstMessage() {
         const messageText = document.getElementById('messageText').value.trim();
-        const contactInfo = document.getElementById('contactInfo').value.trim();
         
         if (!messageText) {
             alert('請輸入訊息內容');
@@ -761,54 +755,44 @@
             return;
         }
         
-        const bookId = document.querySelector('input[name="bookId"]').value;
-        const listingId = document.querySelector('input[name="listingId"]').value;
-        const sellerId = document.querySelector('input[name="sellerId"]').value;
-        const sellerEmail = document.querySelector('input[name="sellerEmail"]').value;
-        
-        if (!bookId || !listingId || !sellerId) {
-            alert('❌ 系統錯誤：缺少必要資料');
-            return;
-        }
-        
-        const formData = new URLSearchParams();
-        formData.append('bookId', bookId);
-        formData.append('listingId', listingId);
-        formData.append('sellerId', sellerId);
-        formData.append('sellerEmail', sellerEmail || '');
-        formData.append('message', messageText);
-        formData.append('contactInfo', contactInfo);
-        
         const sendBtn = document.querySelector('.btn-send');
         const originalText = sendBtn.textContent;
         sendBtn.textContent = '發送中...';
         sendBtn.disabled = true;
         
-        fetch('sendContactMessage.jsp', {
+        // 生成 conversationId: buyer_seller_bookId
+        const conversationId = currentUserId + '_' + sellerId + '_' + bookId;
+        
+        const formData = new URLSearchParams();
+        formData.append('conversationId', conversationId);
+        formData.append('senderId', currentUserId);
+        formData.append('receiverId', sellerId);
+        formData.append('bookId', bookId);
+        formData.append('message', messageText);
+        formData.append('senderType', 'buyer'); // 買家發起對話
+        
+        fetch('sendMessage.jsp', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: formData.toString()
         })
-        .then(response => response.text())
-        .then(text => {
-            try {
-                const data = JSON.parse(text);
-                if (data.success) {
-                    alert('✅ 訊息已成功發送!\n\n賣家將會收到您的購買意願通知。');
-                    closeModal();
-                } else {
-                    alert('❌ 發送失敗: ' + (data.message || '未知錯誤'));
-                }
-            } catch (e) {
-                alert('❌ 伺服器回傳格式錯誤');
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('✅ 訊息已成功發送!\n\n即將進入對話頁面...');
+                closeModal();
+                // 跳轉到對話頁面
+                window.location.href = 'conversation.jsp?conversationId=' + conversationId;
+            } else {
+                alert('❌ 發送失敗: ' + (data.message || '未知錯誤'));
+                sendBtn.textContent = originalText;
+                sendBtn.disabled = false;
             }
         })
         .catch(error => {
             alert('❌ 系統錯誤: ' + error.message);
-        })
-        .finally(() => {
             sendBtn.textContent = originalText;
             sendBtn.disabled = false;
         });
@@ -823,7 +807,7 @@
         }
         
         const btn = document.getElementById('favoriteBtn');
-        const bookId = btn.getAttribute('data-book-id');
+        const bookIdParam = btn.getAttribute('data-book-id');
         const isFavorited = btn.getAttribute('data-favorited') === 'true';
         const action = isFavorited ? 'remove' : 'add';
         
@@ -836,7 +820,7 @@
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: 'bookId=' + bookId + '&action=' + action
+            body: 'bookId=' + bookIdParam + '&action=' + action
         })
         .then(response => response.json())
         .then(data => {
@@ -880,24 +864,24 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             z-index: 10000;
             font-size: 14px;
-            animation: slideIn 0.3s ease-out;
+            animation: slideInToast 0.3s ease-out;
         `;
         
         document.body.appendChild(toast);
         
         setTimeout(() => {
-            toast.style.animation = 'slideOut 0.3s ease-out';
+            toast.style.animation = 'slideOutToast 0.3s ease-out';
             setTimeout(() => toast.remove(), 300);
         }, 2000);
     }
 
     const style = document.createElement('style');
     style.textContent = `
-        @keyframes slideIn {
+        @keyframes slideInToast {
             from { transform: translateX(400px); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
-        @keyframes slideOut {
+        @keyframes slideOutToast {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(400px); opacity: 0; }
         }

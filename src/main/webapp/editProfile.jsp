@@ -43,10 +43,6 @@
         if (ps != null) try { ps.close(); } catch (Exception e) {}
         if (con != null) try { con.close(); } catch (Exception e) {}
     }
-
-    // 判斷現有的聯絡方式是預設選項還是自訂的
-    String contactType = "";
-    String customContact = "";
     
     // 根據系所判斷所屬學院
     String selectedCollege = "";
@@ -307,28 +303,6 @@
             <input type="text" name="name" value="<%= name %>" required>
         </div>
 
-        <!-- 聯絡方式 -->
-        <div class="form-group">
-            <label>聯絡方式：<span class="required">*</span></label>
-            <select name="contactType" id="contactType" onchange="toggleCustomContact()" required>
-                <option value="">請選擇</option>
-                <option value="LINE" <%= contactType.equals("LINE") ? "selected" : "" %>>LINE</option>
-                <option value="IG" <%= contactType.equals("IG") ? "selected" : "" %>>IG</option>
-                <option value="FB" <%= contactType.equals("FB") ? "selected" : "" %>>FB</option>
-                <option value="其他" <%= contactType.equals("其他") ? "selected" : "" %>>其他</option>
-            </select>
-        </div>
-
-        <!-- 自訂聯絡方式 -->
-        <div class="form-group" id="customContactDiv" style="display: <%= contactType.equals("其他") ? "flex" : "none" %>;">
-            <label>請輸入聯絡方式：<span class="required">*</span></label>
-            <input type="text" name="customContact" id="customContact" 
-                   placeholder="例如：電話、Email等" value="<%= customContact %>">
-        </div>
-
-        <!-- 隱藏欄位，用來傳送最終的 contact 值 -->
-        <input type="hidden" name="contact" id="finalContact">
-
         <!-- 就讀系所 -->
         <div class="form-group">
             <label>就讀系所：<span class="required">*</span></label>
@@ -419,25 +393,6 @@
             customDiv.style.display = 'none';
             document.getElementById('customContact').value = '';
         }
-    }
-
-    // 提交前準備最終的 contact 值
-    function prepareSubmit() {
-        var contactType = document.getElementById('contactType').value;
-        var finalContact = document.getElementById('finalContact');
-        
-        if (contactType === '其他') {
-            var customContact = document.getElementById('customContact').value.trim();
-            if (customContact === '') {
-                alert('請輸入自訂的聯絡方式');
-                return false;
-            }
-            finalContact.value = customContact;
-        } else {
-            finalContact.value = contactType;
-        }
-        
-        return true;
     }
 </script>
 

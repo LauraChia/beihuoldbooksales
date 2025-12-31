@@ -307,12 +307,6 @@
             </div>
         </div>
 
-        <!-- 偏好聯絡方式 -->
-        <div class="form-group">
-            <label>偏好聯絡方式：<span class="required">*</span></label>
-            <input type="text" name="contact" placeholder="例如：Line、Email、IG、FB" required>
-        </div>
-
         <!-- 使用書籍系所 -->
         <div class="form-group">
             <label>使用書籍系所：<span class="required">*</span></label>

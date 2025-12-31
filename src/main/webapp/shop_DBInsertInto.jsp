@@ -50,7 +50,6 @@ try {
     String quantity = multi.getParameter("quantity");
     String condition = multi.getParameter("condition");
     String remarks = multi.getParameter("remarks"); // 有無筆記
-    String contact = multi.getParameter("contact");
     String listedAt = multi.getParameter("listedAt"); // 上架日期（來自隱藏欄位）
     String expiryDateRaw = multi.getParameter("expiryDate");
 
@@ -73,15 +72,7 @@ try {
     String teacher = multi.getParameter("teacher");
     String department = multi.getParameter("department");
 
-    // 組合備註資訊（包含聯絡方式和有無筆記）
-    StringBuilder fullRemarks = new StringBuilder();
-    if (contact != null && !contact.trim().isEmpty()) {
-        fullRemarks.append("聯絡方式: ").append(contact);
-    }
-    if (remarks != null && !remarks.trim().isEmpty()) {
-        if (fullRemarks.length() > 0) fullRemarks.append(" | ");
-        fullRemarks.append("筆記: ").append(remarks);
-    }
+    
 
     out.println("<!-- 接收到的資料 -->");
     out.println("<!-- 書名: " + title + " -->");
@@ -203,12 +194,9 @@ try {
     insertListingStmt.setString(4, quantity != null ? quantity : "1");
     insertListingStmt.setString(5, condition);
     insertListingStmt.setString(6, photosPaths);
-    insertListingStmt.setString(7, fullRemarks.toString());
+    insertListingStmt.setString(7, remarks);
     insertListingStmt.setString(8, "待審核");
-    
-    // 🔧 修正：使用 setBoolean() 而不是 setString()
     insertListingStmt.setBoolean(9, false); // isDelisted: false = 未下架
-    
     insertListingStmt.setString(10, listedAt);
     
     // 使用 Timestamp 儲存下架日期時間

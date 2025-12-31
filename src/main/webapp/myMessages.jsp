@@ -242,16 +242,19 @@
         Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
         
+        // 將 userId 轉換為整數
+        int currentUserId = Integer.parseInt(userId);
+        
         // 宣告變數
         int totalConversations = 0;
         int totalUnreadCount = 0;
         
-        // 查詢總對話數
+        // 查詢總對話數（修正：senderId 和 receiverId 現在是 INTEGER）
         String totalSQL = "SELECT COUNT(DISTINCT conversationId) as total FROM messages " +
                          "WHERE senderId = ? OR receiverId = ?";
         pstmt = con.prepareStatement(totalSQL);
-        pstmt.setString(1, userId);
-        pstmt.setString(2, userId);
+        pstmt.setInt(1, currentUserId);  // 改用 setInt
+        pstmt.setInt(2, currentUserId);
         ResultSet totalRs = pstmt.executeQuery();
         if (totalRs.next()) {
             totalConversations = totalRs.getInt("total");
@@ -263,10 +266,10 @@
         String unreadSQL = "SELECT COUNT(DISTINCT conversationId) as unread FROM messages " +
                           "WHERE receiverId = ? AND isRead = false";
         pstmt = con.prepareStatement(unreadSQL);
-        pstmt.setString(1, userId);
+        pstmt.setInt(1, currentUserId);  // 改用 setInt
         ResultSet unreadRs = pstmt.executeQuery();
         if (unreadRs.next()) {
-        	totalUnreadCount = unreadRs.getInt("unread");
+            totalUnreadCount = unreadRs.getInt("unread");
         }
         unreadRs.close();
         pstmt.close();
@@ -304,7 +307,7 @@
     </div>
     
     <%
-        // 查詢對話列表（取得每個對話的最新訊息）
+        // 查詢對話列表（修正 JOIN 語法）
         String sql = 
             "SELECT m.conversationId, m.senderId, m.receiverId, m.bookId, " +
             "m.message as lastMessage, m.sentAt as lastMessageTime, m.senderType as lastSenderType, " +
@@ -314,10 +317,10 @@
             " WHERE m2.conversationId = m.conversationId " +
             " AND m2.isRead = false " +
             " AND m2.receiverId = ?) as unreadInConv " +
-            "FROM (((messages m " +
-            "INNER JOIN bookListings bl ON m.bookId = bl.listingId) " +
-            "INNER JOIN books b ON bl.bookId = b.bookId) " +
-            "INNER JOIN users sender ON m.senderId = sender.userId) " +
+            "FROM messages m " +
+            "INNER JOIN bookListings bl ON m.bookId = bl.listingId " +
+            "INNER JOIN books b ON bl.bookId = b.bookId " +
+            "INNER JOIN users sender ON m.senderId = sender.userId " +
             "INNER JOIN users receiver ON m.receiverId = receiver.userId " +
             "WHERE (m.senderId = ? OR m.receiverId = ?) " +
             "AND m.messageId IN (" +
@@ -337,11 +340,11 @@
         sql += " ORDER BY m.sentAt DESC";
         
         pstmt = con.prepareStatement(sql);
-        pstmt.setInt(1, Integer.parseInt(userId));  // unreadInConv 子查詢
-        pstmt.setInt(2, Integer.parseInt(userId));  // senderId
-        pstmt.setInt(3, Integer.parseInt(userId));  // receiverId
+        pstmt.setInt(1, currentUserId);  // unreadInConv 子查詢
+        pstmt.setInt(2, currentUserId);  // senderId
+        pstmt.setInt(3, currentUserId);  // receiverId
         if (filter.equals("unread")) {
-            pstmt.setInt(4, Integer.parseInt(userId));  // 未讀篩選
+            pstmt.setInt(4, currentUserId);  // 未讀篩選
         }
         
         rs = pstmt.executeQuery();
@@ -362,14 +365,13 @@
             int unreadInConv = rs.getInt("unreadInConv");
             
             // 判斷對方是誰
-            int currentUserId = Integer.parseInt(userId);
             boolean iAmSender = (currentUserId == senderId);
             String otherPersonName = iAmSender ? receiverName : senderName;
             
-            //取得對方名字的第一個字元作為頭像
+            // 取得對方名字的第一個字元作為頭像
             String otherPersonInitial = otherPersonName.substring(0, 1);
             
-            // 格式化時間
+            // 格式化時間（保持原有邏輯）
             long diff = System.currentTimeMillis() - lastMessageTime.getTime();
             String timeAgo = "";
             if (diff < 60000) {

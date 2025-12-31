@@ -215,10 +215,78 @@
             margin-right: 8px;
         }
         
+        /* 🆕 導覽列圖標按鈕樣式 */
+        .nav-icon-btn {
+            position: relative;
+            width: 40px;
+            height: 40px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .nav-icon-btn:hover {
+            border-color: #198754;
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+        
+        .nav-icon-btn i {
+            color: #198754;
+            font-size: 18px;
+        }
+        
+        /* 🆕 未讀數量徽章（導覽列圖標上） */
+        .nav-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: bold;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+        }
+        
+        /* 🆕 無未讀時的小紅點 */
+        .nav-dot {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            background-color: #dc3545;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        
         /* 響應式設計 */
         @media (max-width: 991px) {
             .user-dropdown-menu {
                 right: -10px;
+            }
+            
+            .nav-icon-btn {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .nav-icon-btn i {
+                font-size: 16px;
             }
         }
         
@@ -290,10 +358,13 @@
                                 (hitstd.group.tool.database.DBConfig) session.getAttribute("objDBConfig");
                             menuCon = DriverManager.getConnection("jdbc:ucanaccess://"+dbConfig.FilePath()+";");
                             
-                            // 查詢未讀訊息
-                            String sql = "SELECT COUNT(*) as cnt FROM messages WHERE sellerId = ? AND isRead = No";
+                            // 將 loggedInUserId 轉為 int
+                            int currentUserIdInt = Integer.parseInt(loggedInUserId);
+                            
+                            // 查詢未讀訊息（修正：使用 receiverId 作為 INTEGER）
+                            String sql = "SELECT COUNT(DISTINCT conversationId) as cnt FROM messages WHERE receiverId = ? AND isRead = false";
                             menuPstmt = menuCon.prepareStatement(sql);
-                            menuPstmt.setString(1, loggedInUserId);
+                            menuPstmt.setInt(1, currentUserIdInt);
                             menuRs = menuPstmt.executeQuery();
                             
                             if (menuRs.next()) {
@@ -340,30 +411,34 @@
                     </div>
 
                     <!-- 右側功能區 -->
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center gap-2">
                         <!-- 搜尋按鈕 -->
-                        <button class="btn btn-md-square border border-secondary me-3" data-bs-toggle="modal" data-bs-target="#searchModal">
-                            <i class="fas fa-search text-primary"></i>
+                        <button class="nav-icon-btn" data-bs-toggle="modal" data-bs-target="#searchModal" title="搜尋書籍">
+                            <i class="fas fa-search"></i>
                         </button>
                         
                         <% if (userName != null) { %>
-                            <!-- 通知鈴鐺圖標 -->
-                            <div class="position-relative me-3">
-                                <a href="sellerNotifications.jsp" class="btn btn-md-square border border-secondary position-relative">
-                                    <i class="fas fa-bell text-primary"></i>
-                                    <% if (unreadNotificationCount > 0) { %>
-                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 10px;">
-                                            <%= unreadNotificationCount > 99 ? "99+" : unreadNotificationCount %>
-                                        </span>
-                                    <% } %>
-                                </a>
-                            </div>
+                            <!-- 🆕 訊息圖標按鈕 -->
+                            <a href="myMessages.jsp" class="nav-icon-btn" title="我的訊息">
+                                <i class="fas fa-envelope"></i>
+                                <% if (unreadCount > 0) { %>
+                                    <span class="nav-badge"><%= unreadCount > 99 ? "99+" : unreadCount %></span>
+                                <% } %>
+                            </a>
+                            
+                            <!-- 🆕 通知鈴鐺圖標按鈕 -->
+                            <a href="sellerNotifications.jsp" class="nav-icon-btn" title="系統通知">
+                                <i class="fas fa-bell"></i>
+                                <% if (unreadNotificationCount > 0) { %>
+                                    <span class="nav-badge"><%= unreadNotificationCount > 99 ? "99+" : unreadNotificationCount %></span>
+                                <% } %>
+                            </a>
                             
                             <!-- 已登入：顯示使用者下拉選單 -->
                             <div class="user-dropdown">
                                 <div class="user-icon-wrapper" id="userDropdownToggle">
                                     <i class="fas fa-user-circle fa-2x text-primary"></i>
-                                    <% if (unreadCount > 0) { %>
+                                    <% if (unreadCount > 0 || unreadNotificationCount > 0) { %>
                                         <span class="notification-dot"></span>
                                     <% } %>
                                 </div>

@@ -715,7 +715,7 @@
         <div class="icon"><i class="fas fa-box-open"></i></div>
         <h3>目前沒有符合條件的書籍</h3>
         <p>您尚未上架任何書籍，或目前篩選條件下沒有資料</p>
-        <a href="uploadBook.jsp" class="btn-primary-custom">
+        <a href="shop.jsp" class="btn-primary-custom">
             <i class="fas fa-plus"></i> 立即上架書籍
         </a>
     </div>
