@@ -53,15 +53,16 @@ try {
     String listedAt = multi.getParameter("listedAt"); // 上架日期（來自隱藏欄位）
     String expiryDateRaw = multi.getParameter("expiryDate");
 
-    // ========== 處理下架日期時間格式 ==========
+	 // ========== 處理下架日期格式 ==========
     String expiryDate = expiryDateRaw;
     if (expiryDateRaw != null && !expiryDateRaw.trim().isEmpty()) {
         try {
-            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            // 改用只有日期的格式
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
             java.util.Date date = inputFormat.parse(expiryDateRaw);
             expiryDate = outputFormat.format(date);
-            out.println("<!-- 轉換下架時間: " + expiryDateRaw + " -> " + expiryDate + " -->");
+            out.println("<!-- 轉換下架日期: " + expiryDateRaw + " -> " + expiryDate + " -->");
         } catch (ParseException pe) {
             out.println("<!-- 日期轉換失敗，使用原始值: " + expiryDateRaw + " -->");
         }
@@ -199,11 +200,12 @@ try {
     insertListingStmt.setBoolean(9, false); // isDelisted: false = 未下架
     insertListingStmt.setString(10, listedAt);
     
-    // 使用 Timestamp 儲存下架日期時間
+ 	// 使用 Date 而非 Timestamp 儲存下架日期
     if (expiryDate != null && !expiryDate.trim().isEmpty()) {
-        insertListingStmt.setTimestamp(11, Timestamp.valueOf(expiryDate));
+        // 將字串轉為 java.sql.Date
+        insertListingStmt.setDate(11, java.sql.Date.valueOf(expiryDate));
     } else {
-        insertListingStmt.setNull(11, Types.TIMESTAMP);
+        insertListingStmt.setNull(11, Types.DATE);
     }
 
     int listingRows = insertListingStmt.executeUpdate();
@@ -243,16 +245,8 @@ try {
     con.commit();
     out.println("<!-- ✅ 所有資料已成功寫入資料庫 -->");
     
-    // 格式化顯示日期時間
+    // 顯示日期時間
     String displayExpiryDate = expiryDate;
-    try {
-        SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        java.util.Date date = dbFormat.parse(expiryDate);
-        displayExpiryDate = displayFormat.format(date);
-    } catch (Exception e) {
-        // 如果解析失敗，使用原始值
-    }
 %>
 <div class="success-box">
     <h3 style="color:green;">✅ 上傳成功！</h3>
@@ -265,7 +259,7 @@ try {
     <p><strong>書籍狀況：</strong><%= condition %></p>
     <p><strong>有無筆記：</strong><%= remarks %></p>
     <p><strong>上架日期：</strong><%= listedAt %></p>
-    <p><strong>下架日期時間：</strong><%= displayExpiryDate %></p>
+    <p><strong>下架日期：</strong><%= displayExpiryDate %></p>
     <p><strong>已上傳圖片：</strong><%= uploadedFiles.size() %> 張</p>
     <p style="color:#666; margin-top:15px;">等待管理員審核中...</p>
 </div>

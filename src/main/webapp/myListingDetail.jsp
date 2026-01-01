@@ -671,24 +671,26 @@
                 <span class="value"><%= rs.getString("listedAt").split(" ")[0] %></span>
             </div>
             <%
-                String expiryDateStr = rs.getString("expiryDate");
-                String displayExpiryDate = expiryDateStr;
-                
-                if (expiryDateStr != null && !expiryDateStr.trim().isEmpty()) {
-                    try {
-                        SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                        SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-                        java.util.Date date = dbFormat.parse(expiryDateStr);
-                        displayExpiryDate = displayFormat.format(date);
-                    } catch (Exception e) {
-                        displayExpiryDate = expiryDateStr;
-                    }
-                }
-            %>
-            <div class="info-item">
-                <strong>下架日期時間：</strong>
-                <span class="value"><%= displayExpiryDate %></span>
-            </div>
+			    String expiryDateStr = rs.getString("expiryDate");
+			    String displayExpiryDate = "未設定";
+			    
+			    if (expiryDateStr != null && !expiryDateStr.trim().isEmpty()) {
+			        try {
+			            // 只處理日期部分，不包含時間
+			            SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd");
+			            SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd");
+			            java.util.Date date = dbFormat.parse(expiryDateStr.split(" ")[0]); // 只取日期部分
+			            displayExpiryDate = displayFormat.format(date);
+			        } catch (Exception e) {
+			            // 如果解析失敗，直接顯示原始值的日期部分
+			            displayExpiryDate = expiryDateStr.split(" ")[0];
+			        }
+			    }
+			%>
+			<div class="info-item">
+			    <strong>下架日期：</strong>
+			    <span class="value"><%= displayExpiryDate %></span>
+			</div>
             <div class="info-item">
                 <strong>審核狀態：</strong>
                 <span class="value <%= statusClass.replace("status-", "") %>"><%= statusText %></span>

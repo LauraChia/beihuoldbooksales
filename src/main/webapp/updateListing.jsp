@@ -10,6 +10,12 @@
 <jsp:useBean id='objDBConfig' scope='application' class='hitstd.group.tool.database.DBConfig' />
 <jsp:useBean id='objFolderConfig' scope='session' class='hitstd.group.tool.upload.FolderConfig' />
 
+<%
+// 在最外層宣告變數
+String finalListingId = "";
+String finalBookId = "";
+%>
+
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -445,18 +451,14 @@
                 <div class="notice-content">
                     📢 您的書籍已重新上架並送出審核申請<br>
                     ⏰ 管理員將在 1-2 個工作天內完成審核<br>
-                    📧 審核結果將透過系統通知您
                 </div>
             </div>
 
             <div class="action-buttons">
-                <a href="bookDetail.jsp?listingId=<%= request.getParameter("listingId") %>" class="btn btn-primary">
-                    <i class="fas fa-eye"></i> 查看書籍詳情
-                </a>
-                <a href="myListings.jsp" class="btn btn-secondary">
-                    <i class="fas fa-list"></i> 返回我的刊登
-                </a>
-            </div>
+			    <a href="myListings.jsp" class="btn btn-secondary">
+			        <i class="fas fa-list"></i> 返回我的刊登
+			    </a>
+			</div>
         </div>
 
         <!-- 錯誤狀態 -->
@@ -512,7 +514,7 @@ try {
 
     // 處理 multipart 表單
     MultipartRequest multi = new MultipartRequest(request, uploadPath, maxSize, "UTF-8", new DefaultFileRenamePolicy());
-
+    
     // ========== 取得表單資料 ==========
     String listingId = multi.getParameter("listingId");
     String bookId = multi.getParameter("bookId");
@@ -531,7 +533,6 @@ try {
     String quantity = multi.getParameter("quantity");
     String condition = multi.getParameter("condition");
     String remarks = multi.getParameter("remarks");
-    String contact = multi.getParameter("contact");
     String expiryDateRaw = multi.getParameter("expiryDate");
     
     // 課程資料
@@ -552,25 +553,25 @@ try {
     updateData.put("quantity", quantity);
     updateData.put("condition", condition);
     updateData.put("remarks", remarks);
-    updateData.put("contact", contact);
     updateData.put("courseName", courseName);
     updateData.put("teacher", teacher);
     updateData.put("department", department);
 
-    // ========== 處理下架日期時間格式 ==========
+    // ========== 處理下架日期格式 ==========
     String expiryDate = expiryDateRaw;
-    if (expiryDateRaw != null && !expiryDateRaw.trim().isEmpty()) {
-        try {
-            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy年MM月dd日 HH:mm");
-            java.util.Date date = inputFormat.parse(expiryDateRaw);
-            expiryDate = outputFormat.format(date);
-            updateData.put("expiryDate", displayFormat.format(date));
-        } catch (ParseException pe) {
-            updateData.put("expiryDate", expiryDateRaw);
-        }
-    }
+	if (expiryDateRaw != null && !expiryDateRaw.trim().isEmpty()) {
+	    try {
+	        // 改為只處理日期
+	        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+	        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
+	        SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy年MM月dd日");
+	        java.util.Date date = inputFormat.parse(expiryDateRaw);
+	        expiryDate = outputFormat.format(date);
+	        updateData.put("expiryDate", displayFormat.format(date));
+	    } catch (ParseException pe) {
+	        updateData.put("expiryDate", expiryDateRaw);
+	    }
+	}
 
     // ========== 處理圖片上傳 ==========
     List<String> allPhotos = new ArrayList<>();
@@ -620,14 +621,7 @@ try {
     updateData.put("photos", photosPaths);
 
     // 組合備註
-    StringBuilder fullRemarks = new StringBuilder();
-    if (contact != null && !contact.trim().isEmpty()) {
-        fullRemarks.append("聯絡方式: ").append(contact);
-    }
-    if (remarks != null && !remarks.trim().isEmpty()) {
-        if (fullRemarks.length() > 0) fullRemarks.append(" | ");
-        fullRemarks.append("筆記: ").append(remarks);
-    }
+    String fullRemarks = (remarks != null && !remarks.trim().isEmpty()) ? remarks : "";
 
     // ========== 資料庫連線 ==========
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
@@ -687,9 +681,10 @@ try {
     updateListingStmt.setString(paramIndex++, fullRemarks.toString());
 
     if (expiryDate != null && !expiryDate.trim().isEmpty()) {
-        updateListingStmt.setTimestamp(paramIndex++, Timestamp.valueOf(expiryDate));
+        // 將字串轉為 java.sql.Date
+        updateListingStmt.setDate(paramIndex++, java.sql.Date.valueOf(expiryDate));
     } else {
-        updateListingStmt.setNull(paramIndex++, Types.TIMESTAMP);
+        updateListingStmt.setNull(paramIndex++, Types.DATE);
     }
 
     updateListingStmt.setString(paramIndex++, "待審核");
@@ -793,9 +788,9 @@ if (success) {
                     <div class="info-value"><%= updateData.get("condition") %></div>
                 </div>
                 <div class="info-card">
-                    <div class="info-label"><i class="fas fa-clock"></i> 下架時間</div>
-                    <div class="info-value"><%= updateData.get("expiryDate") %></div>
-                </div>
+	                <div class="info-label"><i class="fas fa-clock"></i> 下架日期</div>
+	                <div class="info-value"><%= updateData.get("expiryDate") %></div>
+	            </div>
                 <div class="info-card">
                     <div class="info-label"><i class="fas fa-box"></i> 數量</div>
                     <div class="info-value"><%= updateData.get("quantity") %> 本</div>
@@ -803,10 +798,6 @@ if (success) {
                 <div class="info-card">
                     <div class="info-label"><i class="fas fa-images"></i> 圖片</div>
                     <div class="info-value"><%= updateData.get("photoCount") %> 張</div>
-                </div>
-                <div class="info-card">
-                    <div class="info-label"><i class="fas fa-phone"></i> 聯絡方式</div>
-                    <div class="info-value"><%= updateData.get("contact") %></div>
                 </div>
                 <div class="info-card">
                     <div class="info-label"><i class="fas fa-edit"></i> 筆記</div>

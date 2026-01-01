@@ -340,11 +340,11 @@
         <!-- 上架日期 (隱藏欄位，自動設定為今天) -->
         <input type="hidden" name="listedAt" value="<%= todayDate %>">
 
-        <!-- 下架日期時間 -->
+        <!-- 下架日期 -->
         <div class="form-group">
-            <label>下架日期時間：<span class="required">*</span></label>
-            <input type="datetime-local" name="expiryDate" required>
-        </div>
+		    <label>下架日期：<span class="required">*</span></label>
+		    <input type="date" name="expiryDate" required>
+		</div>
 		
         <!-- 書籍狀況 -->
         <div class="form-group">

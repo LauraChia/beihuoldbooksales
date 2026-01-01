@@ -382,20 +382,8 @@
     String expiryDateStr = rs.getString("expiryDate");
     Boolean isDelisted = rs.getBoolean("isDelisted");
     
-    // 解析備註
-    String contactInfo = "";
-    String hasNotes = "";
-    if (remarks != null && !remarks.trim().isEmpty()) {
-        String[] remarksParts = remarks.split("\\|");
-        for (String part : remarksParts) {
-            part = part.trim();
-            if (part.startsWith("聯絡方式:")) {
-                contactInfo = part.substring("聯絡方式:".length()).trim();
-            } else if (part.startsWith("筆記:")) {
-                hasNotes = part.substring("筆記:".length()).trim();
-            }
-        }
-    }
+ 	// 取得筆記狀態（有/無）
+    String hasNotes = remarks != null ? remarks.trim() : "";
     
     // 處理圖片
     List<String> photoList = new ArrayList<>();
@@ -409,14 +397,12 @@
         }
     }
     
-    // 格式化下架日期時間為 datetime-local 格式
+ 	// 格式化下架日期為 date 格式
     String expiryDateLocal = "";
     if (expiryDateStr != null && !expiryDateStr.trim().isEmpty()) {
         try {
-            SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            SimpleDateFormat localFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
-            Date date = dbFormat.parse(expiryDateStr);
-            expiryDateLocal = localFormat.format(date);
+            // 只取日期部分
+            expiryDateLocal = expiryDateStr.split(" ")[0];
         } catch (Exception e) {
             expiryDateLocal = "";
         }
@@ -535,12 +521,6 @@
             </div>
         </div>
 
-        <!-- 偏好聯絡方式 -->
-        <div class="form-group">
-            <label>偏好聯絡方式：<span class="required">*</span></label>
-            <input type="text" name="contact" value="<%= contactInfo != null ? contactInfo : "" %>" placeholder="例如：Line、Email、IG、FB" required>
-        </div>
-
         <!-- 使用書籍系所 -->
         <div class="form-group">
             <label>使用書籍系所：<span class="required">*</span></label>
@@ -571,11 +551,11 @@
             <input type="text" name="courseName" value="<%= courseName != null ? courseName : "" %>" required>
         </div>
 
-        <!-- 下架日期時間 -->
+        <!-- 下架日期 -->
         <div class="form-group">
-            <label>下架日期時間：<span class="required">*</span></label>
-            <input type="datetime-local" name="expiryDate" value="<%= expiryDateLocal %>" required>
-        </div>
+		    <label>下架日期：<span class="required">*</span></label>
+		    <input type="date" name="expiryDate" value="<%= expiryDateStr != null ? expiryDateStr.split(" ")[0] : "" %>" required>
+		</div>
 		
         <!-- 書籍狀況 -->
         <div class="form-group">
