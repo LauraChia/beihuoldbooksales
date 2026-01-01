@@ -37,11 +37,6 @@ try {
 
 // 統計數據
 int totalRecords = 0;
-int autoExpired = 0;
-int manualDelisted = 0;
-int violation = 0;
-int userRequested = 0;
-int relisted = 0;
 
 List<Map<String, String>> records = new ArrayList<>();
 
@@ -51,7 +46,7 @@ try {
     
     // 構建查詢條件
     StringBuilder whereClause = new StringBuilder("WHERE (bl.isDelisted = True OR bl.isDelisted = -1)");
-    List<Object> params = new ArrayList<>();  // 改用 Object 以支援不同類型
+    List<Object> params = new ArrayList<>();
     
     if (startDate != null && !startDate.isEmpty()) {
         whereClause.append(" AND bl.delistedAt >= ?");
@@ -83,13 +78,7 @@ try {
     }
     
     // 查詢統計數據
-    String statsSQL = "SELECT " +
-        "COUNT(*) as total, " +
-        "SUM(IIF(delistReason = 'AUTO_EXPIRED', 1, 0)) as auto, " +
-        "SUM(IIF(delistReason = 'MANUAL_ADMIN', 1, 0)) as manual, " +
-        "SUM(IIF(delistReason = 'VIOLATION', 1, 0)) as violation, " +
-        "SUM(IIF(delistReason = 'USER_REQUEST', 1, 0)) as userReq, " +
-        "SUM(IIF(relistingCount > 0, 1, 0)) as relisted " +
+    String statsSQL = "SELECT COUNT(*) as total " +
         "FROM bookListings bl " +
         "JOIN books b ON bl.bookId = b.bookId " +
         "JOIN users u ON bl.sellerId = u.userId " + 
@@ -108,11 +97,6 @@ try {
     ResultSet statsRs = statsStmt.executeQuery();
     if (statsRs.next()) {
         totalRecords = statsRs.getInt("total");
-        autoExpired = statsRs.getInt("auto");
-        manualDelisted = statsRs.getInt("manual");
-        violation = statsRs.getInt("violation");
-        userRequested = statsRs.getInt("userReq");
-        relisted = statsRs.getInt("relisted");
     }
     statsRs.close();
     statsStmt.close();
@@ -371,36 +355,42 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
         }
         
         .stats-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-        
-        .stat-card .icon {
-            font-size: 32px;
-            margin-bottom: 10px;
-        }
-        
-        .stat-card .number {
-            font-size: 28px;
-            font-weight: bold;
-            color: #81c408;
-            margin-bottom: 5px;
-        }
-        
-        .stat-card .label {
-            color: #666;
-            font-size: 14px;
-        }
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-width: 300px;
+    margin: 0 auto;
+    gap: 15px;
+}
+
+.stat-card {
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-card .icon {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+.stat-card .number {
+    font-size: 28px;
+    font-weight: bold;
+    color: #81c408;
+    margin-bottom: 5px;
+}
+
+.stat-card .label {
+    color: #666;
+    font-size: 14px;
+}
         
         .table-section {
             background: white;
@@ -604,16 +594,7 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
                         <input type="text" name="bookSearch" placeholder="輸入書名關鍵字" 
                                value="<%= bookSearch != null ? bookSearch : "" %>">
                     </div>
-                    <div class="filter-item">
-                        <label>下架原因</label>
-                        <select name="reasonFilter">
-                            <option value="ALL" <%= "ALL".equals(reasonFilter) || reasonFilter == null ? "selected" : "" %>>全部</option>
-                            <option value="自動到期下架" <%= "自動到期下架".equals(reasonFilter) ? "selected" : "" %>>自動到期</option>
-                            <option value="管理員下架" <%= "管理員下架".equals(reasonFilter) ? "selected" : "" %>>管理員下架</option>
-                            <option value="違規下架" <%= "違規下架".equals(reasonFilter) ? "selected" : "" %>>違規下架</option>
-                            <option value="使用者自行下架" <%= "使用者自行下架".equals(reasonFilter) ? "selected" : "" %>>使用者自行下架</option>
-                        </select>
-                    </div>
+                    
                     <div class="filter-item">
                         <label>重新上架狀態</label>
                         <select name="statusFilter">
@@ -631,38 +612,15 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
         </div>
         
         <!-- 統計區 -->
-        <div class="stats-section">
-            <div class="stat-card">
-                <div class="icon">📦</div>
-                <div class="number"><%= totalRecords %></div>
-                <div class="label">總下架筆數</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon">⏰</div>
-                <div class="number"><%= autoExpired %></div>
-                <div class="label">自動到期</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon">👨‍💼</div>
-                <div class="number"><%= manualDelisted %></div>
-                <div class="label">管理員下架</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon">⚠️</div>
-                <div class="number"><%= violation %></div>
-                <div class="label">違規下架</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon">👤</div>
-                <div class="number"><%= userRequested %></div>
-                <div class="label">使用者下架</div>
-            </div>
-            <div class="stat-card">
-                <div class="icon">🔄</div>
-                <div class="number"><%= relisted %></div>
-                <div class="label">已重新上架</div>
-            </div>
+<div class="stats-section">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="icon">📦</div>
+            <div class="number"><%= totalRecords %></div>
+            <div class="label">總下架筆數</div>
         </div>
+    </div>
+</div>
         
         <!-- 資料表格區 -->
         <div class="table-section">
@@ -690,7 +648,6 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
                             <th>下架原因</th>
                             <th>執行者</th>
                             <th>重新上架次數</th>
-                            <th>操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -742,11 +699,6 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
                                     <span style="color: #999;">0 次</span>
                                 <% } %>
                             </td>
-                            <td>
-                                <button class="detail-btn" onclick="viewDetail('<%= record.get("listingId") %>')">
-                                    詳情
-                                </button>
-                            </td>
                         </tr>
                         <% } %>
                     </tbody>
@@ -770,8 +722,7 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
                     %>
                         <span class="active"><%= i %></span>
                     <% } else { %>
-                        <a href="?page=<%= i %>&startDate=<%= startDate != null ? startDate : "" %>&endDate=<%= endDate != null ? endDate : "" %>&sellerSearch=<%= sellerSearch != null ? sellerSearch : "" %>&bookSearch=<%= bookSearch != null ? bookSearch : "" %>&reasonFilter=<%= reasonFilter != null ? reasonFilter :
-                        "" %>&statusFilter=<%= statusFilter != null ? statusFilter : "" %>">
+                        <a href="?page=<%= i %>&startDate=<%= startDate != null ? startDate : "" %>&endDate=<%= endDate != null ? endDate : "" %>&sellerSearch=<%= sellerSearch != null ? sellerSearch : "" %>&bookSearch=<%= bookSearch != null ? bookSearch : "" %>&reasonFilter=<%= reasonFilter != null ? reasonFilter : "" %>&statusFilter=<%= statusFilter != null ? statusFilter : "" %>">
                             <%= i %>
                         </a>
                     <% } 
@@ -789,12 +740,6 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
     </div>
     
     <script>
-        // 查看詳情
-        function viewDetail(listingId) {
-            // 可以導向詳細頁面或彈出模態框
-            window.location.href = 'listingDetail.jsp?id=' + listingId;
-        }
-        
         // 匯出Excel功能
         function exportToExcel() {
             const table = document.getElementById('recordsTable');
@@ -803,7 +748,6 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
                 return;
             }
             
-            // 取得篩選參數
             const urlParams = new URLSearchParams(window.location.search);
             const params = [];
             
@@ -814,7 +758,6 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
                 }
             });
             
-            // 導向匯出頁面
             window.location.href = 'exportDelistingRecords.jsp?' + params.join('&');
         }
         
@@ -824,19 +767,6 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
                 e.preventDefault();
             }
         });
-        
-        // 自動提交表單（可選）
-        const form = document.querySelector('form');
-        const selects = form.querySelectorAll('select');
-        
-        // 如果需要選擇後自動查詢，取消下面的註解
-        /*
-        selects.forEach(select => {
-            select.addEventListener('change', function() {
-                form.submit();
-            });
-        });
-        */
         
         // 日期範圍驗證
         const startDateInput = document.querySelector('input[name="startDate"]');
@@ -853,7 +783,6 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
             });
         }
         
-        // 顯示載入完成訊息
         console.log('下架記錄查詢頁面載入完成');
         console.log('總記錄數: <%= totalRecords %>');
         console.log('當前頁數: <%= currentPage %> / <%= totalPages %>');

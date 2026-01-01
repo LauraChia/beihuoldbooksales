@@ -26,7 +26,7 @@
 
         /* 頁面標題區塊 - 綠色漸層 */
         .page-header {
-            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            background: linear-gradient(135deg, #66bb6a 0%, #66bb6a 100%);
             color: white;
             padding: 40px 0;
             margin-bottom: 0;
@@ -282,6 +282,25 @@
                 font-size: 14px;
             }
         }
+      .no-results .btn {
+    background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+    border: none;
+    color: #333;
+    padding: 12px 32px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(102, 187, 106, 0.3);
+}
+
+.no-results .btn:hover {
+    background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+    color: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 187, 106, 0.5);
+}
     </style>
 </head>
 
@@ -493,13 +512,13 @@
     <!-- 無結果顯示 -->
     <div class="book-grid-wrapper">
         <div class="no-results">
-            <i class="fas fa-search"></i>
-            <h4>找不到相符的書籍</h4>
-            <p>請嘗試使用其他關鍵字或搜尋條件</p>
-            <a href="index.jsp" class="btn">
-                <i class="fas fa-home"></i> 返回首頁
-            </a>
-        </div>
+    <i class="fas fa-search"></i>
+    <h4>找不到相符的書籍</h4>
+    <p>請嘗試使用其他關鍵字或搜尋條件</p>
+    <a href="index.jsp" class="btn">
+        返回首頁
+    </a>
+</div>
     </div>
 <% } else { %>
     <!-- 有結果時顯示書籍列表 -->

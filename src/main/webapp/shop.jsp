@@ -25,7 +25,7 @@
         body { background-color: #f8f9fa; font-family: "Microsoft JhengHei", sans-serif; }
         
         .page-header {
-            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            background: linear-gradient(135deg, #66bb6a 0%, #66bb6a 100%);
             color: white;
             padding: 40px 0;
             margin-bottom: 40px;

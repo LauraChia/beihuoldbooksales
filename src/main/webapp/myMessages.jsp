@@ -33,7 +33,7 @@
         }
         
         .page-header {
-            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            background: linear-gradient(135deg,  #66bb6a 0%, #66bb6a 100%);
             color: white;
             padding: 30px;
             border-radius: 15px;
@@ -227,6 +227,29 @@
                 right: 10px;
             }
         }
+        .btn-primary {
+    background: white;
+    border: 2px solid #66bb6a;
+    color: #66bb6a;
+    padding: 14px 40px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
+    text-decoration: none;
+}
     </style>
 </head>
 <body>
@@ -419,15 +442,17 @@
         if (!hasConversations) {
     %>
     
-    <div class="empty-state">
-        <i class="fas fa-inbox"></i>
-        <h3>目前沒有對話</h3>
-        <p>當您與其他使用者聯繫時,對話會顯示在這裡</p>
-        <button class="btn btn-primary" onclick="location.href='index.jsp'" style="margin-top: 20px;">
-            <i class="fas fa-home"></i> 返回首頁
-        </button>
+   <div class="empty-state">
+    <i class="fas fa-inbox"></i>
+    <h3>目前沒有對話</h3>
+    <p>當您與其他使用者聯繫時,對話會顯示在這裡</p>
+    <div style="margin-top: 20px;">
+        <a href="index.jsp" class="btn-primary">
+            <span style="font-size: 18px;">🏠</span> 返回首頁
+        </a>
     </div>
-    
+</div>
+</div>
     <%
         }
         

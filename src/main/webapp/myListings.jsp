@@ -26,7 +26,7 @@
         
         /* 頁面標題 - 淺綠色 */
         .page-header {
-            background: #81c784;
+            background:  #66bb6a;
             color: white;
             padding: 40px 0;
             margin-bottom: 40px;
@@ -476,17 +476,22 @@
                      "INNER JOIN books b ON bl.bookId = b.bookId " +
                      "WHERE bl.sellerId = '" + currentUserId + "' ";
         
-        // 添加篩選條件
+     // 添加篩選條件
         if (!filterStatus.equals("all")) {
-	    if (filterStatus.equals("approved")) {
-	        sql += "AND bl.Approved = 'TRUE' AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) ";
-	    } else if (filterStatus.equals("pending")) {
-	        sql += "AND (bl.Approved IS NULL OR bl.Approved = '') AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) ";  // 修改這裡
-	    } else if (filterStatus.equals("rejected")) {  // 新增這個條件
-	        sql += "AND bl.Approved = 'FALSE' AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) ";
-	    } else if (filterStatus.equals("delisted")) {
-	        sql += "AND bl.isDelisted = TRUE ";
-	    }
+            if (filterStatus.equals("approved")) {
+                // 已通過：Approved = 'TRUE' 且未下架
+                sql += "AND bl.Approved = 'TRUE' AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) ";
+            } else if (filterStatus.equals("pending")) {
+                // 待審核：Approved 不是 TRUE 也不是 FALSE (包含 NULL 和空字串)
+                sql += "AND (bl.Approved IS NULL OR bl.Approved = '' OR (bl.Approved <> 'TRUE' AND bl.Approved <> 'FALSE')) AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) ";
+            } else if (filterStatus.equals("rejected")) {
+                // 未通過：Approved = 'FALSE' 且未下架
+                sql += "AND bl.Approved = 'FALSE' AND (bl.isDelisted IS NULL OR bl.isDelisted = FALSE) ";
+            } else if (filterStatus.equals("delisted")) {
+                // 已下架
+                sql += "AND bl.isDelisted = TRUE ";
+            }
+        
 	}
         
         // 添加排序

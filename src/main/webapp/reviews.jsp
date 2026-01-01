@@ -74,7 +74,7 @@
         
         /* 頁面標題 - 改用淺綠色 */
         .reviews-header {
-            background: #81c784;
+            background: #66bb6a;
             color: white;
             padding: 50px 20px 35px;
             text-align: center;
@@ -365,7 +365,7 @@
             }
             
             .review-header {
-                flex-direction: column;
+                flex-direction: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);;
             }
             
             .review-meta {

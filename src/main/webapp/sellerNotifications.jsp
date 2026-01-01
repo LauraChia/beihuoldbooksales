@@ -33,7 +33,7 @@
         
         /* 頁面標題 - 淺綠色 */
         .page-header {
-            background: #81c784;
+            background:  #66bb6a;
             color: white;
             padding: 30px;
             border-radius: 15px;
