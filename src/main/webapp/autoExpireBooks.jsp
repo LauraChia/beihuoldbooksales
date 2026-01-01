@@ -16,8 +16,8 @@
         Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
         con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String currentTime = sdf.format(new java.util.Date());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String currentTime = sdf.format(new java.util.Date()) + " 00:00:00";
 
         // 1. 查詢需要下架的書籍（含賣家資訊）
         String selectSql = "SELECT bl.listingId, bl.bookId, bl.sellerId, b.title, bl.expiryDate, " +
