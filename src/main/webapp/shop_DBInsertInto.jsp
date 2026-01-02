@@ -9,29 +9,502 @@
 <jsp:useBean id='objDBConfig' scope='application' class='hitstd.group.tool.database.DBConfig' />
 <jsp:useBean id='objFolderConfig' scope='session' class='hitstd.group.tool.upload.FolderConfig' />
 
-<html>
+<!DOCTYPE html>
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>處理上架中 - 二手書交易網</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; padding: 20px; }
-        .error-box { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
-        .success-box { background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; }
-        pre { background: #f5f5f5; padding: 10px; overflow: auto; font-size: 12px; }
+        body {
+            font-family: "Microsoft JhengHei", sans-serif;
+            background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .processing-container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(102, 187, 106, 0.2);
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .processing-header {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .processing-header h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .processing-body {
+            padding: 40px;
+        }
+
+        /* Loading 動畫 */
+        .loading-section {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #e8f5e9;
+            border-top: 4px solid #66bb6a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #66bb6a;
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .loading-hint {
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* 成功訊息樣式 */
+        .success-section {
+            display: none;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            animation: scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .success-icon i {
+            font-size: 40px;
+            color: white;
+        }
+
+        .success-title {
+            color: #2e7d32;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            border-left: 4px solid #66bb6a;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .info-card:hover {
+            background: #e8f5e9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.15);
+        }
+
+        .info-label {
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 120px;
+            font-weight: 500;
+        }
+
+        .info-label i {
+            color: #66bb6a;
+            font-size: 14px;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 15px;
+            font-weight: 400;
+            word-break: break-word;
+            flex: 1;
+        }
+
+        .photo-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .photo-item {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .photo-item:hover {
+            border-color: #66bb6a;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.3);
+        }
+
+        .photo-item img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .notice-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.9; }
+        }
+
+        .notice-box .notice-title {
+            color: #1565c0;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notice-box .notice-content {
+            color: #1976d2;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* 錯誤訊息樣式 */
+        .error-section {
+            display: none;
+        }
+
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ef5350 0%, #e53935 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            animation: shake 0.5s ease-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .error-icon i {
+            font-size: 40px;
+            color: white;
+        }
+
+        .error-title {
+            color: #c62828;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            background: #ffebee;
+            border: 1px solid #ef9a9a;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .error-message-title {
+            color: #c62828;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-message-content {
+            color: #d32f2f;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .error-details {
+            background: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .error-details pre {
+            margin: 0;
+            font-size: 12px;
+            color: #666;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* 按鈕樣式 */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f5f5;
+            border-color: #bdbdbd;
+        }
+
+        .btn-danger {
+            background: white;
+            color: #e53935;
+            border: 2px solid #ef5350;
+        }
+
+        .btn-danger:hover {
+            background: #ffebee;
+            border-color: #e53935;
+        }
+
+        /* 進度條 */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #81c784 0%, #66bb6a 100%);
+            animation: progress 2s ease-out;
+        }
+
+        @keyframes progress {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
     </style>
 </head>
 <body>
+
+<div class="processing-container">
+    <div class="processing-header">
+        <h2>
+            <i class="fas fa-sync-alt fa-spin"></i>
+            處理上架中
+        </h2>
+    </div>
+    
+    <div class="processing-body">
+        <!-- Loading 狀態 -->
+        <div class="loading-section" id="loadingSection">
+            <div class="spinner"></div>
+            <div class="loading-text">正在處理您的上架申請...</div>
+            <div class="loading-hint">請稍候，不要關閉此頁面</div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- 成功狀態 -->
+        <div class="success-section" id="successSection">
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+            <div class="success-title">✨ 上架成功！</div>
+            
+            <div id="successContent"></div>
+            
+            <div class="notice-box">
+                <div class="notice-title">
+                    <i class="fas fa-info-circle"></i>
+                    重要提醒
+                </div>
+                <div class="notice-content">
+                    📢 您的書籍已成功提交上架申請<br>
+                    ⏰ 管理員將在 1-2 個工作天內完成審核<br>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="index.jsp" class="btn btn-primary">
+                    <i class="fas fa-home"></i> 返回首頁
+                </a>
+                <a href="shop.jsp" class="btn btn-secondary">
+                    <i class="fas fa-plus"></i> 繼續上架
+                </a>
+            </div>
+        </div>
+
+        <!-- 錯誤狀態 -->
+        <div class="error-section" id="errorSection">
+            <div class="error-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="error-title">❌ 上架失敗</div>
+            
+            <div class="error-message">
+                <div class="error-message-title">
+                    <i class="fas fa-times-circle"></i>
+                    錯誤訊息
+                </div>
+                <div class="error-message-content" id="errorMessage"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button onclick="history.back()" class="btn btn-danger">
+                    <i class="fas fa-arrow-left"></i> 返回上架頁面
+                </button>
+                <a href="index.jsp" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> 返回首頁
+                </a>
+            </div>
+
+            <div class="error-details" id="errorDetails" style="display:none;">
+                <pre id="errorDetailsContent"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
 <%
 Connection con = null;
+boolean success = false;
+String errorMsg = "";
+String errorDetails = "";
+
+// 收集資料用於顯示
+Map<String, String> uploadData = new HashMap<>();
+
 try {
     // 設定上傳目錄和大小限制 (20MB)
     String uploadPath = objFolderConfig.FilePath();
-    int maxSize = 20 * 1024 * 1024;
+    int maxSize = 100 * 1024 * 1024;
     
     // 檢查並建立上傳目錄
     File uploadDir = new File(uploadPath);
     if (!uploadDir.exists()) {
         boolean created = uploadDir.mkdirs();
-        out.println("<!-- 建立目錄: " + uploadPath + " (成功: " + created + ") -->");
     }
 
     // MultipartRequest 支援中文和多檔案
@@ -49,40 +522,45 @@ try {
     String price = multi.getParameter("price");
     String quantity = multi.getParameter("quantity");
     String condition = multi.getParameter("condition");
-    String remarks = multi.getParameter("remarks"); // 有無筆記
-    String listedAt = multi.getParameter("listedAt"); // 上架日期（來自隱藏欄位）
+    String remarks = multi.getParameter("remarks");
+    String listedAt = multi.getParameter("listedAt");
     String expiryDateRaw = multi.getParameter("expiryDate");
-
-	 // ========== 處理下架日期格式 ==========
-    String expiryDate = expiryDateRaw;
-    if (expiryDateRaw != null && !expiryDateRaw.trim().isEmpty()) {
-        try {
-            // 改用只有日期的格式
-            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
-            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
-            java.util.Date date = inputFormat.parse(expiryDateRaw);
-            expiryDate = outputFormat.format(date);
-            out.println("<!-- 轉換下架日期: " + expiryDateRaw + " -> " + expiryDate + " -->");
-        } catch (ParseException pe) {
-            out.println("<!-- 日期轉換失敗，使用原始值: " + expiryDateRaw + " -->");
-        }
-    }
 
     // ========== 取得課程資料 (courses 表) ==========
     String courseName = multi.getParameter("courseName");
     String teacher = multi.getParameter("teacher");
     String department = multi.getParameter("department");
 
-    
+    // 儲存資料以便顯示
+    uploadData.put("title", title);
+    uploadData.put("author", author);
+    uploadData.put("price", price);
+    uploadData.put("publishDate", publishDate);
+    uploadData.put("edition", edition != null && !edition.trim().isEmpty() ? edition : "無");
+    uploadData.put("ISBN", ISBN != null && !ISBN.trim().isEmpty() ? ISBN : "無");
+    uploadData.put("quantity", quantity != null ? quantity : "1");
+    uploadData.put("condition", condition);
+    uploadData.put("remarks", remarks);
+    uploadData.put("courseName", courseName);
+    uploadData.put("teacher", teacher);
+    uploadData.put("department", department);
+    uploadData.put("listedAt", listedAt);
 
-    out.println("<!-- 接收到的資料 -->");
-    out.println("<!-- 書名: " + title + " -->");
-    out.println("<!-- 作者: " + author + " -->");
-    out.println("<!-- 出版日期: " + publishDate + " -->");
-    out.println("<!-- 上架日期: " + listedAt + " -->");
-    out.println("<!-- 下架日期時間: " + expiryDate + " -->");
-    out.println("<!-- 書籍狀況: " + condition + " -->");
-    out.println("<!-- 有無筆記: " + remarks + " -->");
+    // ========== 處理下架日期格式 ==========
+    String expiryDate = expiryDateRaw;
+    if (expiryDateRaw != null && !expiryDateRaw.trim().isEmpty()) {
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy年MM月dd日");
+            java.util.Date date = inputFormat.parse(expiryDateRaw);
+            expiryDate = inputFormat.format(date);
+            uploadData.put("expiryDate", displayFormat.format(date));
+        } catch (ParseException pe) {
+            uploadData.put("expiryDate", expiryDateRaw);
+        }
+    } else {
+        uploadData.put("expiryDate", "無");
+    }
 
     // ========== 處理多個上傳的圖片檔案 ==========
     List<String> uploadedFiles = new ArrayList<>();
@@ -103,18 +581,18 @@ try {
 
             if (oldFile.exists() && oldFile.renameTo(newFile)) {
                 uploadedFiles.add(safeFileName);
-                out.println("<!-- 上傳成功: " + safeFileName + " -->");
             }
         }
     }
 
     String photosPaths = String.join(",", uploadedFiles);
-    out.println("<!-- 最終圖片路徑: " + photosPaths + " -->");
+    uploadData.put("photoCount", String.valueOf(uploadedFiles.size()));
+    uploadData.put("photos", photosPaths);
 
     // ========== 資料庫連線 ==========
     Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
     con = DriverManager.getConnection("jdbc:ucanaccess://" + objDBConfig.FilePath() + ";");
-    con.setAutoCommit(false); // 開啟交易
+    con.setAutoCommit(false);
 
     int bookId = -1;
     int courseId = -1;
@@ -127,11 +605,8 @@ try {
     ResultSet bookRs = checkBookStmt.executeQuery();
 
     if (bookRs.next()) {
-        // 書籍已存在，取得 bookId
         bookId = bookRs.getInt("bookId");
-        out.println("<!-- ✅ 書籍已存在，bookId: " + bookId + " -->");
     } else {
-        // 新增書籍
         String insertBookSQL = "INSERT INTO books(title, author, ISBN, edition, createdAt) VALUES(?, ?, ?, ?, ?)";
         PreparedStatement insertBookStmt = con.prepareStatement(insertBookSQL, Statement.RETURN_GENERATED_KEYS);
         insertBookStmt.setString(1, title);
@@ -145,7 +620,6 @@ try {
         ResultSet generatedKeys = insertBookStmt.getGeneratedKeys();
         if (generatedKeys.next()) {
             bookId = generatedKeys.getInt(1);
-            out.println("<!-- ✅ 新增書籍成功，bookId: " + bookId + " -->");
         }
         generatedKeys.close();
         insertBookStmt.close();
@@ -162,11 +636,8 @@ try {
     ResultSet courseRs = checkCourseStmt.executeQuery();
 
     if (courseRs.next()) {
-        // 課程已存在
         courseId = courseRs.getInt("courseId");
-        out.println("<!-- ✅ 課程已存在，courseId: " + courseId + " -->");
     } else {
-        // 新增課程
         String insertCourseSQL = "INSERT INTO courses(courseName, teacher, department) VALUES(?, ?, ?)";
         PreparedStatement insertCourseStmt = con.prepareStatement(insertCourseSQL, Statement.RETURN_GENERATED_KEYS);
         insertCourseStmt.setString(1, courseName);
@@ -178,7 +649,6 @@ try {
         ResultSet courseKeys = insertCourseStmt.getGeneratedKeys();
         if (courseKeys.next()) {
             courseId = courseKeys.getInt(1);
-            out.println("<!-- ✅ 新增課程成功，courseId: " + courseId + " -->");
         }
         courseKeys.close();
         insertCourseStmt.close();
@@ -197,12 +667,10 @@ try {
     insertListingStmt.setString(6, photosPaths);
     insertListingStmt.setString(7, remarks);
     insertListingStmt.setString(8, "待審核");
-    insertListingStmt.setBoolean(9, false); // isDelisted: false = 未下架
+    insertListingStmt.setBoolean(9, false);
     insertListingStmt.setString(10, listedAt);
     
- 	// 使用 Date 而非 Timestamp 儲存下架日期
     if (expiryDate != null && !expiryDate.trim().isEmpty()) {
-        // 將字串轉為 java.sql.Date
         insertListingStmt.setDate(11, java.sql.Date.valueOf(expiryDate));
     } else {
         insertListingStmt.setNull(11, Types.DATE);
@@ -214,7 +682,6 @@ try {
     int listingId = -1;
     if (listingKeys.next()) {
         listingId = listingKeys.getInt(1);
-        out.println("<!-- ✅ 新增上架詳情成功，listingId: " + listingId + " -->");
     }
     listingKeys.close();
     insertListingStmt.close();
@@ -227,83 +694,191 @@ try {
     ResultSet relationRs = checkRelationStmt.executeQuery();
 
     if (!relationRs.next()) {
-        // 不存在關聯，新增
         String insertRelationSQL = "INSERT INTO book_course_relations(bookId, courseId) VALUES(?, ?)";
         PreparedStatement insertRelationStmt = con.prepareStatement(insertRelationSQL);
         insertRelationStmt.setInt(1, bookId);
         insertRelationStmt.setInt(2, courseId);
         insertRelationStmt.executeUpdate();
         insertRelationStmt.close();
-        out.println("<!-- ✅ 新增書籍-課程關聯成功 -->");
-    } else {
-        out.println("<!-- ✅ 書籍-課程關聯已存在 -->");
     }
     relationRs.close();
     checkRelationStmt.close();
 
     // ========== 提交交易 ==========
     con.commit();
-    out.println("<!-- ✅ 所有資料已成功寫入資料庫 -->");
-    
-    // 顯示日期時間
-    String displayExpiryDate = expiryDate;
-%>
-<div class="success-box">
-    <h3 style="color:green;">✅ 上傳成功！</h3>
-    <p><strong>書名：</strong><%= title %></p>
-    <p><strong>作者：</strong><%= author %></p>
-    <p><strong>價格：</strong>NT$<%= price %></p>
-    <p><strong>課程：</strong><%= courseName %></p>
-    <p><strong>授課教師：</strong><%= teacher %></p>
-    <p><strong>系所：</strong><%= department %></p>
-    <p><strong>書籍狀況：</strong><%= condition %></p>
-    <p><strong>有無筆記：</strong><%= remarks %></p>
-    <p><strong>上架日期：</strong><%= listedAt %></p>
-    <p><strong>下架日期：</strong><%= displayExpiryDate %></p>
-    <p><strong>已上傳圖片：</strong><%= uploadedFiles.size() %> 張</p>
-    <p style="color:#666; margin-top:15px;">等待管理員審核中...</p>
-</div>
+    success = true;
 
-<script>
-    setTimeout(function() {
-        alert("✅ 書籍已成功上架！\n書名：<%= title %>\n課程：<%= courseName %>\n書籍狀況：<%= condition %>\n有無筆記：<%= remarks %>\n上架日期：<%= listedAt %>\n下架日期時間：<%= displayExpiryDate %>\n已上傳 <%= uploadedFiles.size() %> 張圖片\n等待管理員審核中...");
-        window.location.href = "index.jsp";
-    }, 1000);
-</script>
-<%
 } catch (Exception e) {
-    // 發生錯誤時回滾交易
     if (con != null) {
         try {
             con.rollback();
-            out.println("<!-- ❌ 交易已回滾 -->");
         } catch (SQLException se) {
-            out.println("<!-- ❌ 回滾失敗: " + se.getMessage() + " -->");
+            // 忽略回滾錯誤
         }
     }
     
-    out.println("<div class='error-box'>");
-    out.println("<h3 style='color:red;'>❌ 上傳失敗</h3>");
-    out.println("<p><strong>錯誤訊息：</strong>" + e.getMessage() + "</p>");
-    out.println("</div>");
+    success = false;
+    errorMsg = e.getMessage();
     
-    out.println("<h4>詳細錯誤資訊</h4>");
-    out.println("<pre>");
-    e.printStackTrace(new PrintWriter(out));
-    out.println("</pre>");
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    e.printStackTrace(pw);
+    errorDetails = sw.toString();
     
-    out.println("<br><a href='shop.jsp' style='display:inline-block; padding:10px 20px; background:#007bff; color:#fff; text-decoration:none; border-radius:4px;'>返回上架頁面</a>");
 } finally {
-    // 關閉資料庫連線
     if (con != null) {
         try {
             con.setAutoCommit(true);
             con.close();
         } catch (SQLException se) {
-            out.println("<!-- 關閉連線錯誤: " + se.getMessage() + " -->");
+            // 忽略關閉錯誤
         }
     }
 }
+
+// 輸出 JavaScript 來更新頁面
+if (success) {
 %>
-</body>
-</html>
+<script>
+    setTimeout(function() {
+        // 隱藏 loading
+        document.getElementById('loadingSection').style.display = 'none';
+        
+        // 顯示成功區塊
+        const successSection = document.getElementById('successSection');
+        successSection.style.display = 'block';
+        
+        // 建立成功內容
+        const successContent = `
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-book"></i> 書名</div>
+                    <div class="info-value"><%= uploadData.get("title") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-user-edit"></i> 作者</div>
+                    <div class="info-value"><%= uploadData.get("author") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-dollar-sign"></i> 價格</div>
+                    <div class="info-value">NT$ <%= uploadData.get("price") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-calendar-alt"></i> 出版日期</div>
+                    <div class="info-value"><%= uploadData.get("publishDate") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-barcode"></i> ISBN</div>
+                    <div class="info-value"><%= uploadData.get("ISBN") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-bookmark"></i> 版次</div>
+                    <div class="info-value"><%= uploadData.get("edition") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-graduation-cap"></i> 課程</div>
+                    <div class="info-value"><%= uploadData.get("courseName") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-chalkboard-teacher"></i> 授課教師</div>
+                    <div class="info-value"><%= uploadData.get("teacher") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-university"></i> 系所</div>
+                    <div class="info-value"><%= uploadData.get("department") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-star"></i> 書籍狀況</div>
+                    <div class="info-value"><%= uploadData.get("condition") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-sticky-note"></i> 筆記</div>
+                    <div class="info-value"><%= uploadData.get("remarks") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-calendar-check"></i> 上架日期</div>
+                    <div class="info-value"><%= uploadData.get("listedAt") %></div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label"><i class="fas fa-clock"></i> 下架日期</div>
+                    <div class="info-value"><%= uploadData.get("expiryDate") %></div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label"><i class="fas fa-images"></i> 圖片</div>
+                        <div class="info-value"><%= uploadData.get("photoCount") %> 張</div>
+                    </div>
+                </div>
+                
+                <% if (uploadData.get("photos") != null && !uploadData.get("photos").isEmpty()) { 
+                    String[] photoArray = uploadData.get("photos").split(",");
+                %>
+                <div style="margin-top: 30px;">
+                    <div style="color: #666; font-size: 14px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-images" style="color: #66bb6a;"></i>
+                        <strong>書籍照片預覽</strong>
+                    </div>
+                    <div class="photo-preview">
+                        <% for (String photo : photoArray) { 
+                            String displayPath = photo.trim();
+                            if (!displayPath.startsWith("assets/")) {
+                                displayPath = "assets/images/member/" + displayPath;
+                            }
+                        %>
+                        <div class="photo-item">
+                            <img src="<%= displayPath %>" alt="書籍照片" onerror="this.src='assets/images/about.png'">
+                        </div>
+                        <% } %>
+                    </div>
+                </div>
+                <% } %>
+            `;
+            
+            document.getElementById('successContent').innerHTML = successContent;
+        }, 1500);
+    </script>
+    <%
+    } else {
+    %>
+    <script>
+        setTimeout(function() {
+            // 隱藏 loading
+            document.getElementById('loadingSection').style.display = 'none';
+            
+            // 顯示錯誤區塊
+            const errorSection = document.getElementById('errorSection');
+            errorSection.style.display = 'block';
+            
+            // 設定錯誤訊息
+            document.getElementById('errorMessage').textContent = '<%= errorMsg.replace("'", "\\'").replace("\n", " ") %>';
+            
+            <% if (errorDetails != null && !errorDetails.isEmpty()) { %>
+            // 顯示詳細錯誤（可選）
+            const errorDetailsDiv = document.getElementById('errorDetails');
+            const errorDetailsContent = document.getElementById('errorDetailsContent');
+            errorDetailsContent.textContent = '<%= errorDetails.replace("'", "\\'").replace("\n", "\\n") %>';
+            
+            // 添加顯示/隱藏詳細資訊的按鈕
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'btn btn-secondary';
+            toggleBtn.innerHTML = '<i class="fas fa-info-circle"></i> 顯示技術細節';
+            toggleBtn.style.marginTop = '15px';
+            toggleBtn.onclick = function() {
+                if (errorDetailsDiv.style.display === 'none') {
+                    errorDetailsDiv.style.display = 'block';
+                    toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> 隱藏技術細節';
+                } else {
+                    errorDetailsDiv.style.display = 'none';
+                    toggleBtn.innerHTML = '<i class="fas fa-info-circle"></i> 顯示技術細節';
+                }
+            };
+            
+            document.querySelector('.error-message').appendChild(toggleBtn);
+            <% } %>
+        }, 1000);
+    </script>
+    <%
+    }
+    %>
+
+    </body>
+    </html> 

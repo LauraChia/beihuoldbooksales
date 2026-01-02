@@ -611,17 +611,6 @@ int totalPages = (int) Math.ceil((double) totalRecords / recordsPerPage);
             </form>
         </div>
         
-        <!-- 統計區 -->
-<div class="stats-section">
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="icon">📦</div>
-            <div class="number"><%= totalRecords %></div>
-            <div class="label">總下架筆數</div>
-        </div>
-    </div>
-</div>
-        
         <!-- 資料表格區 -->
         <div class="table-section">
             <div class="table-header">

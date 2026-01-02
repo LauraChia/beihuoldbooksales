@@ -419,7 +419,8 @@
         selectedFiles.forEach((file, index) => {
             const div = document.createElement('div');
             div.className = 'preview-item';
-            div.innerHTML = `<img src="" alt="載入中..." style="display:none;"><button type="button" class="remove-btn" onclick="removeImage(${index})">×</button>`;
+            div.dataset.index = index;
+            div.innerHTML = `<img src="" alt="載入中..." style="display:none;"><button type="button" class="remove-btn">×</button>`;
             previewContainer.appendChild(div);
             const reader = new FileReader();
             const img = div.querySelector('img');
@@ -435,6 +436,15 @@
         updatePreview();
     }
 
+    // 使用事件委託處理刪除
+    previewContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('remove-btn')) {
+            const previewItem = e.target.closest('.preview-item');
+            const index = parseInt(previewItem.dataset.index);
+            removeImage(index);
+        }
+    });
+
     function updateFileInput() {
         const dt = new DataTransfer();
         selectedFiles.forEach(file => dt.items.add(file));
@@ -443,9 +453,27 @@
 
     photoInput.addEventListener('change', function() {
         const newFiles = Array.from(this.files);
+        const maxSize = 100 * 1024 * 1024; // 100MB
+        
         newFiles.forEach(file => {
-            if (!file.type.startsWith('image/')) { alert('請選擇圖片檔案！'); return; }
-            if (selectedFiles.length >= MAX_IMAGES) { alert(`最多只能上傳 ${MAX_IMAGES} 張圖片！`); return; }
+            // 檢查檔案類型
+            if (!file.type.startsWith('image/')) { 
+                alert('請選擇圖片檔案！'); 
+                return; 
+            }
+            
+            // 檢查檔案大小
+            if (file.size > maxSize) {
+                alert(`檔案 "${file.name}" 大小超過 100MB，請壓縮後再上傳`);
+                return;
+            }
+            
+            // 檢查圖片數量限制
+            if (selectedFiles.length >= MAX_IMAGES) { 
+                alert(`最多只能上傳6張圖片！`); 
+                return; 
+            }
+            
             selectedFiles.push(file);
         });
         updateFileInput();
@@ -457,8 +485,20 @@
     uploadArea.addEventListener('drop', e => {
         e.preventDefault();
         uploadArea.classList.remove('dragover');
+        const maxSize = 100 * 1024 * 1024; // 100MB
+        
         Array.from(e.dataTransfer.files).forEach(file => {
-            if (file.type.startsWith('image/') && selectedFiles.length < MAX_IMAGES) selectedFiles.push(file);
+            if (file.type.startsWith('image/')) {
+                // 檢查檔案大小
+                if (file.size > maxSize) {
+                    alert(`檔案 "${file.name}" 大小超過 100MB，請壓縮後再上傳`);
+                    return;
+                }
+                
+                if (selectedFiles.length < MAX_IMAGES) {
+                    selectedFiles.push(file);
+                }
+            }
         });
         updateFileInput();
         updatePreview();

@@ -10,387 +10,620 @@
     <meta charset="utf-8">
     <title>書籍詳情 - 北護二手書交易網</title>
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f9f9f9;
-            font-family: "Microsoft JhengHei", sans-serif;
-        }
-        .book-detail {
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            gap: 40px;
-            padding: 80px;
-        }
-        .image-gallery {
-            position: relative;
-            width: 350px;
-        }
-        .image-container {
-            position: relative;
-            width: 350px;
-            height: 450px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-            background-color: #f0f0f0;
-        }
-        .book-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-        .book-image.active {
-            display: block;
-        }
-        .image-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: rgba(0,0,0,0.5);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s;
-            z-index: 10;
-        }
-        .image-nav:hover {
-            background-color: rgba(0,0,0,0.7);
-        }
-        .image-nav.prev {
-            left: 10px;
-        }
-        .image-nav.next {
-            right: 10px;
-        }
-        .thumbnail-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            overflow-x: auto;
-            padding: 5px 0;
-        }
-        .thumbnail {
-            width: 70px;
-            height: 90px;
-            border-radius: 5px;
-            object-fit: cover;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.3s;
-            flex-shrink: 0;
-        }
-        .thumbnail:hover {
-            transform: scale(1.05);
-        }
-        .thumbnail.active {
-            border-color: #d9534f;
-            box-shadow: 0 2px 8px rgba(217, 83, 79, 0.4);
-        }
-        .image-counter {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(0,0,0,0.6);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 14px;
-            z-index: 10;
-        }
-        .detail-info {
-            max-width: 500px;
-        }
-        h2 {
-            font-weight: bold;
-        }
-        .price {
-            font-size: 20px;
-            color: #d9534f;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        .info-item {
-            margin-top: 10px;
-            color: #555;
-        }
-        .status-pending {
-            color: #ff9800;
-            font-weight: bold;
-        }
-        .status-approved {
-            color: #4caf50;
-            font-weight: bold;
-        }
-        .status-rejected {
-            color: #f44336;
-            font-weight: bold;
-        }
-        .no-image {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #999;
-            font-size: 16px;
-        }
-        
-        .action-buttons {
-            margin-top: 30px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .btn-contact {
-            background-color: #d9534f;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-contact:hover {
-            background-color: #c9302c;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .btn-contact:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-favorite {
-            background-color: #fff;
-            color: #ff6b6b;
-            padding: 12px 30px;
-            border: 2px solid #ff6b6b;
-            border-radius: 25px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-        }
-        .btn-favorite:hover {
-            background-color: #ff6b6b;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-        }
-        .btn-favorite.favorited {
-            background-color: #ff6b6b;
-            color: white;
-            border-color: #ff6b6b;
-        }
-        .btn-favorite:disabled {
-            background-color: #e0e0e0;
-            border-color: #e0e0e0;
-            color: #999;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .favorite-icon {
-            font-size: 18px;
-            transition: transform 0.3s;
-        }
-        .btn-favorite:hover .favorite-icon {
-            transform: scale(1.2);
-        }
-        .favorite-count {
-            font-size: 13px;
-            color: #666;
-            margin-top: 5px;
-        }
-        
-        .tooltip-wrapper {
-            position: relative;
-            display: inline-block;
-        }
-        .custom-tooltip {
-            visibility: hidden;
-            width: 280px;
-            background-color: #333;
-            color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 10px;
-            position: absolute;
-            z-index: 1000;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -140px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        .custom-tooltip::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 50%;
-            margin-left: -5px;
-            border-width: 5px;
-            border-style: solid;
-            border-color: #333 transparent transparent transparent;
-        }
-        .tooltip-wrapper:hover .custom-tooltip {
-            visibility: visible;
-            opacity: 1;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s;
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 5% auto;
-            padding: 30px;
-            border-radius: 10px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            animation: slideIn 0.3s;
-        }
-        @keyframes fadeIn {
-            from {opacity: 0;}
-            to {opacity: 1;}
-        }
-        @keyframes slideIn {
-            from {transform: translateY(-50px); opacity: 0;}
-            to {transform: translateY(0); opacity: 1;}
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .modal-header h3 {
-            margin: 0;
-            color: #333;
-        }
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            background: none;
-        }
-        .close:hover {
-            color: #000;
-        }
-        .modal-body {
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-        }
-        .form-group input.form-control, .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-family: "Microsoft JhengHei", sans-serif;
-            resize: vertical;
-        }
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        .btn-modal {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        .btn-send {
-            background-color: #d9534f;
-            color: white;
-        }
-        .btn-send:hover {
-            background-color: #c9302c;
-        }
-        .btn-cancel {
-            background-color: #6c757d;
-            color: white;
-        }
-        .btn-cancel:hover {
-            background-color: #5a6268;
-        }
-        
-        .alert {
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            animation: slideIn 0.3s;
-        }
-        .alert-warning {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
-        }
-        .alert-info {
-            background-color: #d1ecf1;
-            border-color: #bee5eb;
-            color: #0c5460;
-        }
-        
-        @media (max-width: 768px) {
-            .book-detail {
-                flex-direction: column;
-                padding: 40px 20px;
-            }
-            .image-gallery {
-                width: 100%;
-                max-width: 350px;
-                margin: 0 auto;
-            }
-            .image-container {
-                width: 100%;
-            }
-            .detail-info {
-                max-width: 100%;
-            }
-        }
+    background-color: #f8f9fa;
+    font-family: "Microsoft JhengHei", sans-serif;
+}
+
+/* 頁面標題 - 使用綠色系 */
+.page-header {
+    background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+    color: white;
+    padding: 40px 0;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 600;
+}
+
+.page-header .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin: 10px 0 0 0;
+    font-size: 14px;
+}
+
+.page-header .breadcrumb a {
+    color: white;
+    opacity: 0.9;
+    text-decoration: none;
+}
+
+.page-header .breadcrumb a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.page-header .breadcrumb-item.active {
+    color: white;
+    opacity: 0.7;
+}
+
+.page-header .breadcrumb-item + .breadcrumb-item::before {
+    color: white;
+    opacity: 0.7;
+}
+
+.back-button {
+    background-color: white;
+    border: 2px solid #81c784;
+    color: #66bb6a;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.back-button:hover {
+    background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 4px 12px rgba(129, 199, 132, 0.4);
+}
+
+.book-detail {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+    padding: 0 40px 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.image-gallery {
+    position: relative;
+    width: 400px;
+    flex-shrink: 0;
+}
+
+.image-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    background-color: #f0f0f0;
+}
+
+.book-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+}
+
+.book-image.active {
+    display: block;
+}
+
+.image-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(129, 199, 132, 0.9);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    z-index: 10;
+}
+
+.image-nav:hover {
+    background-color: #66bb6a;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.image-nav.prev {
+    left: 10px;
+}
+
+.image-nav.next {
+    right: 10px;
+}
+
+.thumbnail-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    overflow-x: auto;
+    padding: 5px 0;
+}
+
+.thumbnail {
+    width: 80px;
+    height: 100px;
+    border-radius: 8px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 3px solid transparent;
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+
+.thumbnail:hover {
+    transform: scale(1.05);
+    border-color: #c8e6c9;
+}
+
+.thumbnail.active {
+    border-color: #66bb6a;
+    box-shadow: 0 2px 8px rgba(102, 187, 106, 0.4);
+}
+
+.image-counter {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(102, 187, 106, 0.9);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10;
+}
+
+.status-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.status-approved {
+    background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+    color: white;
+}
+
+.status-pending {
+    background: linear-gradient(135deg, #ffb74d 0%, #ffa726 100%);
+    color: white;
+}
+
+.status-rejected {
+    background: linear-gradient(135deg, #e57373 0%, #ef5350 100%);
+    color: white;
+}
+
+.detail-info {
+    flex: 1;
+    max-width: 700px;
+}
+
+.detail-header {
+    margin-bottom: 20px;
+}
+
+.detail-header h2 {
+    font-weight: bold;
+    margin: 0 0 10px 0;
+    color: #333;
+    font-size: 28px;
+}
+
+.price {
+    font-size: 32px;
+    color: #e53935;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+.info-section {
+    background-color: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #e0e0e0;
+}
+
+.info-section h3 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #66bb6a;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #c8e6c9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-item {
+    margin: 14px 0;
+    color: #555;
+    line-height: 1.8;
+    display: flex;
+    align-items: flex-start;
+}
+
+.info-item strong {
+    color: #333;
+    min-width: 140px;
+    display: inline-block;
+    font-weight: 600;
+}
+
+.info-item .value {
+    flex: 1;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.btn-action {
+    padding: 14px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-contact {
+    background: linear-gradient(135deg, #81c784 0%, #66bb6a 100%);
+    color: white;
+}
+
+.btn-contact:hover {
+    background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(129, 199, 132, 0.4);
+}
+
+.btn-contact:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.btn-favorite {
+    background-color: #fff;
+    color: #ff6b6b;
+    padding: 14px 30px;
+    border: 2px solid #ff6b6b;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.btn-favorite:hover {
+    background-color: #ff6b6b;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.btn-favorite.favorited {
+    background-color: #ff6b6b;
+    color: white;
+    border-color: #ff6b6b;
+}
+
+.btn-favorite:disabled {
+    background-color: #e0e0e0;
+    border-color: #e0e0e0;
+    color: #999;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.favorite-icon {
+    font-size: 18px;
+    transition: transform 0.3s;
+}
+
+.btn-favorite:hover .favorite-icon {
+    transform: scale(1.2);
+}
+
+.favorite-wrapper {
+    text-align: center;
+}
+
+.favorite-count {
+    font-size: 13px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.btn-secondary {
+    background-color: white;
+    border: 2px solid #66bb6a;
+    color: #66bb6a;
+    text-decoration: none;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 187, 106, 0.2);
+    text-decoration: none;
+}
+
+.alert {
+    padding: 18px 25px;
+    margin: 0 40px 30px;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 10px;
+    animation: slideIn 0.3s;
+    border-left: 4px solid;
+}
+
+.alert-warning {
+    background-color: #fff8e1;
+    border-color: #ffb74d;
+    color: #f57c00;
+}
+
+.alert-info {
+    background-color: #e3f2fd;
+    border-color: #42a5f5;
+    color: #1976d2;
+}
+
+.alert strong {
+    font-size: 16px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
+    font-size: 16px;
+}
+
+/* Modal 樣式 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    animation: fadeIn 0.3s;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    animation: slideInModal 0.3s;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.close {
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    background: none;
+}
+
+.close:hover {
+    color: #000;
+}
+
+.modal-body {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input.form-control, .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-family: "Microsoft JhengHei", sans-serif;
+    resize: vertical;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-modal {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.btn-send {
+    background-color: #66bb6a;
+    color: white;
+}
+
+.btn-send:hover {
+    background-color: #4caf50;
+}
+
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #5a6268;
+}
+
+.tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.custom-tooltip {
+    visibility: hidden;
+    width: 280px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 10px;
+    position: absolute;
+    z-index: 1000;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -140px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.custom-tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+.tooltip-wrapper:hover .custom-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+@keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInModal {
+    from {transform: translateY(-50px); opacity: 0;}
+    to {transform: translateY(0); opacity: 1;}
+}
+
+@media (max-width: 1024px) {
+    .book-detail {
+        flex-direction: column;
+        padding: 0 20px 40px;
+    }
+    
+    .image-gallery {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    .detail-info {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .alert {
+        margin: 0 20px 30px;
+    }
+}
     </style>
 </head>
 
 <body>
 <%@ include file="menu.jsp"%>
-<br><br><br><br>
+
+<div class="page-header">
+    <div class="container">
+        <h1><i class="fas fa-book"></i> 書籍詳情</h1>
+    </div>
+</div>
 
 <%
     String listingId = request.getParameter("listingId");
@@ -482,13 +715,12 @@
         String remarks = rs.getString("remarks");
         String hasNotes = (remarks != null && !remarks.trim().isEmpty()) ? remarks : "未提供";
         
-        // 檢查是否已有對話串（使用 INTEGER 類型）
+        // 檢查是否已有對話串
         String existingConversationId = "";
         if (isLoggedIn && !isOwnBook) {
             int currentUserIdInt = Integer.parseInt(loggedInUserId);
             int sellerIdInt = Integer.parseInt(sellerId);
             
-            // 查找現有對話 - 確保 buyerId/sellerId 對應正確
             String checkConvSQL = "SELECT conversationId FROM messages " +
                                  "WHERE bookId = " + listingId + " " +
                                  "AND ((senderId = " + currentUserIdInt + " AND receiverId = " + sellerIdInt + ") " +
@@ -502,9 +734,17 @@
         }
 %>
 
+<div style="max-width: 1400px; margin: 0 auto; padding: 0 40px;">
+    <button class="back-button" onclick="window.location.href='index.jsp'">
+        <i class="fas fa-arrow-left"></i> 返回首頁
+    </button>
+</div>
+
 <div class="book-detail">
     <div class="image-gallery">
         <div class="image-container">
+            <div class="status-badge <%= statusClass %>"><%= statusText %></div>
+            
             <% if (photoList.isEmpty()) { %>
                 <div class="no-image">無圖片</div>
             <% } else { %>
@@ -516,8 +756,12 @@
                 <% } %>
                 
                 <% if (totalImages > 1) { %>
-                    <button class="image-nav prev" onclick="changeImage(-1)">‹</button>
-                    <button class="image-nav next" onclick="changeImage(1)">›</button>
+                    <button class="image-nav prev" onclick="changeImage(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="image-nav next" onclick="changeImage(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                     <div class="image-counter">
                         <span id="current-image">1</span> / <%= totalImages %>
                     </div>
@@ -539,47 +783,103 @@
     </div>
     
     <div class="detail-info">
-        <h2><%= rs.getString("title") %></h2>
+        <div class="detail-header">
+            <h2><%= rs.getString("title") %></h2>
+        </div>
 
         <div class="price">NT$<%= (int) Float.parseFloat(rs.getString("price")) %></div>
         
-        <div class="info-item"><strong>作者：</strong><%= rs.getString("author") != null ? rs.getString("author") : "未提供" %></div>
-        <div class="info-item"><strong>出版日期：</strong><%= rs.getString("publishDate") != null ? rs.getString("publishDate").split(" ")[0] : "未提供" %></div>
-        <div class="info-item"><strong>書籍版本：</strong><%= rs.getString("edition") != null && !rs.getString("edition").trim().isEmpty() ? rs.getString("edition") : "未提供" %></div>
-        <div class="info-item"><strong>ISBN：</strong><%= rs.getString("ISBN") != null && !rs.getString("ISBN").trim().isEmpty() ? rs.getString("ISBN") : "未提供" %></div>
-        <div class="info-item"><strong>書籍狀況：</strong><%= rs.getString("condition") %></div>
-        <div class="info-item"><strong>有無筆記：</strong><%= hasNotes %></div>
-        <div class="info-item"><strong>使用系所：</strong><%= rs.getString("department") != null ? rs.getString("department") : "未提供" %></div>
-        <div class="info-item"><strong>使用課程：</strong><%= rs.getString("courseName") != null ? rs.getString("courseName") : "未提供" %></div>
-        <div class="info-item"><strong>授課老師：</strong><%= rs.getString("teacher") != null ? rs.getString("teacher") : "未提供" %></div>
-        <div class="info-item"><strong>賣家：</strong><%= rs.getString("sellerName") %></div>
-        <div class="info-item"><strong>上架日期：</strong><%= rs.getString("listedAt").split(" ")[0] %></div>
-        <%
-		String expiryDateStr = rs.getString("expiryDate");
-		String displayExpiryDate = "未設定";
-		
-		if (expiryDateStr != null && !expiryDateStr.trim().isEmpty()) {
-		    try {
-		        // 只處理日期部分，不包含時間
-		        SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd");
-		        SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd");
-		        java.util.Date date = dbFormat.parse(expiryDateStr.split(" ")[0]); // 只取日期部分
-		        displayExpiryDate = displayFormat.format(date);
-		    } catch (Exception e) {
-		        // 如果解析失敗，直接顯示原始值
-		        displayExpiryDate = expiryDateStr.split(" ")[0];
-		    }
-		}
-		%>
-		<div class="info-item"><strong>下架日期：</strong><%= displayExpiryDate %></div>
-		<div class="info-item"><strong>上架本數：</strong><%= rs.getString("quantity") %></div>
-        <div class="info-item"><strong>審核狀態：</strong><span class="<%= statusClass %>"><%= statusText %></span></div>
+        <!-- 基本資訊 -->
+        <div class="info-section">
+            <h3><i class="fas fa-book"></i> 基本資訊</h3>
+            <div class="info-item">
+                <strong>作者：</strong>
+                <span class="value"><%= rs.getString("author") != null ? rs.getString("author") : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>出版日期：</strong>
+                <span class="value"><%= rs.getString("publishDate") != null ? rs.getString("publishDate").split(" ")[0] : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>書籍版本：</strong>
+                <span class="value"><%= rs.getString("edition") != null && !rs.getString("edition").trim().isEmpty() ? rs.getString("edition") : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>ISBN：</strong>
+                <span class="value"><%= rs.getString("ISBN") != null && !rs.getString("ISBN").trim().isEmpty() ? rs.getString("ISBN") : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>書籍狀況：</strong>
+                <span class="value"><%= rs.getString("condition") %></span>
+            </div>
+            <div class="info-item">
+                <strong>有無筆記：</strong>
+                <span class="value"><%= hasNotes %></span>
+            </div>
+            <div class="info-item">
+                <strong>剩餘數量：</strong>
+                <span class="value"><%= rs.getString("quantity") %> 本</span>
+            </div>
+        </div>
+        
+        <!-- 課程資訊 -->
+        <div class="info-section">
+            <h3><i class="fas fa-graduation-cap"></i> 課程資訊</h3>
+            <div class="info-item">
+                <strong>使用系所：</strong>
+                <span class="value"><%= rs.getString("department") != null ? rs.getString("department") : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>使用課程：</strong>
+                <span class="value"><%= rs.getString("courseName") != null ? rs.getString("courseName") : "未提供" %></span>
+            </div>
+            <div class="info-item">
+                <strong>授課老師：</strong>
+                <span class="value"><%= rs.getString("teacher") != null ? rs.getString("teacher") : "未提供" %></span>
+            </div>
+        </div>
+        
+        <!-- 賣家與上架資訊 -->
+<div class="info-section">
+    <h3><i class="fas fa-info-circle"></i> 賣家與上架資訊</h3>
+    <div class="info-item">
+        <strong>賣家：</strong>
+        <span class="value"><%= rs.getString("sellerName") %></span>
+    </div>
+    <div class="info-item">
+        <strong>上架日期：</strong>
+        <span class="value"><%= rs.getString("listedAt").split(" ")[0] %></span>
+    </div>
+    <%
+        String expiryDateStr = rs.getString("expiryDate");
+        String displayExpiryDate = "未設定";
+        
+        if (expiryDateStr != null && !expiryDateStr.trim().isEmpty()) {
+            try {
+                SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd");
+                SimpleDateFormat displayFormat = new SimpleDateFormat("yyyy-MM-dd");
+                java.util.Date date = dbFormat.parse(expiryDateStr.split(" ")[0]);
+                displayExpiryDate = displayFormat.format(date);
+            } catch (Exception e) {
+                displayExpiryDate = expiryDateStr.split(" ")[0];
+            }
+        }
+    %>
+    <div class="info-item">
+        <strong>下架日期：</strong>
+        <span class="value"><%= displayExpiryDate %></span>
+    </div>
+    <div class="info-item">
+        <strong>審核狀態：</strong>
+        <span class="value <%= statusClass.replace("status-", "") %>"><%= statusText %></span>
+    </div>
+</div>
 
         <div class="action-buttons">
             <% if (!isOwnBook) { %>
                 <div class="tooltip-wrapper">
-                    <button class="btn-contact" onclick="handleContactSeller()" id="contactBtn">
-                        💬 <%= existingConversationId.isEmpty() ? "我要購買" : "繼續對話" %>
+                    <button class="btn-action btn-contact" onclick="handleContactSeller()" id="contactBtn">
+                        <i class="fas fa-comments"></i> <%= existingConversationId.isEmpty() ? "我要購買" : "繼續對話" %>
                     </button>
                     <span class="custom-tooltip">
                         <%= existingConversationId.isEmpty() ? 
@@ -589,66 +889,38 @@
                     </span>
                 </div>
             <% } else { %>
-                <button class="btn-contact" disabled>
-                    這是您的書籍
+                <button class="btn-action btn-contact" disabled>
+                    <i class="fas fa-user"></i> 這是您的書籍
                 </button>
             <% } %>
             
-            <div style="text-align: center;">
-                <button class="btn-favorite <%= isFavorited ? "favorited" : "" %>" 
-                        onclick="toggleFavorite()"
-                        id="favoriteBtn"
-                        data-book-id="<%= bookId %>"
-                        data-favorited="<%= isFavorited %>">
-                    <span class="favorite-icon"><%= isFavorited ? "❤️" : "🤍" %></span>
-                    <span id="favoriteBtnText"><%= isFavorited ? "已收藏" : "加入收藏" %></span>
-                </button>
-                <div class="favorite-count">
-                    <span id="favoriteCount"><%= favoriteCount %></span> 人收藏
-                </div>
-            </div>
+            <div class="favorite-wrapper">
+		        <% if (!isOwnBook) { %>
+		            <button class="btn-favorite <%= isFavorited ? "favorited" : "" %>" 
+		                    onclick="toggleFavorite()"
+		                    id="favoriteBtn"
+		                    data-book-id="<%= bookId %>"
+		                    data-favorited="<%= isFavorited %>">
+		                <span class="favorite-icon"><%= isFavorited ? "❤️" : "🤍" %></span>
+		                <span id="favoriteBtnText"><%= isFavorited ? "已收藏" : "加入收藏" %></span>
+		            </button>
+		            <div class="favorite-count">
+		                <span id="favoriteCount"><%= favoriteCount %></span> 人收藏
+		            </div>
+		        <% } else { %>
+		            <button class="btn-favorite" disabled>
+		                <span class="favorite-icon">🤍</span>
+		                <span>無法收藏自己的書籍</span>
+		            </button>
+		            <div class="favorite-count">
+		                <span id="favoriteCount"><%= favoriteCount %></span> 人收藏
+		            </div>
+		        <% } %>
+		    </div>
             
-            <a class="btn btn-link" href="index.jsp">回首頁</a>
-        </div>
-    </div>
-</div>
-
-<!-- 聯絡賣家的 Modal - 只用於第一次發起對話 -->
-<div id="contactModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>💬 聯絡賣家</h3>
-            <button class="close" onclick="closeModal()">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="alert alert-info">
-                <strong>提醒：</strong>發送後，您可以在「我的訊息」中查看與賣家的對話記錄。
-            </div>
-            <form id="contactForm">
-                <input type="hidden" name="bookId" value="<%= listingId %>">
-                <input type="hidden" name="sellerId" value="<%= sellerId %>">
-                <input type="hidden" name="sellerEmail" value="<%= sellerEmail %>">
-                
-                <div class="form-group">
-                    <label>書籍名稱：</label>
-                    <input type="text" class="form-control" value="<%= rs.getString("title") %>" readonly style="background-color: #f0f0f0;">
-                </div>
-                
-                <div class="form-group">
-                    <label>給賣家的訊息：<span style="color: red;">*</span></label>
-                    <textarea name="message" id="messageText" rows="5" placeholder="例如：您好，我對這本書很感興趣...
-
-建議內容：
-• 表達購買意願
-• 詢問書籍狀況
-• 詢問面交時間地點" required></textarea>
-                    <small style="color: #666;">至少需要10個字元</small>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn-modal btn-cancel" onclick="closeModal()">取消</button>
-            <button class="btn-modal btn-send" onclick="sendFirstMessage()">發送訊息</button>
+            <button class="btn-action btn-secondary" onclick="window.location.href='index.jsp'">
+                <i class="fas fa-home"></i> 返回首頁
+            </button>
         </div>
     </div>
 </div>
@@ -801,8 +1073,14 @@
     }
     
     function toggleFavorite() {
+        // 添加自己书籍的检查
+        if (isOwnBook) {
+            alert('❌ 無法收藏自己的書籍');
+            return;
+        }
+        
         if (!isLoggedIn) {
-            if (confirm('您需要先登入才能收藏書籍\n\n是否前往登入頁面？')) {
+            if (confirm('您需要先登入才能收藏書籍\n\n是否前往登入頁面?')) {
                 window.location.href = 'login.jsp?redirect=' + encodeURIComponent(window.location.href);
             }
             return;

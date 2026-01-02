@@ -454,13 +454,6 @@
 <div class="page-header">
     <div class="container">
         <h1><i class="fas fa-book-open"></i> 書籍詳情</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.jsp">首頁</a></li>
-                <li class="breadcrumb-item"><a href="myListings.jsp">我的上架</a></li>
-                <li class="breadcrumb-item active">書籍詳情</li>
-            </ol>
-        </nav>
     </div>
 </div>
 
